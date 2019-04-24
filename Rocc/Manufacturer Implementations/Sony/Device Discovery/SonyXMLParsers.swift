@@ -34,8 +34,11 @@ final class SonyCameraParser: NSObject, XMLParserDelegate {
     
     let xmlString: String
     
-    init(xmlString string: String) {
+    let baseURL: URL
+    
+    init(xmlString string: String, baseURL: URL) {
         xmlString = string
+        self.baseURL = baseURL
         super.init()
     }
     
@@ -145,7 +148,7 @@ final class SonyCameraParser: NSObject, XMLParserDelegate {
     }
     
     func parserDidEndDocument(_ parser: XMLParser) {
-        device = SonyCameraDevice(dictionary: deviceDictionary)
+        device = SonyCameraDevice(dictionary: deviceDictionary, baseURL: baseURL)
         completion?(device, nil)
         Logger.log(message: "Parser did end document with success: \(device != nil)", category: "SonyCameraXMLParser")
         os_log("Parser did end document", log: log, type: .debug)

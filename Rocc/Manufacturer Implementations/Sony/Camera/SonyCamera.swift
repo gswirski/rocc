@@ -146,9 +146,34 @@ internal final class SonyCameraDevice {
         return .remoteControl
     }
     
-    init?(dictionary: [AnyHashable : Any]) {
+    init?(dictionary: [AnyHashable : Any], baseURL: URL) {
         
-        guard let apiDeviceInfoDict = dictionary["av:X_ScalarWebAPI_DeviceInfo"] as? [AnyHashable : Any], let apiInfo = ApiDeviceInfo(dictionary: apiDeviceInfoDict) else {
+        guard dictionary["X_ScalarWebAPI_DeviceInfo"] != nil else { return nil }
+        
+        let actionURL = baseURL.absoluteString.split(separator: ":").first! + ":8080/sony"
+        let _apiDeviceInfoDict: [AnyHashable : Any]? = dictionary["X_ScalarWebAPI_DeviceInfo"] as? [AnyHashable : Any] ?? [
+            "av:X_ScalarWebAPI_Version": "1.0",
+            "av:X_ScalarWebAPI_ServiceList": [
+                [
+                    "av:X_ScalarWebAPI_ServiceType": "guide",
+                    "av:X_ScalarWebAPI_ActionList_URL": String(actionURL)
+                ],
+                [
+                    "av:X_ScalarWebAPI_ServiceType": "accessControl",
+                    "av:X_ScalarWebAPI_ActionList_URL": String(actionURL)
+                ],
+                [
+                    "av:X_ScalarWebAPI_ServiceType": "camera",
+                    "av:X_ScalarWebAPI_ActionList_URL": String(actionURL)
+                ],
+                [
+                    "av:X_ScalarWebAPI_ServiceType": "avContent",
+                    "av:X_ScalarWebAPI_ActionList_URL": String(actionURL)
+                ]
+            ]
+        ]
+        
+        guard let apiDeviceInfoDict = _apiDeviceInfoDict, let apiInfo = ApiDeviceInfo(dictionary: apiDeviceInfoDict) else {
             return nil
         }
         

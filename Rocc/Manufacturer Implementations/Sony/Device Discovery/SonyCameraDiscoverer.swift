@@ -174,7 +174,7 @@ internal final class SonyCameraDiscoverer: UDPDeviceDiscoverer {
     
     private func parseCameraXML(string: String, baseURL: URL, callback: @escaping (Bool) -> Void) {
         
-        let parser = SonyCameraParser(xmlString: string)
+        let parser = SonyCameraParser(xmlString: string, baseURL: baseURL)
         parser.parse { [weak self] (cameraDevice, error) in
             
             guard let strongSelf = self else {
