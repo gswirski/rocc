@@ -148,32 +148,41 @@ internal final class SonyCameraDevice {
     
     init?(dictionary: [AnyHashable : Any], baseURL: URL) {
         
-        guard dictionary["X_ScalarWebAPI_DeviceInfo"] != nil else { return nil }
+        guard var apiDeviceInfoDict = dictionary["av:X_ScalarWebAPI_DeviceInfo"] as? [AnyHashable : Any] else { return nil }
         
-        let actionURL = baseURL.absoluteString.split(separator: ":").first! + ":8080/sony"
-        let _apiDeviceInfoDict: [AnyHashable : Any]? = dictionary["X_ScalarWebAPI_DeviceInfo"] as? [AnyHashable : Any] ?? [
-            "av:X_ScalarWebAPI_Version": "1.0",
-            "av:X_ScalarWebAPI_ServiceList": [
-                [
-                    "av:X_ScalarWebAPI_ServiceType": "guide",
-                    "av:X_ScalarWebAPI_ActionList_URL": String(actionURL)
-                ],
-                [
-                    "av:X_ScalarWebAPI_ServiceType": "accessControl",
-                    "av:X_ScalarWebAPI_ActionList_URL": String(actionURL)
-                ],
-                [
-                    "av:X_ScalarWebAPI_ServiceType": "camera",
-                    "av:X_ScalarWebAPI_ActionList_URL": String(actionURL)
-                ],
-                [
-                    "av:X_ScalarWebAPI_ServiceType": "avContent",
-                    "av:X_ScalarWebAPI_ActionList_URL": String(actionURL)
+        
+        
+        if apiDeviceInfoDict.isEmpty {
+            
+            guard let baseURLHost = baseURL.absoluteString.split(separator: ":").first else {
+                return nil
+            }
+            
+            let actionURL = baseURLHost + ":8080/sony"
+            
+            apiDeviceInfoDict = [
+                "av:X_ScalarWebAPI_Version": "1.0",
+                "av:X_ScalarWebAPI_ServiceList": [
+                    [
+                        "av:X_ScalarWebAPI_ServiceType": "guide",
+                        "av:X_ScalarWebAPI_ActionList_URL": String(actionURL)
+                    ],
+                    [
+                        "av:X_ScalarWebAPI_ServiceType": "accessControl",
+                        "av:X_ScalarWebAPI_ActionList_URL": String(actionURL)
+                    ],
+                    [
+                        "av:X_ScalarWebAPI_ServiceType": "camera",
+                        "av:X_ScalarWebAPI_ActionList_URL": String(actionURL)
+                    ],
+                    [
+                        "av:X_ScalarWebAPI_ServiceType": "avContent",
+                        "av:X_ScalarWebAPI_ActionList_URL": String(actionURL)
+                    ]
                 ]
             ]
-        ]
-        
-        guard let apiDeviceInfoDict = _apiDeviceInfoDict, let apiInfo = ApiDeviceInfo(dictionary: apiDeviceInfoDict) else {
+        }
+        guard let apiInfo = ApiDeviceInfo(dictionary: apiDeviceInfoDict) else {
             return nil
         }
         
