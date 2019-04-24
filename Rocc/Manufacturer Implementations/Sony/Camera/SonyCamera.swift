@@ -150,14 +150,11 @@ internal final class SonyCameraDevice {
         
         guard var apiDeviceInfoDict = dictionary["av:X_ScalarWebAPI_DeviceInfo"] as? [AnyHashable : Any] else { return nil }
         
-        
-        
         if apiDeviceInfoDict.isEmpty {
             
-            guard let baseURLHost = baseURL.absoluteString.split(separator: ":").first else {
-                return nil
-            }
-            
+            var splits = baseURL.absoluteString.split(separator: ":")
+            splits.removeLast()
+            let baseURLHost = splits.joined()
             let actionURL = baseURLHost + ":8080/sony"
             
             apiDeviceInfoDict = [
