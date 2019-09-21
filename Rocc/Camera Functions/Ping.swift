@@ -9,7 +9,7 @@
 import Foundation
 
 /// A function to ping the camera to see if it is accessible
-struct Ping: CameraFunction {
+public struct Ping: CameraFunction {
     
     public var function: _CameraFunction
     

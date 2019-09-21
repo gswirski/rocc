@@ -98,11 +98,12 @@ public final class DeviceConnectivityNotifier {
         reachability?.networkChangeCallback = { [weak self] (ssid) in
             
             guard let self = self else { return }
-            
-            guard ssid != self.initialSSID else {
-                Logger.log(message: "Re-connected to device's SSID", category: "DeviceConnectivity")
-                os_log("Re-connected to device's SSID", log: self.logger, type: .debug)
-                self.handle(reachable: true)
+
+            guard ssid != self.initialSSID || ssid == nil else {
+                Logger.log(message: "Re-connected to device's SSID: \(String(describing: ssid))", category: "DeviceConnectivity")
+                os_log("Re-connected to device's SSID: %{public}@", log: self.logger, type: .debug, ssid ?? "nil")
+                //self.handle(reachable: true)
+                self.handle(flags: .reachable)
                 return
             }
             

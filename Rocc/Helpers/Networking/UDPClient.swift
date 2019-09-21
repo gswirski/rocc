@@ -351,7 +351,13 @@ class UDPClient {
             
             Logger.log(message: "Got data from socket:\n\(responseString)", category: "UDPClient")
             os_log("Got data from socket:\n%@", log: log, type: .debug, responseString)
-            
+
+            if !responseString.contains("SonyImagingDevice") {
+                Logger.log(message: "Could not find SonyImagingDevice", category: "UDPClient")
+                os_log("Could not find SonyImagingDevice", log: log, type: .debug)
+                //return
+            }
+
             guard let ddURL = parseDDURL(from: responseString) else {
                 Logger.log(message: "Could not parse ddURL from socket data", category: "UDPClient")
                 os_log("Could not parse ddURL from socket data", log: log, type: .error)

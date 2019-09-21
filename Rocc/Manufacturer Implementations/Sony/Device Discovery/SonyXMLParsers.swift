@@ -142,6 +142,11 @@ final class SonyCameraParser: NSObject, XMLParserDelegate {
     }
     
     func parserDidEndDocument(_ parser: XMLParser) {
+        guard let apiDeviceInfoDict = deviceDictionary["av:X_ScalarWebAPI_DeviceInfo"] as? [AnyHashable : Any], let _ = SonyCameraDevice.ApiDeviceInfo(dictionary: apiDeviceInfoDict, model: nil) else {
+            completion?(nil, CameraDiscoveryError.ptpip)
+            return
+        }
+
         device = SonyCameraDevice(dictionary: deviceDictionary)
         completion?(device, nil)
         Logger.log(message: "Parser did end document with success: \(device != nil)", category: "SonyCameraXMLParser")

@@ -56,6 +56,7 @@ protocol DeviceDiscoverer {
 
 public enum CameraDiscoveryError: Error {
     case unknown
+    case ptpip
 }
 
 /// A protocol for receiving messages about camera discovery

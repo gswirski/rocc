@@ -78,7 +78,9 @@ public protocol Camera {
     
     /// The IP address of the camera
     var ipAddress: sockaddr_in? { get }
-    
+
+    var eventVersion: String? { get }
+
     /// The API version of the software running on the camera
     var apiVersion: String? { get }
     

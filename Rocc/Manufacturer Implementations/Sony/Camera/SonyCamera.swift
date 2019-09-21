@@ -31,7 +31,7 @@ fileprivate extension CountRequest {
     static let sonyDefault = CountRequest(uri: "storage:memoryCard1", view: .flat, target: "all", types: nil)
 }
 
-internal final class SonyCameraDevice {
+public final class SonyCameraDevice {
     
     private let apiClient: SonyCameraAPIClient
     
@@ -39,7 +39,7 @@ internal final class SonyCameraDevice {
     
     fileprivate var lastShootMode: ShootingMode?
     
-    struct ApiDeviceInfo {
+    public struct ApiDeviceInfo {
         
         struct Service {
             
@@ -74,9 +74,9 @@ internal final class SonyCameraDevice {
         let version: String
         
         let services: [Service]
-        
+
         init?(dictionary: [AnyHashable : Any], model: Model?) {
-            
+
             guard let versionString = dictionary["av:X_ScalarWebAPI_Version"] as? String else { return nil }
             version = versionString
             guard let serviceList = dictionary["av:X_ScalarWebAPI_ServiceList"] as? [[AnyHashable : Any]] else {
@@ -126,7 +126,9 @@ internal final class SonyCameraDevice {
     
     let services: [UPnPService]?
     
-    let apiDeviceInfo: ApiDeviceInfo
+    public let apiDeviceInfo: ApiDeviceInfo
+
+    public var eventVersion: String?
     
     public var firmwareVersion: String?
     
@@ -146,7 +148,7 @@ internal final class SonyCameraDevice {
         return apiDeviceInfo.services.first?.url
     }
     
-    var connectionMode: ConnectionMode {
+    public var connectionMode: ConnectionMode {
         return .remoteControl
     }
     
@@ -167,7 +169,7 @@ internal final class SonyCameraDevice {
         apiDeviceInfo = apiInfo
         apiClient = SonyCameraAPIClient(apiInfo: apiDeviceInfo)
         apiVersion = apiDeviceInfo.version
-        
+
         name = _modelEnum?.friendlyName ?? _name
         udn = dictionary["UDN"] as? String
         
@@ -198,18 +200,18 @@ internal final class SonyCameraDevice {
 
 extension SonyCameraDevice: Camera {
     
-    func finishTransfer(callback: @escaping ((Error?) -> Void)) {
+    public func finishTransfer(callback: @escaping ((Error?) -> Void)) {
         callback(CameraError.noSuchMethod("Finish Transfer"))
     }
     
-    func handleEvent(event: CameraEvent) {
+    public func handleEvent(event: CameraEvent) {
         focusStatus = event.focusStatus
         if let currentFocusMode = event.focusMode?.current {
             focusMode = currentFocusMode
         }
     }
     
-    func loadFilesToTransfer(callback: @escaping ((Error?, [File]?) -> Void)) {
+    public func loadFilesToTransfer(callback: @escaping ((Error?, [File]?) -> Void)) {
         callback(CameraError.noSuchMethod("Transfer Files"), nil)
     }
     
@@ -238,8 +240,10 @@ extension SonyCameraDevice: Camera {
                 if case let .failure(error) = result, (error as NSError).code != 404 {
                     callback(Result.failure(error))
                     return
+                } else if case let .success(versions) = result {
+                    self.eventVersion = versions.map { Double($0) }.compactMap { $0 }.max().map { String($0) }
                 }
-                
+
                 guard let avClient = self.apiClient.avContent else {
                     callback(Result.success(false))
                     return
@@ -1763,7 +1767,13 @@ extension SonyCameraDevice: Camera {
                         }
                     }
                 }
-                
+
+                print("Sony Camera take picture immediately")
+                takePicture(false, nil)
+                return
+
+                /*
+
                 // Make sure our camera model requires this call! Only 3rd gen seem to
                 guard let _model = modelEnum, _model.requiresHalfPressToCapture else {
                     Logger.shared.log("\(modelEnum?.friendlyName ?? "Unknown") doesn't require half press to focus, skipping step", category: "SonyCamera", level: .debug)
@@ -1803,18 +1813,42 @@ extension SonyCameraDevice: Camera {
                         // Take picture immediately after half press has completed, two scenarios here:
                         // 1. User is in MF, this takePicture should succeed and take the photo
                         // 2. User is in AF, this takePicture could fail (which we ignore), and then we wait for focus change
+<<<<<<< HEAD
                         takePicture(false, { success in
                             
+=======
+                        takePicture(true, { [weak _this] success in
+                            guard let __this = _this else { return }
+
+>>>>>>> 089c1e4... Shutter modifications
                             // If the take picture failed, then we'll await the focus change from `Shutter.halfPress`
                             guard !success else {
                                 Logger.shared.log("Take picture succeeded, camera either in MF or already focussed", category: "SonyCamera", level: .debug)
                                 return
                             }
                             
+<<<<<<< HEAD
                             Logger.shared.log("Take picture failed, nothing we can do...", category: "SonyCamera", level: .debug)
+=======
+                            Logger.shared.log("Take picture failed, awaiting focus change", category: "SonyCamera", level: .debug)
+
+                            let startTime = Date()
+                            // Await event letting us know the camera has finished focussing
+                            __this.onFocusChange({ (status) -> Bool in
+                                print("SonyCamera onFocusChange \(status) \(startTime) \(Date()), \(Date().timeIntervalSince(startTime))")
+                                if Date().timeIntervalSince(startTime) > 2 {
+                                    takePicture(false, nil)
+                                    return true
+                                }
+                                guard let _status = status, _status != .focusing else { return false }
+                                Logger.shared.log("Camera achieved focus, taking picture", category: "SonyCamera", level: .debug)
+                                takePicture(false, nil)
+                                return true
+                            })
+>>>>>>> 089c1e4... Shutter modifications
                         })
                     })
-                }
+                }*/
                 
             case .startBulbCapture:
                 
