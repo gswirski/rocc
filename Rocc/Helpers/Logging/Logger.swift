@@ -19,7 +19,9 @@ public final class Logger {
     
     /// Shared instance of the logger
     public static let shared = Logger()
-    
+
+    public var externalLogger: ((String) -> ())?
+
     /// Whether logs are currently being saved to a file
     public var isLoggingToFile: Bool {
         return fileURL != nil
@@ -65,12 +67,21 @@ public final class Logger {
         
     }
     
-    private func log(_ message: String, category: String) {
-        
+    private func log(_ message: String, category: String) {        
         #if DEBUG
             print("[\(category)] \(message)")
         #endif
-        
+
+        if let externalLogger = externalLogger {
+            var writeString = message
+
+            if !writeString.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                writeString = "[\(category)] \(writeString)"
+            }
+
+            externalLogger(writeString)
+        }
+
         guard let fileURL = fileURL, let logQueue = logQueue else { return }
         
         logQueue.sync {
@@ -85,7 +96,7 @@ public final class Logger {
             if !writeString.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 writeString = "\n\(formatter.string(from: Date())) [\(category)] \(writeString)"
             }
-            
+
             if let handle = try? FileHandle(forWritingTo: fileURL) {
                 handle.seekToEndOfFile()
                 handle.write(writeString.data(using: .utf8)!)

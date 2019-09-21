@@ -16,7 +16,9 @@ import ThunderRequestMac
 internal final class SonyTransferDevice {
     
     var ipAddress: sockaddr_in?
-    
+
+    var eventVersion: String?
+
     var apiVersion: String?
     
     var baseURL: URL?

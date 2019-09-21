@@ -119,7 +119,6 @@
 		B1A3EC1E21F11AA500670712 /* FileSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1B4342920939EF500A81B9D /* FileSystem.swift */; };
 		B1A3EC2521F11AB700670712 /* CameraFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1B4344F209746B000A81B9D /* CameraFunctions.swift */; };
 		B1AF502A208A51D00029336B /* NetworkInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1AF5029208A51D00029336B /* NetworkInterface.swift */; };
-		B1AF504B208D345A0029336B /* ThunderRequest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1AF5041208D34510029336B /* ThunderRequest.framework */; };
 		B1AF5091208DC3A80029336B /* RoccMac.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1AF5088208DC3A80029336B /* RoccMac.framework */; };
 		B1AF5096208DC3A80029336B /* RoccMacTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1AF5095208DC3A80029336B /* RoccMacTests.swift */; };
 		B1AF5098208DC3A80029336B /* RoccMac.h in Headers */ = {isa = PBXBuildFile; fileRef = B1AF508A208DC3A80029336B /* RoccMac.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -166,6 +165,7 @@
 		B1FB486F2092585400C33C86 /* SonyCamera.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1FB486E2092585400C33C86 /* SonyCamera.swift */; };
 		B1FB48702092585400C33C86 /* SonyCamera.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1FB486E2092585400C33C86 /* SonyCamera.swift */; };
 		B1FB48732092743100C33C86 /* Aperture.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1FB48722092743100C33C86 /* Aperture.swift */; };
+		EFD4250A233204E8004A6732 /* ThunderRequest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1AF5041208D34510029336B /* ThunderRequest.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -322,7 +322,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B1AF504B208D345A0029336B /* ThunderRequest.framework in Frameworks */,
+				EFD4250A233204E8004A6732 /* ThunderRequest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

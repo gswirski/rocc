@@ -37,7 +37,6 @@ internal struct SonyDeviceInfo {
     let installedPlayMemoriesApps: [PlayMemoriesApp]
     
     init(dictionary: [AnyHashable : Any]) {
-        
         if let modelString = dictionary["X_ModelName"] as? String {
             model = SonyCameraDevice.Model(rawValue: modelString)
         } else {

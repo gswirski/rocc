@@ -122,7 +122,9 @@ public final class DummyCamera: Camera {
     public var firmwareVersion: String?
     
     public var lensModelName: String?
-    
+
+    public var eventVersion: String?
+
     public var apiVersion: String?
     
     public var model: String?
@@ -309,7 +311,7 @@ public final class DummyCamera: Camera {
             intervalTime: nil,
             colorSetting: nil,
             videoFileFormat: nil,
-            videoRecordingTime: nil,
+            videoRecordingTime: TimeInterval(17),
             infraredRemoteControl: nil,
             tvColorSystem: nil,
             trackingFocusStatus: nil,
