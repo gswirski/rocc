@@ -1813,39 +1813,16 @@ extension SonyCameraDevice: Camera {
                         // Take picture immediately after half press has completed, two scenarios here:
                         // 1. User is in MF, this takePicture should succeed and take the photo
                         // 2. User is in AF, this takePicture could fail (which we ignore), and then we wait for focus change
-<<<<<<< HEAD
                         takePicture(false, { success in
                             
-=======
-                        takePicture(true, { [weak _this] success in
-                            guard let __this = _this else { return }
 
->>>>>>> 089c1e4... Shutter modifications
                             // If the take picture failed, then we'll await the focus change from `Shutter.halfPress`
                             guard !success else {
                                 Logger.shared.log("Take picture succeeded, camera either in MF or already focussed", category: "SonyCamera", level: .debug)
                                 return
                             }
                             
-<<<<<<< HEAD
                             Logger.shared.log("Take picture failed, nothing we can do...", category: "SonyCamera", level: .debug)
-=======
-                            Logger.shared.log("Take picture failed, awaiting focus change", category: "SonyCamera", level: .debug)
-
-                            let startTime = Date()
-                            // Await event letting us know the camera has finished focussing
-                            __this.onFocusChange({ (status) -> Bool in
-                                print("SonyCamera onFocusChange \(status) \(startTime) \(Date()), \(Date().timeIntervalSince(startTime))")
-                                if Date().timeIntervalSince(startTime) > 2 {
-                                    takePicture(false, nil)
-                                    return true
-                                }
-                                guard let _status = status, _status != .focusing else { return false }
-                                Logger.shared.log("Camera achieved focus, taking picture", category: "SonyCamera", level: .debug)
-                                takePicture(false, nil)
-                                return true
-                            })
->>>>>>> 089c1e4... Shutter modifications
                         })
                     })
                 }*/
