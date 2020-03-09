@@ -139,7 +139,9 @@ public final class LiveViewStream: NSObject {
     
     /// The size of the stream (M/L)
     public var streamSize: String?
-    
+
+    private var streamingQueue: OperationQueue
+
     /// The data that has been received from the stream
     internal var receivedData: Data = Data()
     
@@ -152,6 +154,9 @@ public final class LiveViewStream: NSObject {
         
         self.delegate = delegate
         self.camera = camera
+
+        self.streamingQueue = OperationQueue()
+        self.streamingQueue.maxConcurrentOperationCount = 1
     }
     
     private var eventTimer: Timer?
@@ -200,7 +205,7 @@ public final class LiveViewStream: NSObject {
             strongSelf.streamFrom(url: streamURL)
         }
     }
-    
+
     private var streamingSession: URLSession?
     
     private var dataTask: URLSessionDataTask?
@@ -209,7 +214,7 @@ public final class LiveViewStream: NSObject {
         
         isStreaming = true
         //TODO: CREATE AND SEND A DELEGATE QUEUE HERE
-        streamingSession = URLSession(configuration: .default, delegate: self, delegateQueue: nil)
+        streamingSession = URLSession(configuration: .default, delegate: self, delegateQueue: streamingQueue)
         let request = URLRequest(url: url)
         
         receivedData = Data()
