@@ -152,6 +152,8 @@ public final class DummyCamera: Camera {
     private var currentSelfTimer: TimeInterval = 0.0
     
     private var currentShootMode: ShootingMode = .photo
+
+    private var currentContinuousShootingMode: ContinuousShootingMode = .single
     
     var currentFocusMode: String = "AF-S"
     
@@ -303,7 +305,7 @@ public final class DummyCamera: Camera {
             focusStatus: nil,
             zoomSetting: nil,
             stillQuality: nil,
-            continuousShootingMode: nil,
+            continuousShootingMode: (current: currentContinuousShootingMode, available: [.single, .continuous]),
             continuousShootingSpeed: nil,
             continuousShootingURLS: nil,
             flipSetting: nil,
@@ -405,7 +407,14 @@ public final class DummyCamera: Camera {
             }
             currentShootMode = value
             eventCompletion?()
-            
+
+        case .setContinuousShootingMode:
+            guard let value = payload as? ContinuousShootingMode else {
+                return
+            }
+            currentContinuousShootingMode = value
+            eventCompletion?()
+
         case .setFocusMode:
             
             guard let value = payload as? String else {
