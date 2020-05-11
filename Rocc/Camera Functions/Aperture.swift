@@ -14,6 +14,10 @@ public struct Aperture: CameraFunction {
     public struct Value {
         
         public let value: Double
+
+        public init(value: Double) {
+            self.value = value
+        }
     }
     
     public var function: _CameraFunction
