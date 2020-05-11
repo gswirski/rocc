@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -119,7 +119,7 @@
 		B1A3EC1E21F11AA500670712 /* FileSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1B4342920939EF500A81B9D /* FileSystem.swift */; };
 		B1A3EC2521F11AB700670712 /* CameraFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1B4344F209746B000A81B9D /* CameraFunctions.swift */; };
 		B1AF502A208A51D00029336B /* NetworkInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1AF5029208A51D00029336B /* NetworkInterface.swift */; };
-		B1AF504B208D345A0029336B /* ThunderRequest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1AF5041208D34510029336B /* ThunderRequest.framework */; };
+		B1AF504B208D345A0029336B /* ThunderRequest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1AF5041208D34510029336B /* ThunderRequest.framework */; platformFilter = ios; };
 		B1AF5091208DC3A80029336B /* RoccMac.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1AF5088208DC3A80029336B /* RoccMac.framework */; };
 		B1AF5096208DC3A80029336B /* RoccMacTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1AF5095208DC3A80029336B /* RoccMacTests.swift */; };
 		B1AF5098208DC3A80029336B /* RoccMac.h in Headers */ = {isa = PBXBuildFile; fileRef = B1AF508A208DC3A80029336B /* RoccMac.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -135,7 +135,7 @@
 		B1BAAC8F222583B8007F0F61 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1A1B67E21F8BC78008B5181 /* Logger.swift */; };
 		B1BAAC96222583B9007F0F61 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1A1B67E21F8BC78008B5181 /* Logger.swift */; };
 		B1CDCB8322234CAA00DD0F0E /* UPnPService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1CDCB8222234CAA00DD0F0E /* UPnPService.swift */; };
-		B1CDCB8F2223524100DD0F0E /* ThunderRequestMac.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1AF5045208D34510029336B /* ThunderRequestMac.framework */; };
+		B1CDCB8F2223524100DD0F0E /* ThunderRequest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1AF5045208D34510029336B /* ThunderRequest.framework */; };
 		B1CDCB90222352BB00DD0F0E /* UPnPService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1CDCB8222234CAA00DD0F0E /* UPnPService.swift */; };
 		B1CE24AD2098FD1E0049EC87 /* LiveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1CE24A72098FD1E0049EC87 /* LiveView.swift */; };
 		B1CE24B22099184B0049EC87 /* Zoom.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1CE24B12099184B0049EC87 /* Zoom.swift */; };
@@ -224,6 +224,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = B1AF5087208DC3A80029336B;
 			remoteInfo = CCKitMac;
+		};
+		EF55FBF9245F2C43008B66C8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B1AF5038208D34510029336B /* ThunderRequest.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = B190A829228DBA3A00E44821;
+			remoteInfo = "ThunderRequestTests-tvOS";
 		};
 /* End PBXContainerItemProxy section */
 
@@ -338,7 +345,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B1CDCB8F2223524100DD0F0E /* ThunderRequestMac.framework in Frameworks */,
+				B1CDCB8F2223524100DD0F0E /* ThunderRequest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -432,9 +439,10 @@
 			children = (
 				B1AF5041208D34510029336B /* ThunderRequest.framework */,
 				B1AF5043208D34510029336B /* ThunderRequestTests.xctest */,
-				B1AF5045208D34510029336B /* ThunderRequestMac.framework */,
+				B1AF5045208D34510029336B /* ThunderRequest.framework */,
 				B1AF5047208D34510029336B /* ThunderRequestMacTests.xctest */,
 				B1AF5049208D34510029336B /* ThunderRequestTV.framework */,
+				EF55FBFA245F2C43008B66C8 /* ThunderRequestTests-tvOS.xctest */,
 				B115EFC021ECF88200667FB7 /* ThunderRequestWatch.framework */,
 			);
 			name = Products;
@@ -763,7 +771,7 @@
 		B115EFC021ECF88200667FB7 /* ThunderRequestWatch.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
-			path = ThunderRequestWatch.framework;
+			path = ThunderRequest.framework;
 			remoteRef = B115EFBF21ECF88200667FB7 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
@@ -781,10 +789,10 @@
 			remoteRef = B1AF5042208D34510029336B /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		B1AF5045208D34510029336B /* ThunderRequestMac.framework */ = {
+		B1AF5045208D34510029336B /* ThunderRequest.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
-			path = ThunderRequestMac.framework;
+			path = ThunderRequest.framework;
 			remoteRef = B1AF5044208D34510029336B /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
@@ -798,8 +806,15 @@
 		B1AF5049208D34510029336B /* ThunderRequestTV.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
-			path = ThunderRequestTV.framework;
+			path = ThunderRequest.framework;
 			remoteRef = B1AF5048208D34510029336B /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		EF55FBFA245F2C43008B66C8 /* ThunderRequestTests-tvOS.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "ThunderRequestTests-tvOS.xctest";
+			remoteRef = EF55FBF9245F2C43008B66C8 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */

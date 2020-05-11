@@ -405,6 +405,13 @@ extension LiveViewStream: URLSessionDataDelegate {
     }
     
     public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+
+        if (error as NSError?)?.domain == NSURLErrorDomain && (error as NSError?)?.code == NSURLErrorCancelled {
+            // Still need to reset data, otherwise we may run into parsing issues!
+            receivedData = Data()
+            return
+        }
+
         receivedData = Data()
         guard error != nil else { return }
         start()
