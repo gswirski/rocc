@@ -156,13 +156,13 @@ enum SonyStillCaptureMode: DWord, SonyPTPPropValueConvertable {
              .singleBracket2_3, .singleBracket2_5, .singleBracket3_3, .singleBracket3_5,
              .whiteBalanceBracketHigh, .whiteBalanceBracketLow, .droBracketHigh, .droBracketLow:
             //TODO: Add bracketed `ShootingMode`
-            return nil
+            return .loop
         case .continuous, .continuousS, .continuousHigh, .continuousLow,
              .continuousHighPlus:
             return .continuous
         case .timer2_3, .timer2_5, .timer5_3, .timer5_5, .timer10_3, .timer10_5:
             //TODO: Add "multi-timer" timer mode
-            return nil
+            return .loop
         }
     }
     
