@@ -114,8 +114,8 @@ class UDPDeviceDiscoverer: DeviceDiscoverer {
         }
         
         reachability?.networkChangeCallback = { [weak self] (ssid) in
-            guard let this = self, this.lastSSID != ssid else { return }
-            this.lastSSID = ssid
+            guard let this = self/*, this.lastSSID != ssid */ else { return }
+//            this.lastSSID = ssid
             Logger.log(message: "Network did change: \(ssid ?? "null")", category: "UDPDeviceDiscoverer", level: .debug)
             os_log("Network did change %{public}@", log: this.log, type: .debug, ssid ?? "Unknown")
             this.requestController.cancelAllRequests()
