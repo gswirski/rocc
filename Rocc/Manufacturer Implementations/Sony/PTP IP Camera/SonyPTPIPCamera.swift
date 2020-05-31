@@ -470,8 +470,8 @@ extension SonyPTPIPDevice: Camera {
         retry(work: { [weak self] (attemptRetry, attemptNumber) in
             guard let self = self else { return }
 
-            Logger.log(message: "PTP/IP Connection attempt", category: "SonyPTPIPCamera", level: .debug)
-            os_log("PTP/IP Connection attempt: %@", log: self.log, type: .debug, attemptNumber)
+            Logger.log(message: "PTP/IP Connection attempt: \(attemptNumber)", category: "SonyPTPIPCamera", level: .debug)
+            os_log("PTP/IP Connection attempt: %d", log: self.log, type: .debug, attemptNumber)
 
             let retriableCompletion: SonyPTPIPDevice.ConnectedCompletion = { (_ error: Error?, _ transferMode: Bool) in
                 var retriable = false
