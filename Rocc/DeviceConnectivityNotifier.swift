@@ -64,7 +64,9 @@ public final class DeviceConnectivityNotifier {
         self.isReachable = true
         camera.onDisconnected = { [weak self] in
             guard let self = self else { return }
-            self.delegate?.connectivityNotifier(self, didSocketDisconnectFrom: self.camera)
+            if let _ = self.reachability, let delegate = self.delegate {
+                delegate.connectivityNotifier(self, didSocketDisconnectFrom: self.camera)
+            }
         }
     }
     

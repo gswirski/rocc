@@ -467,6 +467,10 @@ extension SonyPTPIPDevice: Camera {
         zoomingDirection = nil
         highFrameRateCallback = nil
 
+        ptpIPClient?.onDisconnect = {
+            // disable callbacks
+        }
+
         retry(work: { [weak self] (attemptRetry, attemptNumber) in
             guard let self = self else { return }
 
@@ -486,6 +490,11 @@ extension SonyPTPIPDevice: Camera {
                 }
 
                 if !attemptRetry(retriable) {
+                    if error == nil {
+                        self.ptpIPClient?.onDisconnect = { [weak self] in
+                            self?.onDisconnected?()
+                        }
+                    }
                     completion(error, transferMode)
                 }
             }
@@ -494,15 +503,15 @@ extension SonyPTPIPDevice: Camera {
             })
         }, attempts: 3)
 
-        //ptpIPClient?.connect(callback: { [weak self] (error) in
-        //    self?.sendStartSessionPacket(completion: completion)
-        //})
+        // ptpIPClient?.connect(callback: { [weak self] (error) in
+        //     self?.sendStartSessionPacket(completion: completion)
+        // })
         ptpIPClient?.onEvent = { [weak self] (event) in
             self?.handlePTPIPEvent(event)
         }
-        ptpIPClient?.onDisconnect = { [weak self] in
-            self?.onDisconnected?()
-        }
+        // ptpIPClient?.onDisconnect = { [weak self] in
+        //     self?.onDisconnected?()
+        // }
     }
 
     typealias WorkSuccess = (_ retriable: Bool) -> Bool
