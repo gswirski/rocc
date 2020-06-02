@@ -123,7 +123,7 @@ public final class DummyCamera: Camera {
     
     public var lensModelName: String?
 
-    public var eventVersion: String?
+    public var eventVersion: String? = "1.8"
 
     public var apiVersion: String?
     
