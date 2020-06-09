@@ -156,6 +156,7 @@
 		B1FB48732092743100C33C86 /* Aperture.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1FB48722092743100C33C86 /* Aperture.swift */; };
 		B1FF7A382371EC180010D5F0 /* SDIOExtDeviceInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1FF7A372371EC180010D5F0 /* SDIOExtDeviceInfo.swift */; };
 		B1FF7A422371F4AB0010D5F0 /* DeviceProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1FF7A412371F4AB0010D5F0 /* DeviceProperty.swift */; };
+		EF140C5A24902FC7001BAD7F /* Retries.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF140C5924902FC7001BAD7F /* Retries.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -379,6 +380,7 @@
 		B1FB48722092743100C33C86 /* Aperture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Aperture.swift; sourceTree = "<group>"; };
 		B1FF7A372371EC180010D5F0 /* SDIOExtDeviceInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDIOExtDeviceInfo.swift; sourceTree = "<group>"; };
 		B1FF7A412371F4AB0010D5F0 /* DeviceProperty.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceProperty.swift; sourceTree = "<group>"; };
+		EF140C5924902FC7001BAD7F /* Retries.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Retries.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -604,6 +606,7 @@
 				B128D0DE23F9D60D007B37F8 /* Array+Unique.swift */,
 				B117F52A24027F560055ADF5 /* Array+BringToFront.swift */,
 				B17D74A4241D010500C75498 /* String+Truncate.swift */,
+				EF140C5924902FC7001BAD7F /* Retries.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -1014,6 +1017,7 @@
 				B164F02921811C1200590A05 /* String+Regex.swift in Sources */,
 				B185A4EE2394FCB400B87BC7 /* PainInTheArsePacket.swift in Sources */,
 				B1CE24B22099184B0049EC87 /* Zoom.swift in Sources */,
+				EF140C5A24902FC7001BAD7F /* Retries.swift in Sources */,
 				B100E1AB20A0A42D004F7AB8 /* PostViewImage.swift in Sources */,
 				B1B4345D2097483300A81B9D /* WhiteBalance.swift in Sources */,
 				B154535521EFDC1700C59096 /* Countable.swift in Sources */,

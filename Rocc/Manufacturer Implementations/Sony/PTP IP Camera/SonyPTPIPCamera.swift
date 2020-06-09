@@ -213,7 +213,7 @@ internal final class SonyPTPIPDevice: SonyCamera {
         performSdioConnect(completion: { [weak self] (error) in
             guard let self = self else { return }
 
-            if let ptpError = error as? PTPError, case PTPError.commandRequestFailed(.nikon_batteryLow) = ptpError {
+            if let ptpError = error as? PTPError, case PTPError.commandRequestFailed(.sony_anotherSessionOpen) = ptpError {
                 return self.performCloseSession(completion: completion)
             }
 
@@ -222,7 +222,7 @@ internal final class SonyPTPIPDevice: SonyCamera {
                     
                     guard let self = self else { return }
 
-                    if let ptpError = secondaryError as? PTPError, case PTPError.commandRequestFailed(.nikon_batteryLow) = ptpError {
+                    if let ptpError = secondaryError as? PTPError, case PTPError.commandRequestFailed(.sony_anotherSessionOpen) = ptpError {
                         return self.performCloseSession(completion: completion)
                     }
                     
@@ -466,7 +466,7 @@ extension SonyPTPIPDevice: Camera {
         zoomingDirection = nil
         highFrameRateCallback = nil
 
-        retry(work: { [weak self] (attemptRetry, attemptNumber) in
+        retry(work: { [weak self] (anotherAttemptMaybeSuccessful, attemptNumber) in
             guard let self = self else { return }
 
             Logger.log(message: "PTP/IP Connection attempt: \(attemptNumber)", category: "SonyPTPIPCamera", level: .debug)
@@ -484,7 +484,7 @@ extension SonyPTPIPDevice: Camera {
                     }
                 }
 
-                if !attemptRetry(retriable) {
+                if !anotherAttemptMaybeSuccessful(retriable) {
                     completion(error, transferMode)
                 }
             }
@@ -502,22 +502,6 @@ extension SonyPTPIPDevice: Camera {
         ptpIPClient?.onDisconnect = { [weak self] in
             self?.onDisconnected?()
         }
-    }
-
-    typealias WorkSuccess = (_ retriable: Bool) -> Bool
-    typealias WorkBlock = (_ attemptRetry: @escaping WorkSuccess, _ attemptNumber: Int) -> Void
-
-
-    private func retry(work: @escaping WorkBlock, attempts: Int, attempt: Int = 1) {
-        let attemptRetry: WorkSuccess = { (_ retriable: Bool) -> Bool in
-            guard retriable, attempt < attempts else {
-                return false
-            }
-
-            self.retry(work: work, attempts: attempts, attempt: attempt + 1)
-            return true
-        }
-        work(attemptRetry, attempt)
     }
 
     func disconnect(completion: @escaping DisconnectedCompletion) {
