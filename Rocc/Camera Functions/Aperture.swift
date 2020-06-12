@@ -12,11 +12,13 @@ import Foundation
 public struct Aperture: CameraFunction {
     
     public struct Value {
-        
+                        
         public let value: Double
+        internal let decimalSeperator: String?
 
-        public init(value: Double) {
+        public init(value: Double, decimalSeperator: String? = nil) {
             self.value = value
+            self.decimalSeperator = decimalSeperator
         }
     }
     
@@ -31,4 +33,8 @@ public struct Aperture: CameraFunction {
     
     /// Returns the current aperture of the camera
     public static let get = Aperture(function: .getAperture)
+}
+
+extension Aperture.Value: Equatable {
+    
 }
