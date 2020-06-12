@@ -159,7 +159,9 @@ public final class DummyCamera: Camera {
     
     private var currentShutterSpeed: ShutterSpeed = ShutterSpeed(numerator: 1.0, denominator: 1250)
     
-    private var currentAperture: Aperture.Value = Aperture.Value(value: 1.8)
+    private var currentAperture: Aperture.Value = Aperture.Value(value: 1.8, decimalSeperator: nil)
+    
+    private var currentProgrammeMode: Exposure.Mode.Value = .aperturePriority
     
     private var currentSelfTimer: TimeInterval = 0.0
     
@@ -250,6 +252,8 @@ public final class DummyCamera: Camera {
             callback(true, nil, ["AF-S", "MF"] as? [T.SendType])
         case .setWhiteBalance:
             callback(true, nil, [WhiteBalance.Value(mode: .auto, temperature: nil, rawInternal: "AUTO"), WhiteBalance.Value(mode: .shade, temperature: nil, rawInternal: "AUTO"), WhiteBalance.Value(mode: .flash, temperature: nil, rawInternal: "AUTO"), WhiteBalance.Value(mode: .cloudy, temperature: nil, rawInternal: "AUTO"), WhiteBalance.Value(mode: .underwaterAuto, temperature: nil, rawInternal: "AUTO"), WhiteBalance.Value(mode: .fluorescentCoolWhite, temperature: nil, rawInternal: "AUTO"), WhiteBalance.Value(mode: .fluorescentDaylight, temperature: nil, rawInternal: "AUTO")] as? [T.SendType])
+        case .setExposureMode:
+            callback(true, nil, [Exposure.Mode.Value.aperturePriority, Exposure.Mode.Value.manual, Exposure.Mode.Value.videoManual, Exposure.Mode.Value.shutterPriority, Exposure.Mode.Value.videoProgrammedAuto, Exposure.Mode.Value.videoAperturePriority] as? [T.SendType])
         default:
             callback(true, nil, nil)
         }
@@ -265,8 +269,8 @@ public final class DummyCamera: Camera {
             status: .idle,
             liveViewInfo: nil,
             zoomPosition: nil,
-            availableFunctions: [.setISO, .setShutterSpeed, .setAperture, .setExposureCompensation, .setSelfTimerDuration, .setWhiteBalance, .startZooming],
-            supportedFunctions: [.setISO, .setShutterSpeed, .setAperture, .setExposureCompensation, .setSelfTimerDuration, .setWhiteBalance, .startZooming],
+            availableFunctions: [.setISO, .setShutterSpeed, .setAperture, .setExposureCompensation, .setSelfTimerDuration, .setWhiteBalance, .startZooming, .setExposureMode, .setTouchAFPosition],
+            supportedFunctions: [.setISO, .setShutterSpeed, .setAperture, .setExposureCompensation, .setSelfTimerDuration, .setWhiteBalance, .startZooming, .setExposureMode, .setTouchAFPosition],
             postViewPictureURLs: nil,
             storageInformation: nil,
             beepMode: nil,
@@ -276,7 +280,11 @@ public final class DummyCamera: Camera {
             stillSizeInfo: nil,
             steadyMode: nil,
             viewAngle: nil,
-            exposureMode: (current: .aperturePriority, available: [.aperturePriority], supported: [.aperturePriority]),
+            exposureMode: (
+                current: currentProgrammeMode,
+                available: [.aperturePriority, .shutterPriority, .manual, .videoAperturePriority, .videoShutterPriority, .videoManual],
+                supported: [.aperturePriority, .shutterPriority, .manual, .videoAperturePriority, .videoShutterPriority, .videoManual]
+            ),
             exposureModeDialControl: nil,
             exposureSettingsLockStatus: nil,
             postViewImageSize: nil,
@@ -284,7 +292,37 @@ public final class DummyCamera: Camera {
             shootMode: (current: currentShootMode, available: [.photo, .continuous, .timelapse, .video, .continuous, .bulb], supported: [.photo, .continuous, .timelapse, .video, .continuous, .bulb]),
             exposureCompensation: (current: currentExposureComp, available: [-3.0, -2.66, -2.33, -2.0, -1.66, -1.33, -1.0, -0.66, -0.33, 0, 0.33, 0.66, 1.0, 1.33, 1.66, 2.0, 2.33, 2.66, 3.0].map({ Exposure.Compensation.Value(value: $0) }), supported: [-3.0, -2.66, -2.33, -2.0, -1.66, -1.33, -1.0, -0.66, -0.33, 0, 0.33, 0.66, 1.0, 1.33, 1.66, 2.0, 2.33, 2.66, 3.0].map({ Exposure.Compensation.Value(value: $0) })),
             flashMode: nil,
-            aperture: (current: currentAperture, available: [Aperture.Value(value: 1.8), Aperture.Value(value: 2.0), Aperture.Value(value: 2.2), Aperture.Value(value: 2.8), Aperture.Value(value: 3.2), Aperture.Value(value: 4.0), Aperture.Value(value: 4.8), Aperture.Value(value: 5.6), Aperture.Value(value: 8.0), Aperture.Value(value: 11.0), Aperture.Value(value: 18.0), Aperture.Value(value: 22.0)], supported: [Aperture.Value(value: 1.8), Aperture.Value(value: 2.0), Aperture.Value(value: 2.2), Aperture.Value(value: 2.8), Aperture.Value(value: 3.2), Aperture.Value(value: 4.0), Aperture.Value(value: 4.8), Aperture.Value(value: 5.6), Aperture.Value(value: 8.0), Aperture.Value(value: 11.0), Aperture.Value(value: 18.0), Aperture.Value(value: 22.0)]),
+            aperture: (
+                current: currentAperture,
+                available: [
+                        Aperture.Value(value: 1.8, decimalSeperator: "."),
+                        Aperture.Value(value: 2.0, decimalSeperator: "."),
+                        Aperture.Value(value: 2.2, decimalSeperator: "."),
+                        Aperture.Value(value: 2.8, decimalSeperator: "."),
+                        Aperture.Value(value: 3.2, decimalSeperator: "."),
+                        Aperture.Value(value: 4.0, decimalSeperator: "."),
+                        Aperture.Value(value: 4.8, decimalSeperator: "."),
+                        Aperture.Value(value: 5.6, decimalSeperator: "."),
+                        Aperture.Value(value: 8.0, decimalSeperator: "."),
+                        Aperture.Value(value: 11.0, decimalSeperator: "."),
+                        Aperture.Value(value: 18.0, decimalSeperator: "."),
+                        Aperture.Value(value: 22.0, decimalSeperator: ".")
+                ],
+                supported: [
+                    Aperture.Value(value: 1.8, decimalSeperator: "."),
+                    Aperture.Value(value: 2.0, decimalSeperator: "."),
+                    Aperture.Value(value: 2.2, decimalSeperator: "."),
+                    Aperture.Value(value: 2.8, decimalSeperator: "."),
+                    Aperture.Value(value: 3.2, decimalSeperator: "."),
+                    Aperture.Value(value: 4.0, decimalSeperator: "."),
+                    Aperture.Value(value: 4.8, decimalSeperator: "."),
+                    Aperture.Value(value: 5.6, decimalSeperator: "."),
+                    Aperture.Value(value: 8.0, decimalSeperator: "."),
+                    Aperture.Value(value: 11.0, decimalSeperator: "."),
+                    Aperture.Value(value: 18.0, decimalSeperator: "."),
+                    Aperture.Value(value: 22.0, decimalSeperator: ".")
+                ]
+            ),
             focusMode: (current: currentFocusMode, available: [.auto, .manual], supported: [.auto, .manual]),
             iso: (current: currentISO, available: [.auto, .native(100), .native(200), .native(400), .native(1600), .native(3200), .native(6400)], supported: [.auto, .native(100), .native(200), .native(400), .native(1600), .native(3200), .native(6400)]),
             isProgramShifted: false,
@@ -394,6 +432,14 @@ public final class DummyCamera: Camera {
                 return
             }
             currentAperture = value
+            eventCompletion?()
+            
+        case .setExposureMode:
+            
+            guard let value = payload as? Exposure.Mode.Value else {
+                return
+            }
+            currentProgrammeMode = value
             eventCompletion?()
             
         case .setShutterSpeed:
