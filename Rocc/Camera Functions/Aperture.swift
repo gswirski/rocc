@@ -38,3 +38,27 @@ public struct Aperture: CameraFunction {
 extension Aperture.Value: Equatable {
     
 }
+
+extension Aperture.Value: Codable {
+    enum CodingKeys: CodingKey {
+        case value
+        case decimalSeparator
+    }
+
+    public init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        guard let value = try? values.decode(Double.self, forKey: .value) else {
+            throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: [CodingKeys.value], debugDescription: "value cannot be nil"))
+        }
+
+        let decimalSeparator = try? values.decode(String.self, forKey: .decimalSeparator)
+        self = Aperture.Value(value: value, decimalSeperator: decimalSeparator)
+        return
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(value, forKey: .value)
+        try container.encode(decimalSeperator, forKey: .decimalSeparator)
+    }
+}
