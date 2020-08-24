@@ -41,12 +41,41 @@ public struct Focus {
 }
 
 extension Focus.Mode.Value: Codable {
+    enum CodingKeys: CodingKey {
+        case type
+        case value
+    }
+    
     public init(from decoder: Decoder) throws {
-        <#code#>
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        let type = try values.decode(String.self, forKey: .type)
+        
+        switch type {
+        case "AF-A": self = .auto
+        case "AF-S": self = .autoSingle
+        case "AF-C": self = .autoContinuous
+        case "DMF": self = .directManual
+        case "MF": self = .manual
+        default:
+            throw DecodingError .dataCorrupted(DecodingError .Context(codingPath: [CodingKeys.type], debugDescription: "invalid type"))
+        }
     }
     
     public func encode(to encoder: Encoder) throws {
-        <#code#>
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        switch self {
+        case .auto:
+            try container.encode("AF-A", forKey: .type)
+        case .autoSingle:
+            try container.encode("AF-S", forKey: .type)
+        case .autoContinuous:
+            try container.encode("AF-C", forKey: .type)
+        case .directManual:
+            try container.encode("DMF", forKey: .type)
+        case .manual:
+            try container.encode("MF", forKey: .type)
+        }
     }
     
 }
