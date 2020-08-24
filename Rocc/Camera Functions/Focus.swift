@@ -14,8 +14,7 @@ public struct Focus {
     /// Functions for controlling the focus mode of the camera
     public struct Mode: CameraFunction {
         
-        public enum Value {
-            
+        public enum Value: Equatable {
             case auto
             case autoSingle
             case autoContinuous
@@ -39,4 +38,15 @@ public struct Focus {
         /// Returns the current focus mode of the camera
         public static let get = Mode(function: .getFocusMode)
     }
+}
+
+extension Focus.Mode.Value: Codable {
+    public init(from decoder: Decoder) throws {
+        <#code#>
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        <#code#>
+    }
+    
 }
