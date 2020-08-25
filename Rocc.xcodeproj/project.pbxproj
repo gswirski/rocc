@@ -160,6 +160,7 @@
 		B1FB48732092743100C33C86 /* Aperture.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1FB48722092743100C33C86 /* Aperture.swift */; };
 		B1FF7A382371EC180010D5F0 /* SDIOExtDeviceInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1FF7A372371EC180010D5F0 /* SDIOExtDeviceInfo.swift */; };
 		B1FF7A422371F4AB0010D5F0 /* DeviceProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1FF7A412371F4AB0010D5F0 /* DeviceProperty.swift */; };
+		E186CEF824F50E1C006EDFB6 /* Focus.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100E1A120A04EE0004F7AB8 /* Focus.swift */; };
 		EF140C5A24902FC7001BAD7F /* Retries.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF140C5924902FC7001BAD7F /* Retries.swift */; };
 		EFB827052493DE2A008EEA4C /* Wrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFB826FD2493DE2A008EEA4C /* Wrapper.swift */; };
 		EFFB02C124E5403800A774AD /* RoccWatch.h in Headers */ = {isa = PBXBuildFile; fileRef = EFFB02BF24E5403800A774AD /* RoccWatch.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -1229,6 +1230,7 @@
 				EFFB02CE24E541D200A774AD /* Exposure.swift in Sources */,
 				EFFB02CF24E541D400A774AD /* ISO.swift in Sources */,
 				EFFB02D124E5422E00A774AD /* ShutterSpeedFormatter.swift in Sources */,
+				E186CEF824F50E1C006EDFB6 /* Focus.swift in Sources */,
 				EFFB02D024E541E800A774AD /* CameraFunctions.swift in Sources */,
 				EFFB02D224E5429700A774AD /* ApertureFormatter.swift in Sources */,
 				EFFB02CD24E541CD00A774AD /* Aperture.swift in Sources */,
