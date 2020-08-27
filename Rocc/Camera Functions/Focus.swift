@@ -42,13 +42,12 @@ public struct Focus {
 
 extension Focus.Mode.Value: Codable {
     enum CodingKeys: CodingKey {
-        case type
         case value
     }
     
     public init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
-        let type = try values.decode(String.self, forKey: .type)
+        let type = try values.decode(String.self, forKey: .value)
         
         switch type {
         case "AF-A": self = .auto
@@ -57,7 +56,7 @@ extension Focus.Mode.Value: Codable {
         case "DMF": self = .directManual
         case "MF": self = .manual
         default:
-            throw DecodingError .dataCorrupted(DecodingError .Context(codingPath: [CodingKeys.type], debugDescription: "invalid type"))
+            throw DecodingError .dataCorrupted(DecodingError .Context(codingPath: [CodingKeys.value], debugDescription: "invalid type"))
         }
     }
     
@@ -66,15 +65,15 @@ extension Focus.Mode.Value: Codable {
         
         switch self {
         case .auto:
-            try container.encode("AF-A", forKey: .type)
+            try container.encode("AF-A", forKey: .value)
         case .autoSingle:
-            try container.encode("AF-S", forKey: .type)
+            try container.encode("AF-S", forKey: .value)
         case .autoContinuous:
-            try container.encode("AF-C", forKey: .type)
+            try container.encode("AF-C", forKey: .value)
         case .directManual:
-            try container.encode("DMF", forKey: .type)
+            try container.encode("DMF", forKey: .value)
         case .manual:
-            try container.encode("MF", forKey: .type)
+            try container.encode("MF", forKey: .value)
         }
     }
     
