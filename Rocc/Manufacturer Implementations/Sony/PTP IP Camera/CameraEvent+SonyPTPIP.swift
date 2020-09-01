@@ -206,7 +206,7 @@ extension CameraEvent {
         var iso: (current: ISO.Value, available: [ISO.Value], supported: [ISO.Value])?
         var shutterSpeed: (current: ShutterSpeed, available: [ShutterSpeed], supported: [ShutterSpeed])?
         var whiteBalance: WhiteBalanceInformation?
-        var focusStatus: FocusStatus?
+        var focusStatus: (current: FocusStatus, available: [FocusStatus], supported: [FocusStatus])?
         var continuousShootingMode: (current: ContinuousCapture.Mode.Value?, available: [ContinuousCapture.Mode.Value], supported: [ContinuousCapture.Mode.Value])?
         var continuousShootingSpeed: (current: ContinuousCapture.Speed.Value?, available: [ContinuousCapture.Speed.Value], supported: [ContinuousCapture.Speed.Value])?
         var batteryInfo: [BatteryInformation]?
@@ -313,8 +313,13 @@ extension CameraEvent {
                     as? PTP.DeviceProperty.Enum else {
                     return
                 }
-                
-                focusStatus = FocusStatus(sonyValue: enumProperty.currentValue)
+                guard let currentFocusStatus = FocusStatus(sonyValue: enumProperty.currentValue) else {
+                    // MARK: Print/throw error in here?
+                    return
+                }
+                let available = enumProperty.available.compactMap({FocusStatus(sonyValue: $0)})
+                let supported = enumProperty.available.compactMap({FocusStatus(sonyValue: $0)})
+                focusStatus = (currentFocusStatus, available, supported)
                 
             case .flashMode:
                 

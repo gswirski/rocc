@@ -201,7 +201,7 @@ extension SonyAPICameraDevice: Camera {
     }
     
     func handleEvent(event: CameraEvent) {
-        focusStatus = event.focusStatus
+        focusStatus = event.focusStatus?.current
         if let currentFocusMode = event.focusMode?.current {
             focusMode = currentFocusMode
         }

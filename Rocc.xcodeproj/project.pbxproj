@@ -160,6 +160,16 @@
 		B1FB48732092743100C33C86 /* Aperture.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1FB48722092743100C33C86 /* Aperture.swift */; };
 		B1FF7A382371EC180010D5F0 /* SDIOExtDeviceInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1FF7A372371EC180010D5F0 /* SDIOExtDeviceInfo.swift */; };
 		B1FF7A422371F4AB0010D5F0 /* DeviceProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1FF7A412371F4AB0010D5F0 /* DeviceProperty.swift */; };
+		E14C0D1B24FD4D8E00F53111 /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1A1AA1420A4E01D00FD0A4A /* Event.swift */; };
+		E14C0D2324FD4DAC00F53111 /* Capture.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1561ED320976F7A0013D122 /* Capture.swift */; };
+		E14C0D2424FD4DC000F53111 /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1FB486B2092579E00C33C86 /* Camera.swift */; };
+		E14C0D2524FD4DD400F53111 /* Storage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B16BFBC220A49F91006BD081 /* Storage.swift */; };
+		E14C0D2624FD4DE000F53111 /* ShootMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1561ECB20976B850013D122 /* ShootMode.swift */; };
+		E14C0D2724FD4DF100F53111 /* FlashMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1BFC98D2379C8A8004F9C56 /* FlashMode.swift */; };
+		E14C0D2824FD4DFE00F53111 /* TouchAF.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1CE444F2099B492001DB2B6 /* TouchAF.swift */; };
+		E14C0D2924FD4E0400F53111 /* WhiteBalance.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1B4345C2097483300A81B9D /* WhiteBalance.swift */; };
+		E14C0D2A24FD4E0B00F53111 /* Wrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFB826FD2493DE2A008EEA4C /* Wrapper.swift */; };
+		E14C0D2B24FD4E3600F53111 /* FileSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1B4342920939EF500A81B9D /* FileSystem.swift */; };
 		E186CEF824F50E1C006EDFB6 /* Focus.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100E1A120A04EE0004F7AB8 /* Focus.swift */; };
 		EF140C5A24902FC7001BAD7F /* Retries.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF140C5924902FC7001BAD7F /* Retries.swift */; };
 		EFB827052493DE2A008EEA4C /* Wrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFB826FD2493DE2A008EEA4C /* Wrapper.swift */; };
@@ -1227,10 +1237,20 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E14C0D2924FD4E0400F53111 /* WhiteBalance.swift in Sources */,
+				E14C0D2624FD4DE000F53111 /* ShootMode.swift in Sources */,
+				E14C0D1B24FD4D8E00F53111 /* Event.swift in Sources */,
+				E14C0D2524FD4DD400F53111 /* Storage.swift in Sources */,
 				EFFB02CE24E541D200A774AD /* Exposure.swift in Sources */,
+				E14C0D2B24FD4E3600F53111 /* FileSystem.swift in Sources */,
 				EFFB02CF24E541D400A774AD /* ISO.swift in Sources */,
+				E14C0D2324FD4DAC00F53111 /* Capture.swift in Sources */,
+				E14C0D2824FD4DFE00F53111 /* TouchAF.swift in Sources */,
 				EFFB02D124E5422E00A774AD /* ShutterSpeedFormatter.swift in Sources */,
+				E14C0D2A24FD4E0B00F53111 /* Wrapper.swift in Sources */,
 				E186CEF824F50E1C006EDFB6 /* Focus.swift in Sources */,
+				E14C0D2724FD4DF100F53111 /* FlashMode.swift in Sources */,
+				E14C0D2424FD4DC000F53111 /* Camera.swift in Sources */,
 				EFFB02D024E541E800A774AD /* CameraFunctions.swift in Sources */,
 				EFFB02D224E5429700A774AD /* ApertureFormatter.swift in Sources */,
 				EFFB02CD24E541CD00A774AD /* Aperture.swift in Sources */,

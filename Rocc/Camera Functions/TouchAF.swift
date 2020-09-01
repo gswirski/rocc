@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 
 /// Functions for interacting with the Touch AF capability of a camera
 public struct TouchAF: CameraFunction {
