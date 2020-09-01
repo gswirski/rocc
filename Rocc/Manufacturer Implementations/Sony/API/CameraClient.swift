@@ -743,7 +743,7 @@ fileprivate extension CameraEvent {
         var _shutterSpeed: (current: ShutterSpeed, available: [ShutterSpeed], supported: [ShutterSpeed]?)?
         var _whiteBalance: WhiteBalanceInformation?
         var _touchAF: TouchAF.Information?
-        var _focusStatus: (current: FocusStatus, available: [FocusStatus], supported: [FocusStatus])?
+        var _focusStatus: FocusStatus?
         var _zoomSetting: (current: String, available: [String], supported: [String])?
         var _stillQuality: (current: StillCapture.Quality.Value, available: [StillCapture.Quality.Value], supported: [StillCapture.Quality.Value])?
         var _stillFormat: (current: StillCapture.Format.Value, available: [StillCapture.Format.Value], supported: [StillCapture.Format.Value])?
@@ -883,10 +883,8 @@ fileprivate extension CameraEvent {
                 case "touchAFPosition":
                     _touchAF = TouchAF.Information(dictionary: dictionaryElement)
                 case "focusStatus":
-//                    guard let status = dictionaryElement["focusStatus"] as? String else { return }
-//                    _focusStatus = FocusStatus(sonyString: status)
-                    guard let current = dictionaryElement["currentFocusStatus"] as? String, let currentEnum = FocusStatus(sonyString: current), let candidates = dictionaryElement["focusStatusCandidates"] as? [String] else { return }
-                    _focusStatus = (currentEnum, candidates.compactMap({ FocusStatus(sonyString: $0)}), candidates.compactMap({ FocusStatus(sonyString: $0)}))
+                    guard let status = dictionaryElement["focusStatus"] as? String else { return }
+                    _focusStatus = FocusStatus(sonyString: status)
                 case "zoomSetting":
                     guard let current = dictionaryElement["zoom"] as? String, let candidates = dictionaryElement["candidate"] as? [String] else { return }
                     _zoomSetting = (current, candidates, candidates)

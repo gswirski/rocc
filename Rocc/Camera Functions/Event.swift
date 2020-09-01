@@ -67,7 +67,7 @@ public enum FocusStatus: Equatable, Codable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         switch self {
-        case .failed: try container.encode("Not Focusing", forKey: .value)
+        case .failed: try container.encode("Failed", forKey: .value)
         case .focused: try container.encode("Focused", forKey: .value)
         case .focusing: try container.encode("Focusing", forKey: .value)
         case .notFocussing: try container.encode("Not Focusing", forKey: .value)
@@ -257,7 +257,7 @@ public struct CameraEvent: Equatable {
     public let touchAF: TouchAF.Information?
     
     /// The current focus status of the camera.
-    public let focusStatus: (current: FocusStatus, available: [FocusStatus], supported: [FocusStatus])?
+    public let focusStatus: FocusStatus?
     
     /// The current and available zoom settings.
     public let zoomSetting: (current: String, available: [String], supported: [String])?
