@@ -45,7 +45,10 @@ public struct ShutterSpeed: Equatable {
 }
 
 extension ShutterSpeed: Codable {
-    
+    enum CodingKeys: String, CodingKey {
+        case numerator = "n"
+        case denominator = "d"
+    }
 }
 
 public extension ShutterSpeed {
