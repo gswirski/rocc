@@ -96,7 +96,7 @@ enum SonyStillCaptureMode: DWord, SonyPTPPropValueConvertable {
         case .continuous, .continuousS, .continuousLow, .continuousHigh, .continuousHighPlus:
             return .continuous
         default:
-            return nil
+            return .single
         }
     }
     
