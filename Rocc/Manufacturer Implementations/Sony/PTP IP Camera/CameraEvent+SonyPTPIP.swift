@@ -96,7 +96,7 @@ enum SonyStillCaptureMode: DWord, SonyPTPPropValueConvertable {
         case .continuous, .continuousS, .continuousLow, .continuousHigh, .continuousHighPlus:
             return .continuous
         default:
-            return nil
+            return .single
         }
     }
     
@@ -313,7 +313,7 @@ extension CameraEvent {
                     as? PTP.DeviceProperty.Enum else {
                     return
                 }
-                
+               
                 focusStatus = FocusStatus(sonyValue: enumProperty.currentValue)
                 
             case .flashMode:
