@@ -11,7 +11,11 @@ import Foundation
 extension _CameraFunction {
     var sonyCameraMethodName: String? {
         switch self {
-        case .ping:
+        case .ping,
+             .setContinuousBracketedShootingBracket, .getContinuousBracketedShootingBracket,
+             .startContinuousBracketShooting, .stopContinuousBracketShooting,
+             .setSingleBracketedShootingBracket, .getSingleBracketedShootingBracket,
+             .takeSingleBracketShot:
             return nil
         case .setShootMode:
             return "setShootMode"
@@ -65,10 +69,10 @@ extension _CameraFunction {
             return "startLiveview"
         case .endLiveView:
             return "stopLiveview"
-        case .startLiveViewWithSize:
+        case .startLiveViewWithQuality, .setLiveViewQuality:
             return "startLiveviewWithSize"
-        case .getLiveViewSize:
-            return "getLiveViewSize"
+        case .getLiveViewQuality:
+            return "getLiveViewSize"            
         case .setSendLiveViewFrameInfo:
             return "setLiveviewFrameInfo"
         case .getSendLiveViewFrameInfo:

@@ -90,7 +90,7 @@ extension SonyPTPIPDevice {
         case .setProgramShift, .getProgramShift:
             // Not available natively with PTP/IP
             callback(false, nil, nil)
-        case .takePicture, .startContinuousShooting, .endContinuousShooting, .startBulbCapture, .endBulbCapture:
+        case .takePicture, .startContinuousShooting, .endContinuousShooting, .startBulbCapture, .endBulbCapture, .startContinuousBracketShooting, .stopContinuousBracketShooting, .takeSingleBracketShot:
             getDevicePropDescriptionFor(propCode: .stillCaptureMode, callback: { (result) in
                 switch result {
                 case .success(let property):
@@ -119,11 +119,22 @@ extension SonyPTPIPDevice {
         case .startLoopRecording, .endLoopRecording:
             //TODO: Unable to reverse engineer as not supported on RX100 VII
             callback(false, nil, nil)
-        case .startLiveView, .startLiveViewWithSize, .endLiveView:
+        case .startLiveView, .endLiveView:
             callback(true, nil, nil)
-        case .getLiveViewSize:
-            //TODO: Unable to reverse engineer as not supported on RX100 VII
-            callback(false, nil, nil)
+        case .getLiveViewQuality, .setLiveViewQuality, .startLiveViewWithQuality:
+            getDevicePropDescriptionFor(propCode: .liveViewQuality, callback: { (result) in
+                switch result {
+                case .success(let property):
+                    let event = CameraEvent.fromSonyDeviceProperties([property]).event
+                    callback(
+                        event.supportedFunctions?.contains(function.function),
+                        nil,
+                        event.liveViewQuality?.supported as? [T.SendType]
+                    )
+                case .failure(let error):
+                    callback(false, error, nil)
+                }
+            })
         case .setSendLiveViewFrameInfo, .getSendLiveViewFrameInfo:
             // Doesn't seem to be available via PTP/IP
             callback(false, nil, nil)
@@ -171,6 +182,26 @@ extension SonyPTPIPDevice {
                     callback(false, error, nil)
                 }
             })
+        case .setContinuousBracketedShootingBracket, .getContinuousBracketedShootingBracket:
+            getDevicePropDescriptionFor(propCode: .stillCaptureMode) { (result) in
+                switch result {
+                case .success(let property):
+                    let event = CameraEvent.fromSonyDeviceProperties([property]).event
+                    callback(event.supportedFunctions?.contains(function.function), nil, event.continuousBracketedShootingBrackets?.supported as? [T.SendType])
+                case .failure(let error):
+                    callback(false, error, nil)
+                }
+            }
+        case .setSingleBracketedShootingBracket, .getSingleBracketedShootingBracket:
+            getDevicePropDescriptionFor(propCode: .stillCaptureMode) { (result) in
+                switch result {
+                case .success(let property):
+                    let event = CameraEvent.fromSonyDeviceProperties([property]).event
+                    callback(event.supportedFunctions?.contains(function.function), nil, event.singleBracketedShootingBrackets?.supported as? [T.SendType])
+                case .failure(let error):
+                    callback(false, error, nil)
+                }
+            }
         case .setSelfTimerDuration, .getSelfTimerDuration:
             getDevicePropDescriptionFor(propCode: .stillCaptureMode, callback: { (result) in
                 switch result {

@@ -35,7 +35,6 @@ extension Exposure.Mode.Value {
 }
 
 enum SonyStillCaptureMode: DWord, SonyPTPPropValueConvertable {
-    
     case single = 0x00000001
     case continuousHighPlus = 0x00018010
     case continuousLow = 0x00018012
@@ -209,6 +208,8 @@ extension CameraEvent {
         var focusStatus: FocusStatus?
         var continuousShootingMode: (current: ContinuousCapture.Mode.Value?, available: [ContinuousCapture.Mode.Value], supported: [ContinuousCapture.Mode.Value])?
         var continuousShootingSpeed: (current: ContinuousCapture.Speed.Value?, available: [ContinuousCapture.Speed.Value], supported: [ContinuousCapture.Speed.Value])?
+        var singleBrackets: (current: SingleBracketCapture.Bracket.Value?, available: [SingleBracketCapture.Bracket.Value], supported: [SingleBracketCapture.Bracket.Value])?
+        var continuousBrackets: (current: ContinuousBracketCapture.Bracket.Value?, available: [ContinuousBracketCapture.Bracket.Value], supported: [ContinuousBracketCapture.Bracket.Value])?
         var batteryInfo: [BatteryInformation]?
         var stillQuality: (current: StillCapture.Quality.Value, available: [StillCapture.Quality.Value], supported: [StillCapture.Quality.Value])?
         var stillFormat: (current: StillCapture.Format.Value, available: [StillCapture.Format.Value], supported: [StillCapture.Format.Value])?
@@ -218,6 +219,7 @@ extension CameraEvent {
         var videoQuality: (current: VideoCapture.Quality.Value, available: [VideoCapture.Quality.Value], supported: [VideoCapture.Quality.Value])?
         var availableFunctions: [_CameraFunction] = []
         var supportedFunctions: [_CameraFunction] = []
+        var liveViewQuality: (current: LiveView.Quality, available: [LiveView.Quality], supported: [LiveView.Quality])?
         
         sonyDeviceProperties.forEach { (deviceProperty) in
                         
@@ -328,6 +330,19 @@ extension CameraEvent {
                 let supported = enumProperty.supported.compactMap({ Flash.Mode.Value(sonyValue: $0) })
                 
                 flashMode = (mode, available, supported)
+                
+            case .liveViewQuality:
+                
+                guard let enumProperty = deviceProperty as? PTP.DeviceProperty.Enum else {
+                    return
+                }
+                guard let quality = LiveView.Quality(sonyValue: enumProperty.currentValue) else {
+                    return
+                }
+                let available = enumProperty.available.compactMap({ LiveView.Quality(sonyValue: $0) })
+                let supported = enumProperty.supported.compactMap({ LiveView.Quality(sonyValue: $0) })
+                
+                liveViewQuality = (quality, available, supported)
             
             case .stillCaptureMode:
                 
@@ -368,7 +383,7 @@ extension CameraEvent {
                     case .bulb:
                         supportedFunctions.append(contentsOf: [.startBulbCapture, .endBulbCapture])
                     case .photo:
-                        supportedFunctions.append(contentsOf: [.takePicture])
+                        supportedFunctions.append(.takePicture)
                     case .video:
                         supportedFunctions.append(contentsOf: [.startVideoRecording, .endVideoRecording])
                     case .continuous:
@@ -377,6 +392,10 @@ extension CameraEvent {
                         supportedFunctions.append(contentsOf: [.startLoopRecording, .endLoopRecording])
                     case .interval:
                         supportedFunctions.append(contentsOf: [.startIntervalStillRecording, .endIntervalStillRecording])
+                    case .continuousBracket:
+                        supportedFunctions.append(contentsOf: [.startContinuousBracketShooting, .stopContinuousBracketShooting])
+                    case .singleBracket:
+                        supportedFunctions.append(.takeSingleBracketShot)
                     default:
                         break
                     }
@@ -386,8 +405,11 @@ extension CameraEvent {
                 case .photo:
                     availableFunctions.append(.takePicture)
                 case .continuous:
-                    availableFunctions.append(.startContinuousShooting)
-                    availableFunctions.append(.endContinuousShooting)
+                    availableFunctions.append(contentsOf: [.startContinuousShooting, .endContinuousShooting])
+                case .singleBracket:
+                    availableFunctions.append(.takeSingleBracketShot)
+                case .continuousBracket:
+                    availableFunctions.append(contentsOf: [.startContinuousBracketShooting, .stopContinuousBracketShooting])
                 default:
                     // Others are handled by exposureProgrammeMode
                     break
@@ -440,9 +462,31 @@ extension CameraEvent {
                     supportedDurations.append(0.0)
                     selfTimer = (current.timerDuration, availableDurations.sorted(), supportedDurations.sorted())
                     if !availableSelfTimerSingleModes.isEmpty {
-                        availableFunctions.append(.setSelfTimerDuration)
+                        availableFunctions.append(contentsOf: [.setSelfTimerDuration, .getSelfTimerDuration])
                     }
-                    supportedFunctions.append(.setSelfTimerDuration)
+                    supportedFunctions.append(contentsOf: [.setSelfTimerDuration, .getSelfTimerDuration])
+                }
+                
+                //Munge bracketed shooting modes
+                
+                let availableSingleBrackets = available.compactMap({ $0.singleBracket })
+                let supportedSingleBrackets = supported.compactMap({ $0.singleBracket })
+                if !availableSingleBrackets.isEmpty  || !supportedSingleBrackets.isEmpty {
+                    singleBrackets = (current.singleBracket, availableSingleBrackets, supportedSingleBrackets)
+                    if !availableSingleBrackets.isEmpty {
+                        availableFunctions.append(contentsOf: [.setSingleBracketedShootingBracket, .getSingleBracketedShootingBracket])
+                    }
+                    supportedFunctions.append(contentsOf: [.setSingleBracketedShootingBracket, .getSingleBracketedShootingBracket])
+                }
+                
+                let availableContinuousBrackets = available.compactMap({ $0.continuousBracket })
+                let supportedContinuousBrackets = supported.compactMap({ $0.continuousBracket })
+                if !availableContinuousBrackets.isEmpty  || !supportedContinuousBrackets.isEmpty {
+                    continuousBrackets = (current.continuousBracket, availableContinuousBrackets, supportedContinuousBrackets)
+                    if !availableContinuousBrackets.isEmpty {
+                        availableFunctions.append(contentsOf: [.setContinuousBracketedShootingBracket, .getContinuousBracketedShootingBracket])
+                    }
+                    supportedFunctions.append(contentsOf: [.setContinuousBracketedShootingBracket, .getContinuousBracketedShootingBracket])
                 }
                 
                 if shootMode.available.contains(.photo) {
@@ -909,10 +953,11 @@ extension CameraEvent {
         let event = CameraEvent(
             status: nil,
             liveViewInfo: nil,
+            liveViewQuality: liveViewQuality,
             zoomPosition: zoomPosition,
             availableFunctions: availableFunctions,
             supportedFunctions: supportedFunctions,
-            postViewPictureURLs: [],
+            postViewPictureURLs: [:],
             storageInformation: storageInformation,
             beepMode: nil,
             function: nil,
@@ -942,7 +987,8 @@ extension CameraEvent {
             stillFormat: stillFormat,
             continuousShootingMode: continuousShootingMode,
             continuousShootingSpeed: continuousShootingSpeed,
-            continuousShootingURLS: nil,
+            continuousBracketedShootingBrackets: continuousBrackets,
+            singleBracketedShootingBrackets: singleBrackets,
             flipSetting: nil,
             scene: nil,
             intervalTime: nil,

@@ -173,7 +173,7 @@ public final class LiveViewStream: NSObject {
     
     private var eventTimer: Timer?
     
-    /// Starts the stream
+    /// Performs all setup of the live view stream and begins streaming images over the network
     public func start() {
         
         #if os(iOS)
@@ -184,7 +184,7 @@ public final class LiveViewStream: NSObject {
             return
         }
         #endif
-        
+                
         isStarting = true
         
         Logger.log(message: "Starting live view stream", category: "LiveViewStreaming", level: .debug)

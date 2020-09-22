@@ -9,6 +9,29 @@
 import Foundation
 import ThunderRequest
 
+fileprivate extension LiveView.Quality {
+    
+    init?(sonyString: String) {
+        switch sonyString.lowercased() {
+        case "m":
+            self = .displaySpeed
+        case "l":
+            self = .imageQuality
+        default:
+            return nil
+        }
+    }
+    
+    var sonyString: String {
+        switch self {
+        case .displaySpeed:
+            return "m"
+        case .imageQuality:
+            return "l"
+        }
+    }
+}
+
 fileprivate extension StillCapture.Quality.Value {
     
     init?(sonyString: String) {
@@ -456,9 +479,9 @@ fileprivate extension ShootingMode {
             return "looprec"
         case .bulb:
             return "bulb"
-        case .highFrameRate:
-            // Not actually a thing... so should never be asked for this!
-            return "hfr"
+        case .highFrameRate, .singleBracket, .continuousBracket:
+            // Not actually a thing for Sony API cameras... so should never be asked for this!
+            return ""
         }
     }
 }
@@ -1035,7 +1058,10 @@ fileprivate extension CameraEvent {
         }
         
         if let liveViewStatus = _liveViewStatus {
-            liveViewInfo = LiveViewInformation(status: liveViewStatus, orientation: _liveViewOrientation)
+            liveViewInfo = LiveViewInformation(
+                status: liveViewStatus,
+                orientation: _liveViewOrientation
+            )
         } else {
             liveViewInfo = nil
         }
@@ -1046,9 +1072,21 @@ fileprivate extension CameraEvent {
             _shootMode = (.bulb, _shootMode?.available ?? [], _shootMode?.supported ?? [])
         }
         
+        var pictureURLs: [ShootingMode: [(postView: URL, thumbnail: URL?)]] = [:]
+        
+        if !_takenPictureURLS.isEmpty {
+            pictureURLs[.photo] = _takenPictureURLS.flatMap({ $0 }).map({ (url) -> (postView: URL, thumbnail: URL?) in
+                return (url, nil)
+            })
+        }
+        
+        if let continuousShootingURLs = _continuousShootingURLS {
+            pictureURLs[.continuous] = continuousShootingURLs
+        }
+        
         status = _cameraStatus
         zoomPosition = _zoomPosition
-        postViewPictureURLs = _takenPictureURLS.isEmpty ? nil : _takenPictureURLS
+        postViewPictureURLs = pictureURLs.isEmpty ? nil : pictureURLs
         storageInformation = _storageInfo.isEmpty ? nil : _storageInfo
         beepMode = _beepMode
         function = _function
@@ -1077,7 +1115,6 @@ fileprivate extension CameraEvent {
         stillFormat = _stillFormat
         continuousShootingMode = _continuousShootingMode
         continuousShootingSpeed = _continuousShootingSpeed
-        continuousShootingURLS = _continuousShootingURLS
         flipSetting = _flipSetting
         scene = _scene
         intervalTime = _intervalTime
@@ -1100,6 +1137,9 @@ fileprivate extension CameraEvent {
         //PTP/IP things!
         exposureModeDialControl = nil
         highFrameRateCaptureStatus = nil
+        singleBracketedShootingBrackets = nil
+        continuousBracketedShootingBrackets = nil
+        liveViewQuality = nil
     }
 }
 
@@ -1537,7 +1577,7 @@ internal class CameraClient: ServiceClient {
     func setShutterSpeed(_ shutterSpeed: ShutterSpeed, completion: @escaping GenericCompletion) {
         
         let shutterSpeedFormatter = ShutterSpeedFormatter()
-        
+                
         let body = SonyRequestBody(method: "setShutterSpeed", params: [shutterSpeedFormatter.string(from: shutterSpeed)], id: 1, version: "1.0")
         
         requestController.request(service.type, method: .POST, body: body.requestSerialised) { (response, error) in
@@ -2328,9 +2368,11 @@ internal class CameraClient: ServiceClient {
     
     //MARK: - With Size
     
-    typealias LiveViewSizesCompletion = (_ result: Result<[String], Error>) -> Void
+    typealias LiveViewSizesCompletion = (_ result: Result<[LiveView.Quality], Error>) -> Void
     
-    typealias LiveViewSizeCompletion = (_ result: Result<String, Error>) -> Void
+    typealias LiveViewSizeCompletion = (_ result: Result<LiveView.Quality, Error>) -> Void
+    
+    typealias SetLiveViewSizeCompletion = (_ result: Result<URL, Error>) -> Void
     
     func getAvailableLiveViewSizes(_ completion: @escaping LiveViewSizesCompletion) {
         
@@ -2348,7 +2390,7 @@ internal class CameraClient: ServiceClient {
                 return
             }
             
-            completion(Result.success(available))
+            completion(Result.success(available.compactMap({ LiveView.Quality(sonyString: $0) })))
         }
     }
     
@@ -2368,13 +2410,13 @@ internal class CameraClient: ServiceClient {
                 return
             }
             
-            completion(Result.success(supported))
+            completion(Result.success(supported.compactMap({ LiveView.Quality(sonyString: $0) })))
         }
     }
     
-    func startLiveViewWithSize(_ size: String, _ completion: @escaping LiveViewCompletion) {
+    func startLiveViewWithSize(_ size: LiveView.Quality, _ completion: @escaping LiveViewCompletion) {
         
-        let body = SonyRequestBody(method: "startLiveviewWithSize", params: [size], id: 1, version: "1.0")
+        let body = SonyRequestBody(method: "startLiveviewWithSize", params: [size.sonyString], id: 1, version: "1.0")
         requestController.request(service.type, method: .POST, body: body.requestSerialised) { (response, error) in
             
             if let error = error ?? CameraError(responseDictionary: response?.dictionary, methodName: "startLiveviewWithSize") {
@@ -2382,7 +2424,9 @@ internal class CameraClient: ServiceClient {
                 return
             }
             
-            guard let result = response?.dictionary?["result"] as? [String], let streamURLString = result.first, let streamURL = URL(string: streamURLString) else {
+            guard let result = response?.dictionary?["result"] as? [String],
+                let streamURLString = result.first,
+                let streamURL = URL(string: streamURLString) else {
                 completion(Result.failure(CameraError.invalidResponse("startLiveviewWithSize")))
                 return
             }
@@ -2401,12 +2445,39 @@ internal class CameraClient: ServiceClient {
                 return
             }
             
-            guard let result = response?.dictionary?["result"] as? [String], let size = result.first else {
+            guard let result = response?.dictionary?["result"] as? [String],
+                let size = result.first,
+                let sizeEnum = LiveView.Quality(sonyString: size) else {
                 completion(Result.failure(CameraError.invalidResponse("getLiveviewSize")))
                 return
             }
             
-            completion(Result.success(size))
+            completion(Result.success(sizeEnum))
+        }
+    }
+    
+    func setLiveViewSize(size: LiveView.Quality, _ completion: @escaping LiveViewCompletion) {
+        
+        // We have to start and stop the live view to set it's size using `startLiveViewWithSize`
+        let performSwitch: (@escaping LiveViewCompletion) -> Void = { [weak self] completion in
+            guard let self = self else { return }
+            self.stopLiveView { (_) in
+                self.startLiveViewWithSize(size, completion)
+            }
+        }
+        
+        // First we're going to check if the requested size is available, if it's not then we'll return an error
+        getAvailableLiveViewSizes { (result) in
+            switch result {
+            case .success(let sizes):
+                guard sizes.contains(size) else {
+                    completion(.failure(CameraError.notAvailable("")))
+                    return
+                }
+                performSwitch(completion)
+            case .failure(_):
+                performSwitch(completion)
+            }
         }
     }
     

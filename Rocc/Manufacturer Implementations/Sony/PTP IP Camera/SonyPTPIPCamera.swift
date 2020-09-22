@@ -203,7 +203,7 @@ internal final class SonyPTPIPDevice: SonyCamera {
 
     private func performCloseSession(completion: @escaping SonyPTPIPDevice.ConnectedCompletion) {
         let packet = Packet.commandRequestPacket(code: .closeSession, arguments: nil, transactionId: ptpIPClient?.getNextTransactionId() ?? 1)
-        ptpIPClient?.sendCommandRequestPacket(packet, callback: { [weak self] (response) in
+        ptpIPClient?.sendCommandRequestPacket(packet, callback: { (response) in
             completion(PTPError.anotherSessionOpen, false)
         }, callCallbackForAnyResponse: true)
     }
@@ -597,6 +597,14 @@ extension SonyPTPIPDevice: Camera {
             setShutterSpeedAwayFromBulbIfRequired() { [weak self] (_) in
                 self?.setToShootModeIfRequired(.highFrameRate, callback)
             }
+        case .startContinuousBracketShooting:
+            setShutterSpeedAwayFromBulbIfRequired { [weak self] (_) in
+                self?.setToShootModeIfRequired(.continuousBracket, callback)
+            }
+        case .takeSingleBracketShot:
+            setShutterSpeedAwayFromBulbIfRequired { [weak self] (_) in
+                self?.setToShootModeIfRequired(.singleBracket, callback)
+            }
         default:
             callback(nil)
         }
@@ -612,10 +620,20 @@ extension SonyPTPIPDevice: Camera {
         case .photo, .timelapse, .bulb:
             return .single
         case .continuous:
-            guard let continuousShootingModes = lastStillCaptureModes?.available.filter({ $0.shootMode == .continuous }) else {
+            guard let continuousShootingModes = lastStillCaptureModes?.available.filter({
+                $0.shootMode == .continuous
+            }) else {
                 return .continuous
             }
             return continuousShootingModes.first
+        case .singleBracket:
+            return lastStillCaptureModes?.available.filter({
+                $0.shootMode == .singleBracket
+            }).first
+        case .continuousBracket:
+            return lastStillCaptureModes?.available.filter({
+                $0.shootMode == .continuousBracket
+            }).first
         }
     }
     
@@ -654,7 +672,7 @@ extension SonyPTPIPDevice: Camera {
             default:
                 modes = defaultVideoModes
             }
-        case .photo, .timelapse:
+        case .photo, .timelapse, .singleBracket, .continuousBracket:
             switch currentExposureProgrammeMode {
             case .videoShutterPriority:
                 modes = defaultModes.bringingToFront(.slowAndQuickShutterPriority).bringingToFront(.shutterPriority)

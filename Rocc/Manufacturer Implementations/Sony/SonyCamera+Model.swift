@@ -139,6 +139,12 @@ extension SonyCamera {
         
         internal static func supporting(function: _CameraFunction) -> [Model] {
             switch function {
+                // No API based cameras support any of these
+            case .startContinuousBracketShooting, .stopContinuousBracketShooting,
+                 .setContinuousBracketedShootingBracket, .getContinuousBracketedShootingBracket,
+                 .takeSingleBracketShot,
+                 .setSingleBracketedShootingBracket, .getSingleBracketedShootingBracket:
+                return []
                 // This isn't documented, so let's err on the side of caution!
             case .startBulbCapture, .endBulbCapture:
                 return []
@@ -158,7 +164,7 @@ extension SonyCamera {
                 return [.HDR_AS50, .HDR_AS300, .FDR_X3000, .HDR_AS200V, .FDR_X1000V]
             case .startLiveView, .endLiveView, .getEvent, .setShootMode, .getShootMode:
                 return allCases
-            case .startLiveViewWithSize, .getLiveViewSize:
+            case .startLiveViewWithQuality, .getLiveViewQuality, .setLiveViewQuality:
                 var _supportingModels = alphaSeries
                 _supportingModels.append(contentsOf: NEXSeries)
                 _supportingModels.append(contentsOf: cyberShotSeries)
@@ -198,7 +204,7 @@ extension SonyCamera {
             case .setContinuousShootingSpeed, .getContinuousShootingSpeed:
                 var _supportingModels: [Model] = alphaSeries
                 _supportingModels.append(contentsOf: cyberShotSeries)
-                _supportingModels = _supportingModels.filter({ ![.a7, .a7r, .a7s, .a5000, .a5100, .a6000, .cyberShot_HX60, .cyberShot_HX60V, .cyberShot_HX400, .cyberShot_HX400V, .cyberShot_RX100M3].contains($0) })
+                _supportingModels = _supportingModels.filter({ ![.a7, .a7r, .a7s, .a7iii, .a9ii, .a9, .a5000, .a5100, .a6000, .a6400, .a6600, .cyberShot_HX60, .cyberShot_HX60V, .cyberShot_HX400, .cyberShot_HX400V, .cyberShot_RX100M3].contains($0) })
                 let additionalModels: [Model] = [.HDR_AZ1, .HDR_AS200V, .FDR_X1000V, .HDR_AS50, .HDR_AS300, .FDR_X3000, .QX30]
                 _supportingModels.append(contentsOf: additionalModels)
                 return _supportingModels
@@ -211,14 +217,12 @@ extension SonyCamera {
                 _supportingModels.append(contentsOf: additionalModels)
                 return _supportingModels
             case .setExposureMode, .getExposureMode:
-                //TODO: Remove cameras with hardware dial!
                 var _supportingModels = alphaSeries
                 _supportingModels.append(contentsOf: NEXSeries)
                 _supportingModels.append(contentsOf: cyberShotSeries)
                 _supportingModels.append(contentsOf: QXSeries)
                 return _supportingModels
             case .setFocusMode, .getFocusMode:
-                //TODO: Remove cameras with hardware switch!
                 var _supportingModels: [Model] = alphaSeries
                 _supportingModels.append(contentsOf: cyberShotSeries)
                 _supportingModels.append(contentsOf: NEXSeries)
@@ -343,7 +347,7 @@ extension SonyCamera {
         }
         
         static var alphaSeries: [Model] {
-            return [.a7, .a7ii, .a7iii, .a7r, .a7rii, .a7riii, .a7s, .a7sii, .a5000, .a5100, .a6000, .a6300, .a6500]
+            return [.a7, .a7ii, .a7iii, .a7r, .a7rii, .a7riii, .a7s, .a7sii, .a7siii, .a5000, .a5100, .a6000, .a6100, .a6300, .a6400, .a6500, .a6600]
         }
         
         var latestFirmwareVersion: String? {
