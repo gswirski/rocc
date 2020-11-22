@@ -13,7 +13,7 @@ let package = Package(
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
             name: "Rocc",
-            targets: ["Rocc"]),
+            targets: ["Rocc", "RoccWatch"]),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -24,6 +24,18 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "Rocc",
+            path: "Sources",
+            exclude: [
+                "Info.plist",
+                "Rocc.h",
+                "ThunderRequest/LICENSE.md",
+                "Helpers/Networking/SimplePing/LICENSE.txt"
+            ],
+            linkerSettings: [
+                .linkedFramework("UIKit", .when(platforms: [.iOS]))
+            ]),
+        .target(
+            name: "RoccWatch",
             path: "Sources",
             exclude: [
                 "Info.plist",
