@@ -36,6 +36,7 @@
 		B128D0D923F9A17C007B37F8 /* StillQuality+SonyPTPPropValueConvertable.swift in Sources */ = {isa = PBXBuildFile; fileRef = B128D0D823F9A17C007B37F8 /* StillQuality+SonyPTPPropValueConvertable.swift */; };
 		B128D0DC23F9A198007B37F8 /* StillFormat+SonyPTPPropValueConvertable.swift in Sources */ = {isa = PBXBuildFile; fileRef = B128D0DB23F9A198007B37F8 /* StillFormat+SonyPTPPropValueConvertable.swift */; };
 		B128D0DF23F9D60D007B37F8 /* Array+Unique.swift in Sources */ = {isa = PBXBuildFile; fileRef = B128D0DE23F9D60D007B37F8 /* Array+Unique.swift */; };
+		B12CCC93247DAEF100BCD2D1 /* Wrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B12CCC92247DAEF100BCD2D1 /* Wrapper.swift */; };
 		B1316A5C2089C08F006BD136 /* RoccTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1316A5B2089C08F006BD136 /* RoccTests.swift */; };
 		B1316A5E2089C08F006BD136 /* Rocc.h in Headers */ = {isa = PBXBuildFile; fileRef = B1316A502089C08F006BD136 /* Rocc.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B1316A722089C0F6006BD136 /* DeviceDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1316A712089C0F6006BD136 /* DeviceDiscovery.swift */; };
@@ -193,7 +194,6 @@
 		B1FF7A382371EC180010D5F0 /* SDIOExtDeviceInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1FF7A372371EC180010D5F0 /* SDIOExtDeviceInfo.swift */; };
 		B1FF7A422371F4AB0010D5F0 /* DeviceProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1FF7A412371F4AB0010D5F0 /* DeviceProperty.swift */; };
 		EF140C5A24902FC7001BAD7F /* Retries.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF140C5924902FC7001BAD7F /* Retries.swift */; };
-		EFA68B6C256A6BFA003ECC5C /* Wrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF2BF508251A28A100F46E47 /* Wrapper.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -250,6 +250,7 @@
 		B128D0D823F9A17C007B37F8 /* StillQuality+SonyPTPPropValueConvertable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StillQuality+SonyPTPPropValueConvertable.swift"; sourceTree = "<group>"; };
 		B128D0DB23F9A198007B37F8 /* StillFormat+SonyPTPPropValueConvertable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StillFormat+SonyPTPPropValueConvertable.swift"; sourceTree = "<group>"; };
 		B128D0DE23F9D60D007B37F8 /* Array+Unique.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+Unique.swift"; sourceTree = "<group>"; };
+		B12CCC92247DAEF100BCD2D1 /* Wrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Wrapper.swift; sourceTree = "<group>"; };
 		B1316A502089C08F006BD136 /* Rocc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Rocc.h; sourceTree = "<group>"; };
 		B1316A512089C08F006BD136 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B1316A5B2089C08F006BD136 /* RoccTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoccTests.swift; sourceTree = "<group>"; };
@@ -268,6 +269,7 @@
 		B164F02521811BD400590A05 /* SonyCameraDiscoverer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SonyCameraDiscoverer.swift; sourceTree = "<group>"; };
 		B164F02821811C1200590A05 /* String+Regex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Regex.swift"; sourceTree = "<group>"; };
 		B16541CE255B4E3F00173285 /* Rocc.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Rocc.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B16541CF255B4E3F00173285 /* RoccTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RoccTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B16BFBC220A49F91006BD081 /* Storage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Storage.swift; sourceTree = "<group>"; };
 		B16BFD1521F5F0F100AF3F24 /* Pinger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pinger.swift; sourceTree = "<group>"; };
 		B1751E7320A316C2001D05F1 /* SystemClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SystemClient.swift; sourceTree = "<group>"; };
@@ -408,10 +410,6 @@
 		B1FF7A372371EC180010D5F0 /* SDIOExtDeviceInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDIOExtDeviceInfo.swift; sourceTree = "<group>"; };
 		B1FF7A412371F4AB0010D5F0 /* DeviceProperty.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceProperty.swift; sourceTree = "<group>"; };
 		EF140C5924902FC7001BAD7F /* Retries.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Retries.swift; sourceTree = "<group>"; };
-		EF2BF508251A28A100F46E47 /* Wrapper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Wrapper.swift; sourceTree = "<group>"; };
-		EFA68CD9256BEC0C003ECC5C /* RoccTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RoccTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		EFFB02BF24E5403800A774AD /* RoccWatch.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RoccWatch.h; sourceTree = "<group>"; };
-		EFFB02C024E5403800A774AD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -436,16 +434,15 @@
 			isa = PBXGroup;
 			children = (
 				B1F180A02545790200453668 /* ThunderRequest */,
-				B1316A4F2089C08F006BD136 /* Sources */,
+				B1316A4F2089C08F006BD136 /* Rocc */,
 				B1316A5A2089C08F006BD136 /* RoccTests */,
-				EFFB02BE24E5403800A774AD /* RoccWatch */,
 				B1AF504A208D345A0029336B /* Frameworks */,
 				B16541CE255B4E3F00173285 /* Rocc.framework */,
-				EFA68CD9256BEC0C003ECC5C /* RoccTests.xctest */,
+				B16541CF255B4E3F00173285 /* RoccTests.xctest */,
 			);
 			sourceTree = "<group>";
 		};
-		B1316A4F2089C08F006BD136 /* Sources */ = {
+		B1316A4F2089C08F006BD136 /* Rocc */ = {
 			isa = PBXGroup;
 			children = (
 				B1FB48712092742400C33C86 /* Camera Functions */,
@@ -459,6 +456,7 @@
 				B1316A502089C08F006BD136 /* Rocc.h */,
 				B1316A512089C08F006BD136 /* Info.plist */,
 			);
+			name = Rocc;
 			path = Sources;
 			sourceTree = "<group>";
 		};
@@ -605,8 +603,8 @@
 				B128D0DE23F9D60D007B37F8 /* Array+Unique.swift */,
 				B117F52A24027F560055ADF5 /* Array+BringToFront.swift */,
 				B17D74A4241D010500C75498 /* String+Truncate.swift */,
+				B12CCC92247DAEF100BCD2D1 /* Wrapper.swift */,
 				EF140C5924902FC7001BAD7F /* Retries.swift */,
-				EF2BF508251A28A100F46E47 /* Wrapper.swift */,
 				B1DB6922256095BA000F5488 /* Array+FirstNotNilOrEmpty.swift */,
 			);
 			path = Helpers;
@@ -855,15 +853,6 @@
 			path = "Camera Functions";
 			sourceTree = "<group>";
 		};
-		EFFB02BE24E5403800A774AD /* RoccWatch */ = {
-			isa = PBXGroup;
-			children = (
-				EFFB02BF24E5403800A774AD /* RoccWatch.h */,
-				EFFB02C024E5403800A774AD /* Info.plist */,
-			);
-			path = RoccWatch;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -913,7 +902,7 @@
 			);
 			name = RoccTests;
 			productName = CCKitTests;
-			productReference = EFA68CD9256BEC0C003ECC5C /* RoccTests.xctest */;
+			productReference = B16541CF255B4E3F00173285 /* RoccTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
@@ -1032,6 +1021,7 @@
 				B1A1AA1A20A4E01D00FD0A4A /* Event.swift in Sources */,
 				B1FF7A422371F4AB0010D5F0 /* DeviceProperty.swift in Sources */,
 				B1DB6923256095BA000F5488 /* Array+FirstNotNilOrEmpty.swift in Sources */,
+				B12CCC93247DAEF100BCD2D1 /* Wrapper.swift in Sources */,
 				B182B8F32381E1CD0054539E /* SonyPTPIPCamera+PerformFunction.swift in Sources */,
 				B164F02921811C1200590A05 /* String+Regex.swift in Sources */,
 				B185A4EE2394FCB400B87BC7 /* PainInTheArsePacket.swift in Sources */,
@@ -1159,7 +1149,6 @@
 				B1316A7B2089C426006BD136 /* SonyConstants.swift in Sources */,
 				B1F180E62545792000453668 /* RequestResponse.swift in Sources */,
 				B1990A8320C3FDAA0090A2F6 /* Reachability.swift in Sources */,
-				EFA68B6C256A6BFA003ECC5C /* Wrapper.swift in Sources */,
 				B162364324C03D9600C6BDD2 /* LiveViewQuality+SonyPTPPropValueConvertable.swift in Sources */,
 				B100E1B720A0D7C7004F7AB8 /* Scene.swift in Sources */,
 				B1CD5CDA24AE7BFC00FCECF1 /* Bracket+SonyPTPPropValueConvertable.swift in Sources */,
@@ -1325,7 +1314,6 @@
 		B1316A622089C08F006BD136 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				APPLICATION_EXTENSION_API_ONLY = NO;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
@@ -1359,7 +1347,6 @@
 		B1316A632089C08F006BD136 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				APPLICATION_EXTENSION_API_ONLY = NO;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
