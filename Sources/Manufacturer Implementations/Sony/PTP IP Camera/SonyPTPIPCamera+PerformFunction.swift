@@ -32,6 +32,8 @@ extension SonyPTPIPDevice {
                         event.postViewPictureURLs = self.imageURLs.compactMapValues({ (urls) -> [(postView: URL, thumbnail: URL?)]? in
                             return urls.map({ ($0, nil) })
                         })
+                        event.bulbShootingURLS = self.imageURLs[.bulb].flatMap({ return [$0] })
+
                         self.imageURLs = [:]
                         callback(nil, event as? T.ReturnType)
                     case .failure(let error):
@@ -45,6 +47,8 @@ extension SonyPTPIPDevice {
             lastEvent.postViewPictureURLs = self.imageURLs.compactMapValues({ (urls) -> [(postView: URL, thumbnail: URL?)]? in
                 return urls.map({ ($0, nil) })
             })
+            lastEvent.bulbShootingURLS = self.imageURLs[.bulb].flatMap({ return [$0] })
+            
             imageURLs = [:]
             callback(nil, lastEvent as? T.ReturnType)
             

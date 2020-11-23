@@ -311,4 +311,7 @@ public struct CameraEvent: Equatable {
     
     /// The time that the bulb shooting has been running for!
     public let bulbCapturingTime: TimeInterval?
+    
+    /// URLs for postView BULB images that the camera has taken.
+        public var bulbShootingURLS: [[URL]]?
 }
