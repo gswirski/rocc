@@ -14,7 +14,8 @@ public struct Focus {
     /// Functions for controlling the focus mode of the camera
     public struct Mode: CameraFunction {
         
-        public enum Value: String, CaseIterable, Equatable, Codable {
+        public enum Value: CaseIterable {
+            
             case auto
             case autoSingle
             case autoContinuous

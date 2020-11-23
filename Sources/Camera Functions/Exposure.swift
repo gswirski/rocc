@@ -138,7 +138,3 @@ public struct Exposure {
         public static let get = Compensation(function: .getExposureCompensation)
     }
 }
-
-extension Exposure.Compensation.Value: Codable {
-    
-}
