@@ -339,6 +339,9 @@ extension SonyPTPIPDevice {
             callback(FunctionError.notSupportedByAvailableVersion, nil)
         case .takePicture, .takeSingleBracketShot:
             takePicture { (result) in
+                Logger.log(message: "Intervalometer - Taking picture RESULT \(result)", category: "SonyPTPIPCamera", level: .debug)
+                os_log("Intervalometer - Taking picture RESULT", log: self.log, type: .debug)
+
                 switch result {
                 case .success(let url):
                     callback(nil, url as? T.ReturnType)
