@@ -37,6 +37,8 @@ extension Packetable {
 /// A client for transferring images using the PTP IP protocol
 final class PTPIPClient {
     
+    private static var mutex = NSObject()
+
     //MARK: - Initialisation -
     
     internal let ptpClientLog = OSLog(subsystem: "com.yellow-brick-bear.rocc", category: "PTPIPClient")
@@ -61,13 +63,16 @@ final class PTPIPClient {
     }
     
     func getNextTransactionId() -> DWord {
-        
+        objc_sync_enter(PTPIPClient.mutex)
+
         defer {
             if currentTransactionId == DWord.max {
                 currentTransactionId = 0
             } else {
                 currentTransactionId += 1
             }
+            
+            objc_sync_exit(PTPIPClient.mutex)
         }
         
         if currentTransactionId == 0 {

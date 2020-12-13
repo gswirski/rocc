@@ -209,6 +209,10 @@ extension SonyPTPIPDevice {
                         os_log("Intervalometer - Autofocus set to 1", log: self.log, type: .debug, objectID != nil ? "\(objectID!)"
                             : "null")
                         guard objectID != nil || !awaitObjectId else {
+                            Logger.log(message: "Intervalometer - awaiting object id \(String(describing: objectID)) with \(awaitObjectId)", category: "SonyPTPIPCamera", level: .debug)
+                            os_log("Intervalometer - awaiting object id", log: self.log, type: .debug, objectID != nil ? "\(objectID!)"
+                                : "null")
+
                             self.awaitObjectId(completion: completion)
                             return
                         }
@@ -269,7 +273,7 @@ extension SonyPTPIPDevice {
             
             self.getDevicePropDescriptionFor(propCode: .objectInMemory, callback: { (result) in
                 
-                Logger.log(message: "Got device prop description for 'objectInMemory'", category: "SonyPTPIPCamera", level: .debug)
+                Logger.log(message: "Intervalometer - Got device prop description for 'objectInMemory': \(result)", category: "SonyPTPIPCamera", level: .debug)
                 os_log("Got device prop description for 'objectInMemory'", log: self.log, type: .debug)
                 
                 switch result {
@@ -280,6 +284,10 @@ extension SonyPTPIPDevice {
                     // This variable also turns to 1 , but downloading then will crash the firmware
                     // we seem to need to wait for 0x8000 (See https://github.com/gphoto/libgphoto2/blob/de98b151bce6b0aa70157d6c0ebb7f59b4da3792/camlibs/ptp2/library.c#L4330)
                     guard let value = property.currentValue.toInt, value >= 0x8000 else {
+                        Logger.log(message: "Intervalometer - Got device prop description for 'objectInMemory' value \(property.currentValue.toInt)", category: "SonyPTPIPCamera", level: .debug)
+                        os_log("Intervalometer - Got device prop description for 'objectInMemory' wrong value", log: self.log, type: .debug)
+
+                        
                         continueClosure(false)
                         return
                     }
