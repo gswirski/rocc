@@ -301,7 +301,6 @@ extension SonyPTPIPDevice {
                     continueClosure(true)
                 }
             })
-            
 
         }, timeout: 35) { [weak self] in
             
