@@ -387,7 +387,7 @@ class UDPClient {
     private func parseDDURL(from string: String) -> URL? {
         
         do {
-            let urlMatches = try string.matches(for: "LOCATION:\\s+([^\\s\\\\]+)", at: 1)
+            let urlMatches = try string.matches(for: "Location:\\s+([^\\s\\\\]+)", at: 1)
             guard let firstMatch = urlMatches.first?.capture(at: 1) else {
                 return nil
             }

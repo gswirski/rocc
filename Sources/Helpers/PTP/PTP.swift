@@ -118,5 +118,11 @@ struct PTP {
         case getObjectPropertyDescription = 0x9802
         case getObjectPropertyValue = 0x9803
         case getObjectPropertyList = 0x9805
+        
+        case canonSetDevicePropValueEx = 0x9110
+        case canonSetRemoteMode = 0x9114
+        case canonSetEventMode = 0x9115
+        case canonGetEvent = 0x9116
+        case canonUnknownInitCommand = 0x902f
     }
 }

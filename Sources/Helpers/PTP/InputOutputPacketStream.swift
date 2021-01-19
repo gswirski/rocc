@@ -303,9 +303,7 @@ extension InputOutputPacketStream: StreamDelegate {
             break
         case Stream.Event.openCompleted:
             switch aStream {
-            case eventReadStream, eventWriteStream:
-                openStreams.append(aStream)
-                guard openStreams.count == 2 else { return }
+            case eventReadStream:
                 delegate?.packetStreamDidOpenEventStream(self)
             case controlWriteStream:
                 delegate?.packetStreamDidOpenControlStream(self)

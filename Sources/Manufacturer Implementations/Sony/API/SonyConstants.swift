@@ -13,6 +13,6 @@ internal struct SonyConstants {
         static let port = 1900
         static let mx = 1
         static let address = "239.255.255.250"
-        static let st = "urn:schemas-sony-com:service:ScalarWebAPI:1"
+        static let st = "urn:schemas-canon-com:service:ICPO-SmartPhoneEOSSystemService:1"
     }
 }

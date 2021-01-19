@@ -150,9 +150,9 @@ final class SonyCameraParser: NSObject, XMLParserDelegate {
     }
     
     func parserDidEndDocument(_ parser: XMLParser) {
-        device = SonyAPICameraDevice(dictionary: deviceDictionary) ?? SonyPTPIPDevice(dictionary: deviceDictionary)
+        device = SonyAPICameraDevice(dictionary: deviceDictionary) ?? SonyPTPIPDevice(dictionary: deviceDictionary) ?? CanonPTPIPDevice(dictionary: deviceDictionary)
         completion?(device, nil)
-        Logger.log(message: "Parser did end document with success: \(device != nil)", category: "SonyCameraXMLParser", level: .debug)
+        Logger.log(message: "Parser did end document with success: \(device != nil), data: \(deviceDictionary)", category: "SonyCameraXMLParser", level: .debug)
         os_log("Parser did end document", log: log, type: .debug)
     }
     

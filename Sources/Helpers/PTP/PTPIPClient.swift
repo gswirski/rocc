@@ -75,11 +75,7 @@ final class PTPIPClient {
             objc_sync_exit(PTPIPClient.mutex)
         }
         
-        if currentTransactionId == 0 {
-            return 0
-        }
-        
-        return currentTransactionId + 1
+        return currentTransactionId
     }
     
     var onEvent: ((_ event: EventPacket) -> Void)?
@@ -111,8 +107,9 @@ final class PTPIPClient {
     
     private func sendInitCommandRequest() {
         
-        let guidData = guid.data(using: .utf8)
-        let connectPacket = Packet.initCommandPacket(guid: guidData?.toBytes ?? [], name: deviceName)
+        let guidData = "8810B99668841894".data(using: .utf8)
+        let guidBytes = ByteBuffer(hexString: "41 86 d4 f7 1f 9b 42 86  88 4d fb c1 1e e8 8b d9").bytes.compactMap { $0 }
+        let connectPacket = Packet.initCommandPacket(guid: guidBytes, name: deviceName)
         sendControlPacket(connectPacket)
         
         Logger.log(message: "Sending InitCommandPacket to PTP IP Device", category: "PTPIPClient", level: .debug)
@@ -253,11 +250,16 @@ final class PTPIPClient {
         
     fileprivate func handleCommandResponsePacket(_ packet: CommandResponsePacket) {
         
+        print("handleCommandResponsePacket A")
+
+        
         // Need to catch this, as sometimes cameras send invalid command responses, but sometimes they just
         // come through in multiple bundles, so we wait and augment them with further data
         guard !packet.awaitingFurtherData else {
             return
         }
+        
+        print("handleCommandResponsePacket B")
         
         guard let transactionId = packet.transactionId else {
             commandRequestCallbacks = commandRequestCallbacks.filter { (_, value) -> Bool in

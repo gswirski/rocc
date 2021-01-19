@@ -194,6 +194,11 @@
 		B1FF7A382371EC180010D5F0 /* SDIOExtDeviceInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1FF7A372371EC180010D5F0 /* SDIOExtDeviceInfo.swift */; };
 		B1FF7A422371F4AB0010D5F0 /* DeviceProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1FF7A412371F4AB0010D5F0 /* DeviceProperty.swift */; };
 		EF140C5A24902FC7001BAD7F /* Retries.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF140C5924902FC7001BAD7F /* Retries.swift */; };
+		EF8C238625B5CC1400E90BC7 /* CanonPTPIPCamera.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF8C238525B5CC1400E90BC7 /* CanonPTPIPCamera.swift */; };
+		EF8C238925B61A9F00E90BC7 /* CanonPTPIPCamera+PerformFunction.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF8C238825B61A9F00E90BC7 /* CanonPTPIPCamera+PerformFunction.swift */; };
+		EF8C238C25B61AE700E90BC7 /* CanonPTPIPCamera+FunctionSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF8C238B25B61AE700E90BC7 /* CanonPTPIPCamera+FunctionSupport.swift */; };
+		EF8C238F25B61AF600E90BC7 /* CanonPTPIPCamera+FunctionAvailability.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF8C238E25B61AF600E90BC7 /* CanonPTPIPCamera+FunctionAvailability.swift */; };
+		EF8C239225B61B3300E90BC7 /* CanonPTPIPCamera+TakePicture.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF8C239125B61B3300E90BC7 /* CanonPTPIPCamera+TakePicture.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -409,6 +414,11 @@
 		B1FF7A372371EC180010D5F0 /* SDIOExtDeviceInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDIOExtDeviceInfo.swift; sourceTree = "<group>"; };
 		B1FF7A412371F4AB0010D5F0 /* DeviceProperty.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceProperty.swift; sourceTree = "<group>"; };
 		EF140C5924902FC7001BAD7F /* Retries.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Retries.swift; sourceTree = "<group>"; };
+		EF8C238525B5CC1400E90BC7 /* CanonPTPIPCamera.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanonPTPIPCamera.swift; sourceTree = "<group>"; };
+		EF8C238825B61A9F00E90BC7 /* CanonPTPIPCamera+PerformFunction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CanonPTPIPCamera+PerformFunction.swift"; sourceTree = "<group>"; };
+		EF8C238B25B61AE700E90BC7 /* CanonPTPIPCamera+FunctionSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CanonPTPIPCamera+FunctionSupport.swift"; sourceTree = "<group>"; };
+		EF8C238E25B61AF600E90BC7 /* CanonPTPIPCamera+FunctionAvailability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CanonPTPIPCamera+FunctionAvailability.swift"; sourceTree = "<group>"; };
+		EF8C239125B61B3300E90BC7 /* CanonPTPIPCamera+TakePicture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CanonPTPIPCamera+TakePicture.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -580,6 +590,7 @@
 		B1B43457209746DA00A81B9D /* Manufacturer Implementations */ = {
 			isa = PBXGroup;
 			children = (
+				EF8C238425B5CC0000E90BC7 /* Canon */,
 				B1FB48652092574D00C33C86 /* Sony */,
 			);
 			path = "Manufacturer Implementations";
@@ -851,6 +862,18 @@
 			path = "Camera Functions";
 			sourceTree = "<group>";
 		};
+		EF8C238425B5CC0000E90BC7 /* Canon */ = {
+			isa = PBXGroup;
+			children = (
+				EF8C238525B5CC1400E90BC7 /* CanonPTPIPCamera.swift */,
+				EF8C238825B61A9F00E90BC7 /* CanonPTPIPCamera+PerformFunction.swift */,
+				EF8C238B25B61AE700E90BC7 /* CanonPTPIPCamera+FunctionSupport.swift */,
+				EF8C238E25B61AF600E90BC7 /* CanonPTPIPCamera+FunctionAvailability.swift */,
+				EF8C239125B61B3300E90BC7 /* CanonPTPIPCamera+TakePicture.swift */,
+			);
+			path = Canon;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -1010,8 +1033,10 @@
 				B180A7D9236F1D0F001AAF5D /* CommandRequestPacket.swift in Sources */,
 				B1BFC9982379E87C004F9C56 /* FlashMode+SonyPTPPropValueConvertable.swift.swift in Sources */,
 				B1F180D22545792000453668 /* URLSessionTask+Tag.swift in Sources */,
+				EF8C238F25B61AF600E90BC7 /* CanonPTPIPCamera+FunctionAvailability.swift in Sources */,
 				B1AEE5072375CB5000224152 /* ISOValue+SonyPTPPropValueConvertable.swift in Sources */,
 				B1AF502A208A51D00029336B /* NetworkInterface.swift in Sources */,
+				EF8C238625B5CC1400E90BC7 /* CanonPTPIPCamera.swift in Sources */,
 				B1B4342A20939EF500A81B9D /* FileSystem.swift in Sources */,
 				B1CDCB8322234CAA00DD0F0E /* UPnPService.swift in Sources */,
 				B1FB47FF209089CA00C33C86 /* CameraClient.swift in Sources */,
@@ -1023,6 +1048,7 @@
 				B182B8F32381E1CD0054539E /* SonyPTPIPCamera+PerformFunction.swift in Sources */,
 				B164F02921811C1200590A05 /* String+Regex.swift in Sources */,
 				B185A4EE2394FCB400B87BC7 /* PainInTheArsePacket.swift in Sources */,
+				EF8C238C25B61AE700E90BC7 /* CanonPTPIPCamera+FunctionSupport.swift in Sources */,
 				B1CE24B22099184B0049EC87 /* Zoom.swift in Sources */,
 				EF140C5A24902FC7001BAD7F /* Retries.swift in Sources */,
 				B100E1AB20A0A42D004F7AB8 /* PostViewImage.swift in Sources */,
@@ -1108,6 +1134,7 @@
 				B180A7CC236F17EE001AAF5D /* PTP.swift in Sources */,
 				B19BD29F2413C4A100111539 /* SimulatedCamera.swift in Sources */,
 				B1F180D02545792000453668 /* Authenticator.swift in Sources */,
+				EF8C238925B61A9F00E90BC7 /* CanonPTPIPCamera+PerformFunction.swift in Sources */,
 				B1F180CF2545792000453668 /* Request.swift in Sources */,
 				B1AEE4F9237586EC00224152 /* CameraEvent+SonyPTPIP.swift in Sources */,
 				B180A7D6236F1B9D001AAF5D /* CommandResponsePacket.swift in Sources */,
@@ -1125,6 +1152,7 @@
 				B1A1B67F21F8BC78008B5181 /* Logger.swift in Sources */,
 				B1EADA3923795401000B7B36 /* ExposureMode+SonyPTPPropValueConvertable.swift in Sources */,
 				B1F180CC2545792000453668 /* RequestController+Callbacks.swift in Sources */,
+				EF8C239225B61B3300E90BC7 /* CanonPTPIPCamera+TakePicture.swift in Sources */,
 				B180A7E9236F62C7001AAF5D /* PTPDeviceInfo.swift in Sources */,
 				B1F180D92545792000453668 /* EncodableRequestBody.swift in Sources */,
 				B1BFC98E2379C8A8004F9C56 /* FlashMode.swift in Sources */,
