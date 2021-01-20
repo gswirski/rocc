@@ -57,7 +57,6 @@ struct EndDataPacket: Packetable {
            length: \(length)
            code: \(name)
            transactionId: \(transactionId)
-           actualDataLength: \(data.length)
            data: \(data.toHex)
        }
        """

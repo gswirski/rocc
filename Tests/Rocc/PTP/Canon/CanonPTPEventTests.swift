@@ -1,0 +1,413 @@
+//
+//  CanonPTPEventTest.swift
+//  Rocc
+//
+//  Created by Grzegorz Świrski on 20/01/2021.
+//  Copyright © 2021 Simon Mitchell. All rights reserved.
+//
+import XCTest
+@testable import Rocc
+
+enum CanonPropType: DWord {
+    case PTP_EC_CANON_EOS_RequestGetEvent = 0xc101
+    case PTP_EC_CANON_EOS_RequestCancelTransferMA = 0xc180
+    case PTP_EC_CANON_EOS_ObjectAddedEx     = 0xc181
+    case PTP_EC_CANON_EOS_ObjectRemoved     = 0xc182
+    case PTP_EC_CANON_EOS_RequestGetObjectInfoEx = 0xc183
+    case PTP_EC_CANON_EOS_StorageStatusChanged = 0xc184
+    case PTP_EC_CANON_EOS_StorageInfoChanged = 0xc185
+    case PTP_EC_CANON_EOS_RequestObjectTransfer = 0xc186
+    case PTP_EC_CANON_EOS_ObjectInfoChangedEx = 0xc187
+    case PTP_EC_CANON_EOS_ObjectContentChanged = 0xc188
+    case PTP_EC_CANON_EOS_PropValueChanged = 0xc189
+    case PTP_EC_CANON_EOS_AvailListChanged = 0xc18a
+    case PTP_EC_CANON_EOS_CameraStatusChanged = 0xc18b
+    case PTP_EC_CANON_EOS_WillSoonShutdown = 0xc18d
+    case PTP_EC_CANON_EOS_ShutdownTimerUpdated = 0xc18e
+    case PTP_EC_CANON_EOS_RequestCancelTransfer = 0xc18f
+    case PTP_EC_CANON_EOS_RequestObjectTransferDT = 0xc190
+    case PTP_EC_CANON_EOS_RequestCancelTransferDT = 0xc191
+    case PTP_EC_CANON_EOS_StoreAdded     = 0xc192
+    case PTP_EC_CANON_EOS_StoreRemoved     = 0xc193
+    case PTP_EC_CANON_EOS_BulbExposureTime = 0xc194
+    case PTP_EC_CANON_EOS_RecordingTime     = 0xc195
+    case PTP_EC_CANON_EOS_InnerDevelopParam = 0xc196
+    case PTP_EC_CANON_EOS_RequestObjectTransferDevelop = 0xc197
+    case PTP_EC_CANON_EOS_GPSLogOutputProgress = 0xc198
+    case PTP_EC_CANON_EOS_GPSLogOutputComplete = 0xc199
+    case PTP_EC_CANON_EOS_TouchTrans     = 0xc19a
+    case PTP_EC_CANON_EOS_RequestObjectTransferExInfo = 0xc19b
+    case PTP_EC_CANON_EOS_PowerZoomInfoChanged = 0xc19d
+    case PTP_EC_CANON_EOS_RequestPushMode = 0xc19f
+    case PTP_EC_CANON_EOS_RequestObjectTransferTS = 0xc1a2
+    case PTP_EC_CANON_EOS_AfResult     = 0xc1a3
+    case PTP_EC_CANON_EOS_CTGInfoCheckComplete = 0xc1a4
+    case PTP_EC_CANON_EOS_OLCInfoChanged     = 0xc1a5
+    case PTP_EC_CANON_EOS_ObjectAddedEx64 = 0xc1a7
+    case PTP_EC_CANON_EOS_ObjectInfoChangedEx64 = 0xc1a8
+    case PTP_EC_CANON_EOS_RequestObjectTransfer64 = 0xc1a9
+    case PTP_EC_CANON_EOS_RequestObjectTransferDT64 = 0xc1aa
+    case PTP_EC_CANON_EOS_RequestObjectTransferFTP64 = 0xc1ab
+    case PTP_EC_CANON_EOS_RequestObjectTransferInfoEx64 = 0xc1ac
+    case PTP_EC_CANON_EOS_RequestObjectTransferMA64 = 0xc1ad
+    case PTP_EC_CANON_EOS_ImportError     = 0xc1af
+    case PTP_EC_CANON_EOS_BlePairing     = 0xc1b0
+    case PTP_EC_CANON_EOS_RequestAutoSendImages = 0xc1b1
+    case PTP_EC_CANON_EOS_RequestTranscodedBlockTransfer = 0xc1b2
+    case PTP_EC_CANON_EOS_RequestCAssistImage = 0xc1b4
+    case PTP_EC_CANON_EOS_RequestObjectTransferFTP = 0xc1f1
+}
+
+enum CanonSubPropType: DWord {
+    case PTP_DPC_CANON_Zoom = 0xD02A
+    case PTP_DPC_CANON_NamePrefix = 0xD02B
+    case PTP_DPC_CANON_SizeQualityMode = 0xD02C
+    case PTP_DPC_CANON_SupportedThumbSize = 0xD02D
+    case PTP_DPC_CANON_SizeOfOutputDataFromCamera = 0xD02E
+    case PTP_DPC_CANON_SizeOfInputDataToCamera = 0xD02F
+    case PTP_DPC_CANON_RemoteAPIVersion = 0xD030
+    case PTP_DPC_CANON_FirmwareVersion = 0xD031
+    case PTP_DPC_CANON_CameraModel = 0xD032
+    case PTP_DPC_CANON_CameraOwner = 0xD033
+    case PTP_DPC_CANON_UnixTime = 0xD034
+    case PTP_DPC_CANON_CameraBodyID = 0xD035
+    case PTP_DPC_CANON_CameraOutput = 0xD036
+    case PTP_DPC_CANON_DispAv = 0xD037
+    case PTP_DPC_CANON_AvOpenApex = 0xD038
+    case PTP_DPC_CANON_DZoomMagnification = 0xD039
+    case PTP_DPC_CANON_MlSpotPos = 0xD03A
+    case PTP_DPC_CANON_DispAvMax = 0xD03B
+    case PTP_DPC_CANON_AvMaxApex = 0xD03C
+    case PTP_DPC_CANON_EZoomStartPosition = 0xD03D
+    case PTP_DPC_CANON_FocalLengthOfTele = 0xD03E
+    case PTP_DPC_CANON_EZoomSizeOfTele = 0xD03F
+    case PTP_DPC_CANON_PhotoEffect = 0xD040
+    case PTP_DPC_CANON_AssistLight = 0xD041
+    case PTP_DPC_CANON_FlashQuantityCount = 0xD042
+    case PTP_DPC_CANON_RotationAngle = 0xD043
+    case PTP_DPC_CANON_RotationScene = 0xD044
+    case PTP_DPC_CANON_EventEmulateMode = 0xD045
+    case PTP_DPC_CANON_DPOFVersion = 0xD046
+    case PTP_DPC_CANON_TypeOfSupportedSlideShow = 0xD047
+    case PTP_DPC_CANON_AverageFilesizes = 0xD048
+    case PTP_DPC_CANON_ModelID = 0xD049
+
+    case PTP_DPC_CANON_EOS_PowerZoomPosition = 0xD055
+    case PTP_DPC_CANON_EOS_StrobeSettingSimple = 0xD056
+    case PTP_DPC_CANON_EOS_ConnectTrigger = 0xD058
+    case PTP_DPC_CANON_EOS_ChangeCameraMode = 0xD059
+
+    case PTP_DPC_CANON_EOS_Aperture = 0xD101
+    case PTP_DPC_CANON_EOS_ShutterSpeed = 0xD102
+    case PTP_DPC_CANON_EOS_ISOSpeed = 0xD103
+    case PTP_DPC_CANON_EOS_ExpCompensation = 0xD104
+    case PTP_DPC_CANON_EOS_AutoExposureMode = 0xD105
+    case PTP_DPC_CANON_EOS_DriveMode = 0xD106
+    case PTP_DPC_CANON_EOS_MeteringMode = 0xD107
+    case PTP_DPC_CANON_EOS_FocusMode = 0xD108
+    case PTP_DPC_CANON_EOS_WhiteBalance = 0xD109
+    case PTP_DPC_CANON_EOS_ColorTemperature = 0xD10A
+    case PTP_DPC_CANON_EOS_WhiteBalanceAdjustA = 0xD10B
+    case PTP_DPC_CANON_EOS_WhiteBalanceAdjustB = 0xD10C
+    case PTP_DPC_CANON_EOS_WhiteBalanceXA = 0xD10D
+    case PTP_DPC_CANON_EOS_WhiteBalanceXB = 0xD10E
+    case PTP_DPC_CANON_EOS_ColorSpace = 0xD10F
+    case PTP_DPC_CANON_EOS_PictureStyle = 0xD110
+    case PTP_DPC_CANON_EOS_BatteryPower = 0xD111
+    case PTP_DPC_CANON_EOS_BatterySelect = 0xD112
+    case PTP_DPC_CANON_EOS_CameraTime = 0xD113
+    case PTP_DPC_CANON_EOS_AutoPowerOff = 0xD114
+    case PTP_DPC_CANON_EOS_Owner     = 0xD115
+    case PTP_DPC_CANON_EOS_ModelID = 0xD116
+    case PTP_DPC_CANON_EOS_PTPExtensionVersion = 0xD119
+    case PTP_DPC_CANON_EOS_DPOFVersion = 0xD11A
+    case PTP_DPC_CANON_EOS_AvailableShots = 0xD11B
+    case PTP_DPC_CANON_EOS_CaptureDestination = 0xD11C
+    case PTP_DPC_CANON_EOS_BracketMode = 0xD11D
+    case PTP_DPC_CANON_EOS_CurrentStorage = 0xD11E
+    case PTP_DPC_CANON_EOS_CurrentFolder = 0xD11F
+    case PTP_DPC_CANON_EOS_ImageFormat = 0xD120    /* file setting */
+    case PTP_DPC_CANON_EOS_ImageFormatCF = 0xD121    /* file setting CF */
+    case PTP_DPC_CANON_EOS_ImageFormatSD = 0xD122    /* file setting SD */
+    case PTP_DPC_CANON_EOS_ImageFormatExtHD = 0xD123    /* file setting exthd */
+    case PTP_DPC_CANON_EOS_RefocusState = 0xD124
+    case PTP_DPC_CANON_EOS_CameraNickname = 0xD125
+    case PTP_DPC_CANON_EOS_StroboSettingExpCompositionControl = 0xD126
+    case PTP_DPC_CANON_EOS_ConnectStatus = 0xD127
+    case PTP_DPC_CANON_EOS_LensBarrelStatus = 0xD128
+    case PTP_DPC_CANON_EOS_SilentShutterSetting = 0xD129
+    case PTP_DPC_CANON_EOS_LV_AF_EyeDetect = 0xD12C
+    case PTP_DPC_CANON_EOS_AutoTransMobile = 0xD12D
+    case PTP_DPC_CANON_EOS_URLSupportFormat = 0xD12E
+    case PTP_DPC_CANON_EOS_SpecialAcc = 0xD12F
+    case PTP_DPC_CANON_EOS_CompressionS = 0xD130
+    case PTP_DPC_CANON_EOS_CompressionM1 = 0xD131
+    case PTP_DPC_CANON_EOS_CompressionM2 = 0xD132
+    case PTP_DPC_CANON_EOS_CompressionL = 0xD133
+    case PTP_DPC_CANON_EOS_IntervalShootSetting = 0xD134
+    case PTP_DPC_CANON_EOS_IntervalShootState = 0xD135
+    case PTP_DPC_CANON_EOS_PushMode = 0xD136
+    case PTP_DPC_CANON_EOS_LvCFilterKind = 0xD137
+    case PTP_DPC_CANON_EOS_AEModeDial = 0xD138
+    case PTP_DPC_CANON_EOS_AEModeCustom = 0xD139
+    case PTP_DPC_CANON_EOS_MirrorUpSetting = 0xD13A
+    case PTP_DPC_CANON_EOS_HighlightTonePriority = 0xD13B
+    case PTP_DPC_CANON_EOS_AFSelectFocusArea = 0xD13C
+    case PTP_DPC_CANON_EOS_HDRSetting = 0xD13D
+    case PTP_DPC_CANON_EOS_TimeShootSetting = 0xD13E
+    case PTP_DPC_CANON_EOS_NFCApplicationInfo = 0xD13F
+    case PTP_DPC_CANON_EOS_PCWhiteBalance1 = 0xD140
+    case PTP_DPC_CANON_EOS_PCWhiteBalance2 = 0xD141
+    case PTP_DPC_CANON_EOS_PCWhiteBalance3 = 0xD142
+    case PTP_DPC_CANON_EOS_PCWhiteBalance4 = 0xD143
+    case PTP_DPC_CANON_EOS_PCWhiteBalance5 = 0xD144
+    case PTP_DPC_CANON_EOS_MWhiteBalance = 0xD145
+    case PTP_DPC_CANON_EOS_MWhiteBalanceEx = 0xD146
+    case PTP_DPC_CANON_EOS_PowerZoomSpeed = 0xD149
+    case PTP_DPC_CANON_EOS_NetworkServerRegion = 0xD14A
+    case PTP_DPC_CANON_EOS_GPSLogCtrl = 0xD14B
+    case PTP_DPC_CANON_EOS_GPSLogListNum = 0xD14C
+    case PTP_DPC_CANON_EOS_UnknownPropD14D = 0xD14D  /*found in Canon EOS 5D M3*/
+    case PTP_DPC_CANON_EOS_PictureStyleStandard = 0xD150
+    case PTP_DPC_CANON_EOS_PictureStylePortrait = 0xD151
+    case PTP_DPC_CANON_EOS_PictureStyleLandscape = 0xD152
+    case PTP_DPC_CANON_EOS_PictureStyleNeutral = 0xD153
+    case PTP_DPC_CANON_EOS_PictureStyleFaithful = 0xD154
+    case PTP_DPC_CANON_EOS_PictureStyleBlackWhite = 0xD155
+    case PTP_DPC_CANON_EOS_PictureStyleAuto = 0xD156
+    case PTP_DPC_CANON_EOS_PictureStyleExStandard = 0xD157
+    case PTP_DPC_CANON_EOS_PictureStyleExPortrait = 0xD158
+    case PTP_DPC_CANON_EOS_PictureStyleExLandscape = 0xD159
+    case PTP_DPC_CANON_EOS_PictureStyleExNeutral = 0xD15A
+    case PTP_DPC_CANON_EOS_PictureStyleExFaithful = 0xD15B
+    case PTP_DPC_CANON_EOS_PictureStyleExBlackWhite = 0xD15C
+    case PTP_DPC_CANON_EOS_PictureStyleExAuto = 0xD15D
+    case PTP_DPC_CANON_EOS_PictureStyleExFineDetail = 0xD15E
+    case PTP_DPC_CANON_EOS_PictureStyleUserSet1 = 0xD160
+    case PTP_DPC_CANON_EOS_PictureStyleUserSet2 = 0xD161
+    case PTP_DPC_CANON_EOS_PictureStyleUserSet3 = 0xD162
+    case PTP_DPC_CANON_EOS_PictureStyleExUserSet1 = 0xD163
+    case PTP_DPC_CANON_EOS_PictureStyleExUserSet2 = 0xD164
+    case PTP_DPC_CANON_EOS_PictureStyleExUserSet3 = 0xD165
+    case PTP_DPC_CANON_EOS_MovieAVModeFine = 0xD166
+    case PTP_DPC_CANON_EOS_ShutterReleaseCounter = 0xD167    /* perhaps send a requestdeviceprop ex ? */
+    case PTP_DPC_CANON_EOS_AvailableImageSize = 0xD168
+    case PTP_DPC_CANON_EOS_ErrorHistory = 0xD169
+    case PTP_DPC_CANON_EOS_LensExchangeHistory = 0xD16A
+    case PTP_DPC_CANON_EOS_StroboExchangeHistory = 0xD16B
+    case PTP_DPC_CANON_EOS_PictureStyleParam1 = 0xD170
+    case PTP_DPC_CANON_EOS_PictureStyleParam2 = 0xD171
+    case PTP_DPC_CANON_EOS_PictureStyleParam3 = 0xD172
+    case PTP_DPC_CANON_EOS_MovieRecordVolumeLine = 0xD174
+    case PTP_DPC_CANON_EOS_NetworkCommunicationMode = 0xD175
+    case PTP_DPC_CANON_EOS_CanonLogGamma     = 0xD176
+    case PTP_DPC_CANON_EOS_SmartphoneShowImageConfig = 0xD177
+    case PTP_DPC_CANON_EOS_HighISOSettingNoiseReduction = 0xD178
+    case PTP_DPC_CANON_EOS_MovieServoAF = 0xD179
+    case PTP_DPC_CANON_EOS_ContinuousAFValid = 0xD17A
+    case PTP_DPC_CANON_EOS_Attenuator = 0xD17B
+    case PTP_DPC_CANON_EOS_UTCTime = 0xD17C
+    case PTP_DPC_CANON_EOS_Timezone = 0xD17D
+    case PTP_DPC_CANON_EOS_Summertime = 0xD17E
+    case PTP_DPC_CANON_EOS_FlavorLUTParams = 0xD17F
+    case PTP_DPC_CANON_EOS_CustomFunc1 = 0xD180
+    case PTP_DPC_CANON_EOS_CustomFunc2 = 0xD181
+    case PTP_DPC_CANON_EOS_CustomFunc3 = 0xD182
+    case PTP_DPC_CANON_EOS_CustomFunc4 = 0xD183
+    case PTP_DPC_CANON_EOS_CustomFunc5 = 0xD184
+    case PTP_DPC_CANON_EOS_CustomFunc6 = 0xD185
+    case PTP_DPC_CANON_EOS_CustomFunc7 = 0xD186
+    case PTP_DPC_CANON_EOS_CustomFunc8 = 0xD187
+    case PTP_DPC_CANON_EOS_CustomFunc9 = 0xD188
+    case PTP_DPC_CANON_EOS_CustomFunc10 = 0xD189
+    case PTP_DPC_CANON_EOS_CustomFunc11 = 0xD18a
+    case PTP_DPC_CANON_EOS_CustomFunc12 = 0xD18b
+    case PTP_DPC_CANON_EOS_CustomFunc13 = 0xD18c
+    case PTP_DPC_CANON_EOS_CustomFunc14 = 0xD18d
+    case PTP_DPC_CANON_EOS_CustomFunc15 = 0xD18e
+    case PTP_DPC_CANON_EOS_CustomFunc16 = 0xD18f
+    case PTP_DPC_CANON_EOS_CustomFunc17 = 0xD190
+    case PTP_DPC_CANON_EOS_CustomFunc18 = 0xD191
+    case PTP_DPC_CANON_EOS_CustomFunc19 = 0xD192
+    case PTP_DPC_CANON_EOS_InnerDevelop = 0xD193
+    case PTP_DPC_CANON_EOS_MultiAspect = 0xD194
+    case PTP_DPC_CANON_EOS_MovieSoundRecord = 0xD195
+    case PTP_DPC_CANON_EOS_MovieRecordVolume = 0xD196
+    case PTP_DPC_CANON_EOS_WindCut = 0xD197
+    case PTP_DPC_CANON_EOS_ExtenderType = 0xD198
+    case PTP_DPC_CANON_EOS_OLCInfoVersion = 0xD199
+    case PTP_DPC_CANON_EOS_UnknownPropD19A = 0xD19A /*found in Canon EOS 5D M3*/
+    case PTP_DPC_CANON_EOS_UnknownPropD19C = 0xD19C /*found in Canon EOS 5D M3*/
+    case PTP_DPC_CANON_EOS_UnknownPropD19D = 0xD19D /*found in Canon EOS 5D M3*/
+    case PTP_DPC_CANON_EOS_GPSDeviceActive = 0xD19F
+    case PTP_DPC_CANON_EOS_CustomFuncEx = 0xD1a0
+    case PTP_DPC_CANON_EOS_MyMenu = 0xD1a1
+    case PTP_DPC_CANON_EOS_MyMenuList = 0xD1a2
+    case PTP_DPC_CANON_EOS_WftStatus = 0xD1a3
+    case PTP_DPC_CANON_EOS_WftInputTransmission = 0xD1a4
+    case PTP_DPC_CANON_EOS_HDDirectoryStructure = 0xD1a5
+    case PTP_DPC_CANON_EOS_BatteryInfo = 0xD1a6
+    case PTP_DPC_CANON_EOS_AdapterInfo = 0xD1a7
+    case PTP_DPC_CANON_EOS_LensStatus = 0xD1a8
+    case PTP_DPC_CANON_EOS_QuickReviewTime = 0xD1a9
+    case PTP_DPC_CANON_EOS_CardExtension = 0xD1aa
+    case PTP_DPC_CANON_EOS_TempStatus = 0xD1ab
+    case PTP_DPC_CANON_EOS_ShutterCounter = 0xD1ac
+    case PTP_DPC_CANON_EOS_SpecialOption = 0xD1ad
+    case PTP_DPC_CANON_EOS_PhotoStudioMode = 0xD1ae
+    case PTP_DPC_CANON_EOS_SerialNumber = 0xD1af
+    case PTP_DPC_CANON_EOS_EVFOutputDevice = 0xD1b0
+    case PTP_DPC_CANON_EOS_EVFMode = 0xD1b1
+    case PTP_DPC_CANON_EOS_DepthOfFieldPreview = 0xD1b2
+    case PTP_DPC_CANON_EOS_EVFSharpness = 0xD1b3
+    case PTP_DPC_CANON_EOS_EVFWBMode = 0xD1b4
+    case PTP_DPC_CANON_EOS_EVFClickWBCoeffs = 0xD1b5
+    case PTP_DPC_CANON_EOS_EVFColorTemp = 0xD1b6
+    case PTP_DPC_CANON_EOS_ExposureSimMode = 0xD1b7
+    case PTP_DPC_CANON_EOS_EVFRecordStatus = 0xD1b8
+    case PTP_DPC_CANON_EOS_LvAfSystem = 0xD1ba
+    case PTP_DPC_CANON_EOS_MovSize = 0xD1bb
+    case PTP_DPC_CANON_EOS_LvViewTypeSelect = 0xD1bc
+    case PTP_DPC_CANON_EOS_MirrorDownStatus = 0xD1bd
+    case PTP_DPC_CANON_EOS_MovieParam = 0xD1be
+    case PTP_DPC_CANON_EOS_MirrorLockupState = 0xD1bf
+    case PTP_DPC_CANON_EOS_FlashChargingState = 0xD1C0
+    case PTP_DPC_CANON_EOS_AloMode = 0xD1C1
+    case PTP_DPC_CANON_EOS_FixedMovie = 0xD1C2
+    case PTP_DPC_CANON_EOS_OneShotRawOn = 0xD1C3
+    case PTP_DPC_CANON_EOS_ErrorForDisplay = 0xD1C4
+    case PTP_DPC_CANON_EOS_AEModeMovie = 0xD1C5
+    case PTP_DPC_CANON_EOS_BuiltinStroboMode = 0xD1C6
+    case PTP_DPC_CANON_EOS_StroboDispState = 0xD1C7
+    case PTP_DPC_CANON_EOS_StroboETTL2Metering = 0xD1C8
+    case PTP_DPC_CANON_EOS_ContinousAFMode = 0xD1C9
+    case PTP_DPC_CANON_EOS_MovieParam2 = 0xD1CA
+    case PTP_DPC_CANON_EOS_StroboSettingExpComposition = 0xD1CB
+    case PTP_DPC_CANON_EOS_MovieParam3 = 0xD1CC
+    case PTP_DPC_CANON_EOS_MovieParam4 = 0xD1CD
+    case PTP_DPC_CANON_EOS_LVMedicalRotate = 0xD1CF
+    case PTP_DPC_CANON_EOS_Artist = 0xD1d0
+    case PTP_DPC_CANON_EOS_Copyright = 0xD1d1
+    case PTP_DPC_CANON_EOS_BracketValue = 0xD1d2
+    case PTP_DPC_CANON_EOS_FocusInfoEx = 0xD1d3
+    case PTP_DPC_CANON_EOS_DepthOfField = 0xD1d4
+    case PTP_DPC_CANON_EOS_Brightness = 0xD1d5
+    case PTP_DPC_CANON_EOS_LensAdjustParams = 0xD1d6
+    case PTP_DPC_CANON_EOS_EFComp = 0xD1d7
+    case PTP_DPC_CANON_EOS_LensName = 0xD1d8
+    case PTP_DPC_CANON_EOS_AEB     = 0xD1d9
+    case PTP_DPC_CANON_EOS_StroboSetting = 0xD1da
+    case PTP_DPC_CANON_EOS_StroboWirelessSetting = 0xD1db
+    case PTP_DPC_CANON_EOS_StroboFiring = 0xD1dc
+    case PTP_DPC_CANON_EOS_LensID = 0xD1dd
+    case PTP_DPC_CANON_EOS_LCDBrightness = 0xD1de
+    case PTP_DPC_CANON_EOS_CADarkBright = 0xD1df
+
+    case PTP_DPC_CANON_EOS_CAssistPreset = 0xD201
+    case PTP_DPC_CANON_EOS_CAssistBrightness = 0xD202
+    case PTP_DPC_CANON_EOS_CAssistContrast = 0xD203
+    case PTP_DPC_CANON_EOS_CAssistSaturation = 0xD204
+    case PTP_DPC_CANON_EOS_CAssistColorBA = 0xD205
+    case PTP_DPC_CANON_EOS_CAssistColorMG = 0xD206
+    case PTP_DPC_CANON_EOS_CAssistMonochrome = 0xD207
+    case PTP_DPC_CANON_EOS_FocusShiftSetting = 0xD208
+    case PTP_DPC_CANON_EOS_MovieSelfTimer = 0xD209
+    case PTP_DPC_CANON_EOS_Clarity = 0xD20B
+    case PTP_DPC_CANON_EOS_2GHDRSetting = 0xD20C
+    case PTP_DPC_CANON_EOS_MovieParam5 = 0xD20D
+    case PTP_DPC_CANON_EOS_HDRViewAssistModeRec = 0xD20E
+    case PTP_DPC_CANON_EOS_PropFinderAFFrame = 0xD214
+    case PTP_DPC_CANON_EOS_VariableMovieRecSetting = 0xD215
+    case PTP_DPC_CANON_EOS_PropAutoRotate = 0xD216
+    case PTP_DPC_CANON_EOS_MFPeakingSetting = 0xD217
+    case PTP_DPC_CANON_EOS_MovieSpatialOversampling = 0xD218
+    case PTP_DPC_CANON_EOS_MovieCropMode = 0xD219
+    case PTP_DPC_CANON_EOS_ShutterType = 0xD21A
+    case PTP_DPC_CANON_EOS_WFTBatteryPower = 0xD21B
+    case PTP_DPC_CANON_EOS_BatteryInfoEx = 0xD21C
+}
+
+class CanonPTPCameraTests: XCTestCase {
+    
+    
+    func testCanonEventParsesCorrectly() {
+        let eventData = ByteBuffer(hexString: CanonPTPCameraTests.eventContents)
+        
+        var dataSize = eventData.length
+        var pointer: UInt = 0
+        var entries = 0
+        var i = 0
+        
+        while (pointer + 8 < dataSize) {
+            var size: DWord? = eventData[dWord: pointer]
+            var type: DWord? = eventData[dWord: pointer + 4]
+            
+            var propType = CanonPropType(rawValue: type!)
+            
+            var subType: CanonSubPropType?
+            
+            if propType == .PTP_EC_CANON_EOS_PropValueChanged {
+                subType = CanonSubPropType(rawValue: eventData[dWord: pointer + 8]!)
+            }
+            
+            var value: DWord?
+            
+            switch subType {
+            case .PTP_DPC_CANON_EOS_Aperture, .PTP_DPC_CANON_EOS_ShutterSpeed, .PTP_DPC_CANON_EOS_ISOSpeed, .PTP_DPC_CANON_EOS_FocusMode:
+                value = eventData[dWord: pointer + 12]
+            default:
+                break
+            }
+            
+            print("property size:\(size) \(propType) \(subType) \(value)")
+            
+            
+            pointer += UInt(size!)
+        }
+        /*
+        int    i = 0, entries = 0;
+            unsigned char    *curdata = data;
+            PTPCanon_changes_entry *ce;
+
+            if (data==NULL)
+                return 0;
+            while (curdata - data + 8 < datasize) {
+                uint32_t    size = dtoh32a(&curdata[PTP_ece_Size]);
+                uint32_t    type = dtoh32a(&curdata[PTP_ece_Type]);
+
+                if (size > datasize) {
+                    ptp_debug (params, "size %d is larger than datasize %d", size, datasize);
+                    break;
+                }
+                if (size < 8) {
+                    ptp_debug (params, "size %d is smaller than 8.", size);
+                    break;
+                }
+                if ((size == 8) && (type == 0))
+                    break;
+                if ((curdata - data) + size >= datasize) {
+                    ptp_debug (params, "canon eos event decoder ran over supplied data, skipping entries");
+                    break;
+                }
+                if (type == PTP_EC_CANON_EOS_OLCInfoChanged) {
+                    unsigned int j;
+
+                    entries++;
+                    if (size >= 12+2) {
+                        for (j=0;j<31;j++)
+                            if (dtoh16a(curdata+12) & (1<<j))
+                                entries++;
+                    }
+                }
+                curdata += size;
+                entries++;
+            }*/
+        
+        //print(headerData)
+    }
+    
+    static var eventContents = """
+        10 00 00 00 89 c1 00 00 16 d1 00 00 53 04 00 80 10 00 00 00 89 c1 00 00 05 d1 00 00 03 00 00 00 10 00 00 00 89 c1 00 00 38 d1 00 00 03 00 00 00 10 00 00 00 89 c1 00 00 02 d1 00 00 73 00 00 00 10 00 00 00 89 c1 00 00 01 d1 00 00 2d 00 00 00 10 00 00 00 89 c1 00 00 03 d1 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 06 d1 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 08 d1 00 00 01 00 00 00 10 00 00 00 89 c1 00 00 07 d1 00 00 03 00 00 00 10 00 00 00 89 c1 00 00 09 d1 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 1b d1 00 00 82 07 00 00 10 00 00 00 89 c1 00 00 04 d1 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 0c d1 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 0b d1 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 0e d1 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 0d d1 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 d9 d1 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 d5 d1 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 c1 d1 00 00 03 00 00 00 10 00 00 00 89 c1 00 00 0f d1 00 00 01 00 00 00 10 00 00 00 89 c1 00 00 14 d1 00 00 3c 00 00 00 10 00 00 00 89 c1 00 00 b7 d1 00 00 01 00 00 00 10 00 00 00 89 c1 00 00 10 d1 00 00 81 00 00 00 34 00 00 00 89 c1 00 00 57 d1 00 00 28 00 00 00 01 00 00 00 00 00 00 00 04 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02 00 00 00 03 00 00 00 34 00 00 00 89 c1 00 00 58 d1 00 00 28 00 00 00 01 00 00 00 00 00 00 00 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02 00 00 00 04 00 00 00 34 00 00 00 89 c1 00 00 59 d1 00 00 28 00 00 00 01 00 00 00 00 00 00 00 05 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02 00 00 00 03 00 00 00 34 00 00 00 89 c1 00 00 5a d1 00 00 28 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02 00 00 00 02 00 00 00 34 00 00 00 89 c1 00 00 5b d1 00 00 28 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02 00 00 00 02 00 00 00 34 00 00 00 89 c1 00 00 5c d1 00 00 28 00 00 00 01 00 00 00 00 00 00 00 04 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02 00 00 00 03 00 00 00 34 00 00 00 89 c1 00 00 5d d1 00 00 28 00 00 00 01 00 00 00 00 00 00 00 04 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02 00 00 00 03 00 00 00 34 00 00 00 89 c1 00 00 5e d1 00 00 28 00 00 00 01 00 00 00 00 00 00 00 04 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 01 00 00 00 38 00 00 00 89 c1 00 00 63 d1 00 00 2c 00 00 00 01 00 00 00 81 00 00 00 00 00 00 00 04 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02 00 00 00 03 00 00 00 38 00 00 00 89 c1 00 00 64 d1 00 00 2c 00 00 00 01 00 00 00 81 00 00 00 00 00 00 00 04 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02 00 00 00 03 00 00 00 38 00 00 00 89 c1 00 00 65 d1 00 00 2c 00 00 00 01 00 00 00 81 00 00 00 00 00 00 00 04 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02 00 00 00 03 00 00 00 10 00 00 00 89 c1 00 00 b1 d1 00 00 01 00 00 00 10 00 00 00 89 c1 00 00 bc d1 00 00 01 00 00 00 10 00 00 00 89 c1 00 00 b2 d1 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 b3 d1 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 b4 d1 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 b6 d1 00 00 50 14 00 00 10 00 00 00 89 c1 00 00 ab d1 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 b0 d1 00 00 01 00 00 00 10 00 00 00 89 c1 00 00 0a d1 00 00 50 14 00 00 10 00 00 00 89 c1 00 00 a8 d1 00 00 01 00 00 00 10 00 00 00 89 c1 00 00 98 d1 00 00 ff 00 00 00 10 00 00 00 89 c1 00 00 dd d1 00 00 fe ee 02 01 14 00 00 00 89 c1 00 00 a1 d1 00 00 08 00 00 00 00 00 00 00 0d 00 00 00 89 c1 00 00 15 d1 00 00 00 f0 01 00 00 89 c1 00 00 a4 d1 00 00 e4 01 00 00 30 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 31 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 32 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 33 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 34 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 35 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 36 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 37 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 38 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 39 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 31 30 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 31 31 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 31 32 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 31 33 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 31 34 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 b8 d1 00 00 03 00 00 00 10 00 00 00 89 c1 00 00 ba d1 00 00 0a 00 00 00 10 00 00 00 89 c1 00 00 c9 d1 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 7a d1 00 00 00 00 00 00 34 00 00 00 89 c1 00 00 0d d2 00 00 28 00 00 00 c4 09 00 00 00 00 00 00 03 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 08 00 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 c5 d1 00 00 03 00 00 00 10 00 00 00 89 c1 00 00 d4 d1 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 c2 d1 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 bd d1 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 94 d1 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 95 d1 00 00 02 00 00 00 10 00 00 00 89 c1 00 00 96 d1 00 00 2f 00 00 00 10 00 00 00 89 c1 00 00 97 d1 00 00 01 00 00 00 10 00 00 00 89 c1 00 00 3c d1 00 00 7f 7f ff ff 24 00 00 00 89 c1 00 00 3d d1 00 00 18 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 01 00 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 79 d1 00 00 01 00 00 00 10 00 00 00 89 c1 00 00 7b d1 00 00 00 00 00 00 24 00 00 00 89 c1 00 00 77 d1 00 00 18 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 76 d1 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 75 d1 00 00 07 00 00 00 10 00 00 00 89 c1 00 00 37 d1 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 78 d1 00 00 00 00 00 00 30 00 00 00 89 c1 00 00 20 d1 00 00 01 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 04 00 00 00 00 00 00 00 08 00 00 00 00 00 00 00 00 00 00 00 30 00 00 00 89 c1 00 00 21 d1 00 00 01 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 04 00 00 00 00 00 00 00 08 00 00 00 00 00 00 00 00 00 00 00 30 00 00 00 89 c1 00 00 22 d1 00 00 01 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 04 00 00 00 00 00 00 00 08 00 00 00 00 00 00 00 00 00 00 00 30 00 00 00 89 c1 00 00 10 d2 00 00 01 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 04 00 00 00 00 00 00 00 08 00 00 00 00 00 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 33 d1 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 31 d1 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 32 d1 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 30 d1 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 1c d1 00 00 01 00 00 00 10 00 00 00 89 c1 00 00 13 d1 00 00 71 1c 08 60 34 00 00 00 89 c1 00 00 a7 d1 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 12 d1 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 11 d1 00 00 01 00 00 00 6c 00 00 00 89 c1 00 00 1c d2 00 00 01 00 00 00 29 03 00 00 00 01 00 4c 50 2d 45 36 4e 48 00 00 00 01 00 27 a3 d9 a4 00 58 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 84 03 00 00 58 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00 08 dc b5 01 f8 db b5 01 f0 ff 13 02 a1 23 5e 00 5c 3d 1f 3d ef 3c d0 3c b5 3c 9d 3c 4b 00 00 00 89 c1 00 00 d8 d1 00 00 52 46 32 34 2d 31 30 35 6d 6d 20 46 34 20 4c 20 49 53 20 55 53 4d 00 c5 83 15 50 e9 eb 79 bf 7f bf 7d df d7 fc c5 ab af cd 60 cf fd c2 a1 95 d2 7d bd 65 ff 67 af 66 fc b3 b2 2f f9 01 48 94 1c 00 00 00 89 c1 00 00 da d1 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 7e d1 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 7c d1 00 00 61 0e 08 60 10 00 00 00 89 c1 00 00 1f d1 00 00 00 00 90 51 10 00 00 00 89 c1 00 00 1f d1 00 00 00 00 90 51 10 00 00 00 89 c1 00 00 1f d1 00 00 00 00 90 51 10 00 00 00 89 c1 00 00 1e d1 00 00 01 00 01 00 10 00 00 00 89 c1 00 00 aa d1 00 00 00 00 00 00 18 00 00 00 89 c1 00 00 39 d1 00 00 00 00 00 00 00 00 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 c3 d1 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 bf d1 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 1d d1 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 c7 d1 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 c4 d1 00 00 00 00 00 00 40 00 00 00 89 c1 00 00 cb d1 00 00 34 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 dc d1 00 00 01 00 00 00 10 00 00 00 89 c1 00 00 dc d1 00 00 01 00 00 00 10 00 00 00 89 c1 00 00 c0 d1 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 36 d1 00 00 00 00 00 00 3c 00 00 00 89 c1 00 00 40 d1 00 00 30 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 26 02 00 04 00 04 8b 02 3c 00 00 00 89 c1 00 00 41 d1 00 00 30 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 26 02 00 04 00 04 8b 02 3c 00 00 00 89 c1 00 00 42 d1 00 00 30 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 26 02 00 04 00 04 8b 02 3c 00 00 00 89 c1 00 00 43 d1 00 00 30 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 26 02 00 04 00 04 8b 02 3c 00 00 00 89 c1 00 00 44 d1 00 00 30 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 26 02 00 04 00 04 8b 02 10 00 00 00 89 c1 00 00 4a d1 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 49 d1 00 00 00 00 00 00 20 00 00 00 89 c1 00 00 3e d1 00 00 14 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 05 00 00 00 10 00 00 00 89 c1 00 00 9a d1 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 3b d1 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 a3 d1 00 00 01 00 00 00 10 00 00 00 89 c1 00 00 9f d1 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 24 d1 00 00 00 00 00 00 1c 00 00 00 89 c1 00 00 67 d1 00 00 10 00 00 00 01 00 00 00 e8 03 00 00 e8 03 00 00 10 00 00 00 89 c1 00 00 c6 d1 00 00 00 00 00 00 18 00 00 00 89 c1 00 00 2d d1 00 00 0c 00 00 00 00 00 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 2c d1 00 00 00 00 00 00 14 00 00 00 89 c1 00 00 27 d1 00 00 00 00 00 00 00 00 00 00 44 00 00 00 89 c1 00 00 a0 d1 00 00 38 00 00 00 01 00 00 00 01 00 00 00 2c 00 00 00 03 00 00 00 01 01 00 00 01 00 00 00 00 00 00 00 08 01 00 00 01 00 00 00 00 00 00 00 12 01 00 00 01 00 00 00 00 00 00 00 48 00 00 00 89 c1 00 00 a0 d1 00 00 3c 00 00 00 01 00 00 00 02 00 00 00 30 00 00 00 03 00 00 00 04 01 00 00 01 00 00 00 00 00 00 00 05 01 00 00 01 00 00 00 00 00 00 00 06 01 00 00 02 00 00 00 03 00 00 00 00 00 00 00 5c 00 00 00 89 c1 00 00 a0 d1 00 00 50 00 00 00 01 00 00 00 03 00 00 00 44 00 00 00 03 00 00 00 0c 01 00 00 04 00 00 00 00 27 00 00 00 f1 ff ff 00 27 00 00 00 f1 ff ff 0d 01 00 00 04 00 00 00 00 27 00 00 00 00 00 00 00 1b 00 00 60 0c 00 00 14 01 00 00 01 00 00 00 01 00 00 00 74 00 00 00 89 c1 00 00 a0 d1 00 00 68 00 00 00 01 00 00 00 05 00 00 00 5c 00 00 00 07 00 00 00 06 07 00 00 01 00 00 00 00 00 00 00 11 07 00 00 01 00 00 00 00 00 00 00 12 07 00 00 01 00 00 00 00 00 00 00 0e 08 00 00 01 00 00 00 00 00 00 00 13 08 00 00 01 00 00 00 00 00 00 00 14 08 00 00 01 00 00 00 00 00 00 00 15 08 00 00 01 00 00 00 00 00 00 00 44 00 00 00 89 c1 00 00 a0 d1 00 00 38 00 00 00 01 00 00 00 01 00 00 00 2c 00 00 00 03 00 00 00 01 01 00 00 01 00 00 00 00 00 00 00 08 01 00 00 01 00 00 00 00 00 00 00 12 01 00 00 01 00 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 99 d1 00 00 13 00 00 00 10 00 00 00 89 c1 00 00 66 d1 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 00 00 00 00 00 00 00 00 24 00 00 00 89 c1 00 00 08 d2 00 00 18 00 00 00 01 00 00 00 00 00 00 00 64 00 00 00 04 00 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 00 00 00 00 02 00 00 00 10 00 00 00 89 c1 00 00 00 00 00 00 3c 00 00 00 10 00 00 00 89 c1 00 00 14 d1 00 00 3c 00 00 00 10 00 00 00 89 c1 00 00 1a d2 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 0b d2 00 00 00 00 00 00 24 00 00 00 89 c1 00 00 25 d1 00 00 45 4f 53 52 36 5f 46 31 38 44 37 41 00 41 00 00 00 00 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 0e d2 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 74 d1 00 00 00 00 00 00 1c 00 00 00 89 c1 00 00 11 d2 00 00 00 00 00 00 01 00 00 00 01 00 00 00 01 00 00 00 34 03 00 00 89 c1 00 00 13 d2 00 00 14 00 00 00 01 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a4 01 00 00 89 c1 00 00 12 d2 00 00 0a 00 00 00 01 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 07 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 18 00 00 00 89 c1 00 00 7d d1 00 00 0c 00 00 00 13 00 00 00 3c 00 00 00 24 00 00 00 89 c1 00 00 25 d1 00 00 45 4f 53 52 36 5f 46 31 38 44 37 41 00 41 00 00 00 00 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 09 d2 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 0c d2 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 19 d2 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 18 d2 00 00 00 00 00 00 10 00 00 00 89 c1 00 00 15 d2 00 00 00 00 00 00 94 00 00 00 8a c1 00 00 03 d1 00 00 03 00 00 00 20 00 00 00 00 00 00 00 48 00 00 00 4b 00 00 00 4d 00 00 00 50 00 00 00 53 00 00 00 55 00 00 00 58 00 00 00 5b 00 00 00 5d 00 00 00 60 00 00 00 63 00 00 00 65 00 00 00 68 00 00 00 6b 00 00 00 6d 00 00 00 70 00 00 00 73 00 00 00 75 00 00 00 78 00 00 00 7b 00 00 00 7d 00 00 00 80 00 00 00 83 00 00 00 85 00 00 00 88 00 00 00 8b 00 00 00 8d 00 00 00 90 00 00 00 93 00 00 00 95 00 00 00 98 00 00 00 14 00 00 00 8a c1 00 00 05 d1 00 00 01 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 1b d1 00 00 01 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 1b d1 00 00 01 00 00 00 00 00 00 00 30 00 00 00 8a c1 00 00 14 d1 00 00 03 00 00 00 07 00 00 00 1e 00 00 00 3c 00 00 00 b4 00 00 00 2c 01 00 00 58 02 00 00 00 00 00 00 ff ff ff ff 14 00 00 00 8a c1 00 00 16 d1 00 00 01 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 11 d1 00 00 01 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 12 d1 00 00 01 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 a8 d1 00 00 01 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 ab d1 00 00 01 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 47 d1 00 00 01 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 ad d1 00 00 01 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 ae d1 00 00 01 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 aa d1 00 00 01 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 1e d1 00 00 01 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 1f d1 00 00 01 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 af d1 00 00 01 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 d8 d1 00 00 01 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 7f d1 00 00 01 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 b7 d1 00 00 01 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 c4 d1 00 00 01 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 c2 d1 00 00 01 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 39 d1 00 00 01 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 3b d1 00 00 01 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 3c d1 00 00 01 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 9d d1 00 00 01 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 9a d1 00 00 01 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 9c d1 00 00 01 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 4c d1 00 00 01 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 bd d1 00 00 01 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 9f d1 00 00 01 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 24 d1 00 00 01 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 15 d1 00 00 07 00 00 00 00 00 00 00 40 00 00 00 8a c1 00 00 10 d1 00 00 03 00 00 00 0b 00 00 00 87 00 00 00 81 00 00 00 82 00 00 00 83 00 00 00 88 00 00 00 84 00 00 00 85 00 00 00 86 00 00 00 21 00 00 00 22 00 00 00 23 00 00 00 14 00 00 00 8a c1 00 00 70 d1 00 00 07 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 70 d1 00 00 07 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 71 d1 00 00 07 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 71 d1 00 00 07 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 72 d1 00 00 07 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 72 d1 00 00 07 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 a1 d1 00 00 07 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 a7 d1 00 00 07 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 a2 d1 00 00 07 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 b2 d1 00 00 07 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 b3 d1 00 00 07 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 b5 d1 00 00 07 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 46 d1 00 00 07 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 d0 d1 00 00 07 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 d1 d1 00 00 07 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 d3 d1 00 00 07 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 cb d1 00 00 07 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 4d d1 00 00 07 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 96 d1 00 00 07 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 db d1 00 00 07 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 a4 d1 00 00 07 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 bf d1 00 00 07 00 00 00 00 00 00 00 18 00 00 00 8a c1 00 00 55 d0 00 00 03 00 00 00 01 00 00 00 3f 00 00 00 1c 00 00 00 8a c1 00 00 08 d1 00 00 03 00 00 00 02 00 00 00 00 00 00 00 01 00 00 00 2c 00 00 00 8a c1 00 00 06 d1 00 00 03 00 00 00 06 00 00 00 00 00 00 00 12 00 00 00 04 00 00 00 05 00 00 00 10 00 00 00 11 00 00 00 24 00 00 00 8a c1 00 00 07 d1 00 00 03 00 00 00 04 00 00 00 03 00 00 00 04 00 00 00 01 00 00 00 05 00 00 00 3c 00 00 00 8a c1 00 00 09 d1 00 00 03 00 00 00 0a 00 00 00 00 00 00 00 17 00 00 00 01 00 00 00 08 00 00 00 02 00 00 00 03 00 00 00 04 00 00 00 05 00 00 00 06 00 00 00 09 00 00 00 44 01 00 00 8a c1 00 00 0a d1 00 00 03 00 00 00 4c 00 00 00 c4 09 00 00 28 0a 00 00 8c 0a 00 00 f0 0a 00 00 54 0b 00 00 b8 0b 00 00 1c 0c 00 00 80 0c 00 00 e4 0c 00 00 48 0d 00 00 ac 0d 00 00 10 0e 00 00 74 0e 00 00 d8 0e 00 00 3c 0f 00 00 a0 0f 00 00 04 10 00 00 68 10 00 00 cc 10 00 00 30 11 00 00 94 11 00 00 f8 11 00 00 5c 12 00 00 c0 12 00 00 24 13 00 00 88 13 00 00 ec 13 00 00 50 14 00 00 b4 14 00 00 18 15 00 00 7c 15 00 00 e0 15 00 00 44 16 00 00 a8 16 00 00 0c 17 00 00 70 17 00 00 d4 17 00 00 38 18 00 00 9c 18 00 00 00 19 00 00 64 19 00 00 c8 19 00 00 2c 1a 00 00 90 1a 00 00 f4 1a 00 00 58 1b 00 00 bc 1b 00 00 20 1c 00 00 84 1c 00 00 e8 1c 00 00 4c 1d 00 00 b0 1d 00 00 14 1e 00 00 78 1e 00 00 dc 1e 00 00 40 1f 00 00 a4 1f 00 00 08 20 00 00 6c 20 00 00 d0 20 00 00 34 21 00 00 98 21 00 00 fc 21 00 00 60 22 00 00 c4 22 00 00 28 23 00 00 8c 23 00 00 f0 23 00 00 54 24 00 00 b8 24 00 00 1c 25 00 00 80 25 00 00 e4 25 00 00 48 26 00 00 ac 26 00 00 10 27 00 00 60 00 00 00 8a c1 00 00 0b d1 00 00 03 00 00 00 13 00 00 00 f7 ff ff ff f8 ff ff ff f9 ff ff ff fa ff ff ff fb ff ff ff fc ff ff ff fd ff ff ff fe ff ff ff ff ff ff ff 00 00 00 00 01 00 00 00 02 00 00 00 03 00 00 00 04 00 00 00 05 00 00 00 06 00 00 00 07 00 00 00 08 00 00 00 09 00 00 00 60 00 00 00 8a c1 00 00 0c d1 00 00 03 00 00 00 13 00 00 00 f7 ff ff ff f8 ff ff ff f9 ff ff ff fa ff ff ff fb ff ff ff fc ff ff ff fd ff ff ff fe ff ff ff ff ff ff ff 00 00 00 00 01 00 00 00 02 00 00 00 03 00 00 00 04 00 00 00 05 00 00 00 06 00 00 00 07 00 00 00 08 00 00 00 09 00 00 00 24 00 00 00 8a c1 00 00 0d d1 00 00 03 00 00 00 04 00 00 00 00 00 00 00 01 00 00 00 02 00 00 00 03 00 00 00 24 00 00 00 8a c1 00 00 0e d1 00 00 03 00 00 00 04 00 00 00 00 00 00 00 01 00 00 00 02 00 00 00 03 00 00 00 1c 00 00 00 8a c1 00 00 0f d1 00 00 03 00 00 00 02 00 00 00 01 00 00 00 02 00 00 00 54 00 00 00 8a c1 00 00 01 d1 00 00 03 00 00 00 10 00 00 00 28 00 00 00 2b 00 00 00 2d 00 00 00 30 00 00 00 33 00 00 00 35 00 00 00 38 00 00 00 3b 00 00 00 3d 00 00 00 40 00 00 00 43 00 00 00 45 00 00 00 48 00 00 00 4b 00 00 00 4d 00 00 00 50 00 00 00 f0 00 00 00 8a c1 00 00 02 d1 00 00 03 00 00 00 37 00 00 00 10 00 00 00 13 00 00 00 15 00 00 00 18 00 00 00 1b 00 00 00 1d 00 00 00 20 00 00 00 23 00 00 00 25 00 00 00 28 00 00 00 2b 00 00 00 2d 00 00 00 30 00 00 00 33 00 00 00 35 00 00 00 38 00 00 00 3b 00 00 00 3d 00 00 00 40 00 00 00 43 00 00 00 45 00 00 00 48 00 00 00 4b 00 00 00 4d 00 00 00 50 00 00 00 53 00 00 00 55 00 00 00 58 00 00 00 5b 00 00 00 5d 00 00 00 60 00 00 00 63 00 00 00 65 00 00 00 68 00 00 00 6b 00 00 00 6d 00 00 00 70 00 00 00 73 00 00 00 75 00 00 00 78 00 00 00 7b 00 00 00 7d 00 00 00 80 00 00 00 83 00 00 00 85 00 00 00 88 00 00 00 8b 00 00 00 8d 00 00 00 90 00 00 00 93 00 00 00 95 00 00 00 98 00 00 00 9b 00 00 00 9d 00 00 00 a0 00 00 00 60 00 00 00 8a c1 00 00 04 d1 00 00 03 00 00 00 13 00 00 00 e8 00 00 00 eb 00 00 00 ed 00 00 00 f0 00 00 00 f3 00 00 00 f5 00 00 00 f8 00 00 00 fb 00 00 00 fd 00 00 00 00 00 00 00 03 00 00 00 05 00 00 00 08 00 00 00 0b 00 00 00 0d 00 00 00 10 00 00 00 13 00 00 00 15 00 00 00 18 00 00 00 a0 01 00 00 8a c1 00 00 7d d1 00 00 03 00 00 00 21 00 00 00 0c 00 00 00 21 00 00 00 0c 03 00 00 0c 00 00 00 01 00 00 00 fd 02 00 00 0c 00 00 00 02 00 00 00 d0 02 00 00 0c 00 00 00 03 00 00 00 94 02 00 00 0c 00 00 00 04 00 00 00 58 02 00 00 0c 00 00 00 05 00 00 00 3a 02 00 00 0c 00 00 00 06 00 00 00 1c 02 00 00 0c 00 00 00 07 00 00 00 e0 01 00 00 0c 00 00 00 08 00 00 00 a4 01 00 00 0c 00 00 00 09 00 00 00 86 01 00 00 0c 00 00 00 0a 00 00 00 68 01 00 00 0c 00 00 00 0b 00 00 00 59 01 00 00 0c 00 00 00 0c 00 00 00 4a 01 00 00 0c 00 00 00 0d 00 00 00 2c 01 00 00 0c 00 00 00 0e 00 00 00 0e 01 00 00 0c 00 00 00 0f 00 00 00 f0 00 00 00 0c 00 00 00 10 00 00 00 d2 00 00 00 0c 00 00 00 11 00 00 00 b4 00 00 00 0c 00 00 00 12 00 00 00 78 00 00 00 0c 00 00 00 13 00 00 00 3c 00 00 00 0c 00 00 00 14 00 00 00 00 00 00 00 0c 00 00 00 15 00 00 00 c4 ff ff ff 0c 00 00 00 16 00 00 00 88 ff ff ff 0c 00 00 00 17 00 00 00 4c ff ff ff 0c 00 00 00 18 00 00 00 2e ff ff ff 0c 00 00 00 1a 00 00 00 10 ff ff ff 0c 00 00 00 1b 00 00 00 d4 fe ff ff 0c 00 00 00 1c 00 00 00 98 fe ff ff 0c 00 00 00 1d 00 00 00 5c fe ff ff 0c 00 00 00 1e 00 00 00 20 fe ff ff 0c 00 00 00 1f 00 00 00 e4 fd ff ff 0c 00 00 00 20 00 00 00 a8 fd ff ff 0c 00 00 00 ff ff ff ff 00 00 00 00 1c 00 00 00 8a c1 00 00 7e d1 00 00 03 00 00 00 02 00 00 00 00 00 00 00 01 00 00 00 14 00 00 00 8a c1 00 00 7c d1 00 00 07 00 00 00 00 00 00 00 c0 02 00 00 8a c1 00 00 21 d1 00 00 03 00 00 00 17 00 00 00 01 00 00 00 10 00 00 00 01 00 00 00 00 00 00 00 03 00 00 00 01 00 00 00 10 00 00 00 01 00 00 00 00 00 00 00 02 00 00 00 01 00 00 00 10 00 00 00 01 00 00 00 01 00 00 00 03 00 00 00 01 00 00 00 10 00 00 00 01 00 00 00 01 00 00 00 02 00 00 00 01 00 00 00 10 00 00 00 01 00 00 00 0e 00 00 00 03 00 00 00 01 00 00 00 10 00 00 00 01 00 00 00 0e 00 00 00 02 00 00 00 01 00 00 00 10 00 00 00 01 00 00 00 0f 00 00 00 03 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 04 00 00 00 10 00 00 00 01 00 00 00 00 00 00 00 03 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 04 00 00 00 10 00 00 00 01 00 00 00 00 00 00 00 02 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 04 00 00 00 10 00 00 00 01 00 00 00 01 00 00 00 03 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 04 00 00 00 10 00 00 00 01 00 00 00 01 00 00 00 02 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 04 00 00 00 10 00 00 00 01 00 00 00 0e 00 00 00 03 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 04 00 00 00 10 00 00 00 01 00 00 00 0e 00 00 00 02 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 04 00 00 00 10 00 00 00 01 00 00 00 0f 00 00 00 03 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 03 00 00 00 10 00 00 00 01 00 00 00 00 00 00 00 03 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 03 00 00 00 10 00 00 00 01 00 00 00 00 00 00 00 02 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 03 00 00 00 10 00 00 00 01 00 00 00 01 00 00 00 03 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 03 00 00 00 10 00 00 00 01 00 00 00 01 00 00 00 02 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 03 00 00 00 10 00 00 00 01 00 00 00 0e 00 00 00 03 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 03 00 00 00 10 00 00 00 01 00 00 00 0e 00 00 00 02 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 03 00 00 00 10 00 00 00 01 00 00 00 0f 00 00 00 03 00 00 00 01 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 04 00 00 00 01 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 03 00 00 00 c0 02 00 00 8a c1 00 00 22 d1 00 00 03 00 00 00 17 00 00 00 01 00 00 00 10 00 00 00 01 00 00 00 00 00 00 00 03 00 00 00 01 00 00 00 10 00 00 00 01 00 00 00 00 00 00 00 02 00 00 00 01 00 00 00 10 00 00 00 01 00 00 00 01 00 00 00 03 00 00 00 01 00 00 00 10 00 00 00 01 00 00 00 01 00 00 00 02 00 00 00 01 00 00 00 10 00 00 00 01 00 00 00 0e 00 00 00 03 00 00 00 01 00 00 00 10 00 00 00 01 00 00 00 0e 00 00 00 02 00 00 00 01 00 00 00 10 00 00 00 01 00 00 00 0f 00 00 00 03 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 04 00 00 00 10 00 00 00 01 00 00 00 00 00 00 00 03 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 04 00 00 00 10 00 00 00 01 00 00 00 00 00 00 00 02 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 04 00 00 00 10 00 00 00 01 00 00 00 01 00 00 00 03 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 04 00 00 00 10 00 00 00 01 00 00 00 01 00 00 00 02 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 04 00 00 00 10 00 00 00 01 00 00 00 0e 00 00 00 03 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 04 00 00 00 10 00 00 00 01 00 00 00 0e 00 00 00 02 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 04 00 00 00 10 00 00 00 01 00 00 00 0f 00 00 00 03 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 03 00 00 00 10 00 00 00 01 00 00 00 00 00 00 00 03 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 03 00 00 00 10 00 00 00 01 00 00 00 00 00 00 00 02 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 03 00 00 00 10 00 00 00 01 00 00 00 01 00 00 00 03 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 03 00 00 00 10 00 00 00 01 00 00 00 01 00 00 00 02 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 03 00 00 00 10 00 00 00 01 00 00 00 0e 00 00 00 03 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 03 00 00 00 10 00 00 00 01 00 00 00 0e 00 00 00 02 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 03 00 00 00 10 00 00 00 01 00 00 00 0f 00 00 00 03 00 00 00 01 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 04 00 00 00 01 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 03 00 00 00 c0 02 00 00 8a c1 00 00 20 d1 00 00 03 00 00 00 17 00 00 00 01 00 00 00 10 00 00 00 01 00 00 00 00 00 00 00 03 00 00 00 01 00 00 00 10 00 00 00 01 00 00 00 00 00 00 00 02 00 00 00 01 00 00 00 10 00 00 00 01 00 00 00 01 00 00 00 03 00 00 00 01 00 00 00 10 00 00 00 01 00 00 00 01 00 00 00 02 00 00 00 01 00 00 00 10 00 00 00 01 00 00 00 0e 00 00 00 03 00 00 00 01 00 00 00 10 00 00 00 01 00 00 00 0e 00 00 00 02 00 00 00 01 00 00 00 10 00 00 00 01 00 00 00 0f 00 00 00 03 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 04 00 00 00 10 00 00 00 01 00 00 00 00 00 00 00 03 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 04 00 00 00 10 00 00 00 01 00 00 00 00 00 00 00 02 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 04 00 00 00 10 00 00 00 01 00 00 00 01 00 00 00 03 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 04 00 00 00 10 00 00 00 01 00 00 00 01 00 00 00 02 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 04 00 00 00 10 00 00 00 01 00 00 00 0e 00 00 00 03 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 04 00 00 00 10 00 00 00 01 00 00 00 0e 00 00 00 02 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 04 00 00 00 10 00 00 00 01 00 00 00 0f 00 00 00 03 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 03 00 00 00 10 00 00 00 01 00 00 00 00 00 00 00 03 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 03 00 00 00 10 00 00 00 01 00 00 00 00 00 00 00 02 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 03 00 00 00 10 00 00 00 01 00 00 00 01 00 00 00 03 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 03 00 00 00 10 00 00 00 01 00 00 00 01 00 00 00 02 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 03 00 00 00 10 00 00 00 01 00 00 00 0e 00 00 00 03 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 03 00 00 00 10 00 00 00 01 00 00 00 0e 00 00 00 02 00 00 00 02 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 03 00 00 00 10 00 00 00 01 00 00 00 0f 00 00 00 03 00 00 00 01 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 04 00 00 00 01 00 00 00 10 00 00 00 06 00 00 00 00 00 00 00 03 00 00 00 20 00 00 00 8a c1 00 00 1c d1 00 00 03 00 00 00 03 00 00 00 01 00 00 00 05 00 00 00 04 00 00 00 44 00 00 00 8a c1 00 00 b0 d1 00 00 03 00 00 00 0c 00 00 00 00 00 00 00 01 00 00 00 02 00 00 00 03 00 00 00 04 00 00 00 05 00 00 00 06 00 00 00 07 00 00 00 08 00 00 00 09 00 00 00 0a 00 00 00 0b 00 00 00 14 00 00 00 8a c1 00 00 b1 d1 00 00 03 00 00 00 00 00 00 00 44 01 00 00 8a c1 00 00 b6 d1 00 00 03 00 00 00 4c 00 00 00 c4 09 00 00 28 0a 00 00 8c 0a 00 00 f0 0a 00 00 54 0b 00 00 b8 0b 00 00 1c 0c 00 00 80 0c 00 00 e4 0c 00 00 48 0d 00 00 ac 0d 00 00 10 0e 00 00 74 0e 00 00 d8 0e 00 00 3c 0f 00 00 a0 0f 00 00 04 10 00 00 68 10 00 00 cc 10 00 00 30 11 00 00 94 11 00 00 f8 11 00 00 5c 12 00 00 c0 12 00 00 24 13 00 00 88 13 00 00 ec 13 00 00 50 14 00 00 b4 14 00 00 18 15 00 00 7c 15 00 00 e0 15 00 00 44 16 00 00 a8 16 00 00 0c 17 00 00 70 17 00 00 d4 17 00 00 38 18 00 00 9c 18 00 00 00 19 00 00 64 19 00 00 c8 19 00 00 2c 1a 00 00 90 1a 00 00 f4 1a 00 00 58 1b 00 00 bc 1b 00 00 20 1c 00 00 84 1c 00 00 e8 1c 00 00 4c 1d 00 00 b0 1d 00 00 14 1e 00 00 78 1e 00 00 dc 1e 00 00 40 1f 00 00 a4 1f 00 00 08 20 00 00 6c 20 00 00 d0 20 00 00 34 21 00 00 98 21 00 00 fc 21 00 00 60 22 00 00 c4 22 00 00 28 23 00 00 8c 23 00 00 f0 23 00 00 54 24 00 00 b8 24 00 00 1c 25 00 00 80 25 00 00 e4 25 00 00 48 26 00 00 ac 26 00 00 10 27 00 00 28 00 00 00 8a c1 00 00 a9 d1 00 00 03 00 00 00 05 00 00 00 00 00 00 00 02 00 00 00 04 00 00 00 08 00 00 00 ff 00 00 00 40 00 00 00 8a c1 00 00 b4 d1 00 00 03 00 00 00 0b 00 00 00 00 00 00 00 17 00 00 00 01 00 00 00 08 00 00 00 02 00 00 00 03 00 00 00 04 00 00 00 05 00 00 00 06 00 00 00 09 00 00 00 00 80 00 00 3c 00 00 00 8a c1 00 00 d9 d1 00 00 03 00 00 00 0a 00 00 00 00 00 00 00 03 00 00 00 05 00 00 00 08 00 00 00 0b 00 00 00 0d 00 00 00 10 00 00 00 13 00 00 00 15 00 00 00 18 00 00 00 34 00 00 00 8a c1 00 00 ba d1 00 00 03 00 00 00 08 00 00 00 02 00 00 00 0a 00 00 00 01 00 00 00 05 00 00 00 06 00 00 00 04 00 00 00 08 00 00 00 07 00 00 00 14 00 00 00 8a c1 00 00 2c d1 00 00 03 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 0d d2 00 00 03 00 00 00 00 00 00 00 20 00 00 00 8a c1 00 00 bc d1 00 00 03 00 00 00 03 00 00 00 00 00 00 00 01 00 00 00 03 00 00 00 1c 00 00 00 8a c1 00 00 b8 d1 00 00 03 00 00 00 02 00 00 00 04 00 00 00 00 00 00 00 1c 00 00 00 8a c1 00 00 dc d1 00 00 03 00 00 00 02 00 00 00 00 00 00 00 01 00 00 00 18 00 00 00 8a c1 00 00 c1 d1 00 00 03 00 00 00 01 00 00 00 03 00 00 00 14 00 00 00 8a c1 00 00 c5 d1 00 00 03 00 00 00 00 00 00 00 28 00 00 00 8a c1 00 00 94 d1 00 00 03 00 00 00 05 00 00 00 00 00 00 00 0d 00 00 00 01 00 00 00 02 00 00 00 07 00 00 00 14 00 00 00 8a c1 00 00 95 d1 00 00 03 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 97 d1 00 00 03 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 3d d1 00 00 07 00 00 00 00 00 00 00 1c 00 00 00 8a c1 00 00 0c d2 00 00 03 00 00 00 02 00 00 00 00 00 00 00 01 00 00 00 24 00 00 00 8a c1 00 00 78 d1 00 00 03 00 00 00 04 00 00 00 03 00 00 00 01 00 00 00 00 00 00 00 02 00 00 00 14 00 00 00 8a c1 00 00 79 d1 00 00 03 00 00 00 00 00 00 00 1c 00 00 00 8a c1 00 00 7a d1 00 00 03 00 00 00 02 00 00 00 01 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 7b d1 00 00 03 00 00 00 00 00 00 00 1c 00 00 00 8a c1 00 00 c9 d1 00 00 03 00 00 00 02 00 00 00 01 00 00 00 00 00 00 00 18 00 00 00 8a c1 00 00 75 d1 00 00 03 00 00 00 01 00 00 00 00 00 00 00 18 00 00 00 8a c1 00 00 4b d1 00 00 03 00 00 00 01 00 00 00 06 00 00 00 14 00 00 00 8a c1 00 00 3e d1 00 00 01 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 57 d1 00 00 07 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 58 d1 00 00 07 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 59 d1 00 00 07 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 5a d1 00 00 07 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 5b d1 00 00 07 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 5c d1 00 00 07 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 5d d1 00 00 07 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 5e d1 00 00 07 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 63 d1 00 00 07 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 64 d1 00 00 07 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 65 d1 00 00 07 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 d5 d1 00 00 03 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 d5 d1 00 00 03 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 a0 d1 00 00 07 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 a0 d1 00 00 07 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 a0 d1 00 00 07 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 a0 d1 00 00 07 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 08 d2 00 00 07 00 00 00 00 00 00 00 20 00 00 00 8a c1 00 00 00 00 00 00 03 00 00 00 03 00 00 00 01 00 00 00 02 00 00 00 00 00 00 00 30 00 00 00 8a c1 00 00 00 00 00 00 03 00 00 00 07 00 00 00 0f 00 00 00 1e 00 00 00 3c 00 00 00 b4 00 00 00 2c 01 00 00 58 02 00 00 08 07 00 00 14 00 00 00 8a c1 00 00 09 d2 00 00 03 00 00 00 00 00 00 00 38 00 00 00 8a c1 00 00 0b d2 00 00 03 00 00 00 09 00 00 00 fc ff ff ff fd ff ff ff fe ff ff ff ff ff ff ff 00 00 00 00 01 00 00 00 02 00 00 00 03 00 00 00 04 00 00 00 1c 00 00 00 8a c1 00 00 0e d2 00 00 03 00 00 00 02 00 00 00 00 00 00 00 01 00 00 00 14 00 00 00 8a c1 00 00 15 d2 00 00 03 00 00 00 00 00 00 00 14 00 00 00 8a c1 00 00 19 d2 00 00 03 00 00 00 00 00 00 00 1c 00 00 00 8a c1 00 00 1a d2 00 00 03 00 00 00 02 00 00 00 00 00 00 00 02 00 00 00 0c 00 00 00 a4 c1 00 00 01 00 01 00 0c 00 00 00 9d c1 00 00 00 00 00 00 08 00 00 00 00 00 00 00
+    """
+
+}
