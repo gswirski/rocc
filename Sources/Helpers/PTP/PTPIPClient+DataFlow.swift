@@ -26,6 +26,10 @@ extension PTPIPClient {
         mutating func appendData(from dataPacket: DataPacket) {
             data.append(bytes: dataPacket.data.bytes.compactMap({ $0 }))
         }
+        
+        mutating func appendData(from dataPacket: EndDataPacket) {
+            data.append(bytes: dataPacket.data.bytes.compactMap({ $0 }))
+        }
     }
     
     /// Asynchronously waits for data to be received for the given transaction ID
@@ -50,11 +54,13 @@ extension PTPIPClient {
     }
     
     func handleEndDataPacket(_ packet: EndDataPacket) {
-        guard dataContainers[packet.transactionId] == nil else {
+        guard var containerForData = dataContainers[packet.transactionId] else {
+            os_log("Received unexpected end data packet for transactionId: %{public}@", log: ptpClientLog, type: .error, "\(packet.transactionId)")
+            Logger.log(message: "Received unexpected end data packet for transactionId: \(packet.transactionId)", category: "PTPIPClient", level: .error)
             return
         }
-        os_log("Received unexpected end data packet for transactionId: %{public}@", log: ptpClientLog, type: .error, "\(packet.transactionId)")
-        Logger.log(message: "Received unexpected end data packet for transactionId: \(packet.transactionId)", category: "PTPIPClient", level: .error)
+        containerForData.appendData(from: packet)
+        dataContainers[packet.transactionId] = containerForData
     }
 }
 
