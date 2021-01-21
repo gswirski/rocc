@@ -13,6 +13,55 @@ extension CanonPTPIPDevice {
     
     typealias AllDevicePropertyDescriptionsCompletion = (_ result: Result<[PTPDeviceProperty], Error>) -> Void
     
+    func parseEvent(data eventData: ByteBuffer) -> [PTPDeviceProperty] {
+        let dataSize = eventData.length
+        var pointer: UInt = 0
+        var properties = [PTPDeviceProperty]()
+        
+        while (pointer + 8 < dataSize) {
+            var size: DWord? = eventData[dWord: pointer]
+            var type: DWord? = eventData[dWord: pointer + 4]
+            
+            var propType = CanonPropType(rawValue: type!)
+            
+            var subType: CanonSubPropType?
+            
+            if propType == .PTP_EC_CANON_EOS_PropValueChanged {
+                subType = CanonSubPropType(rawValue: eventData[dWord: pointer + 8]!)
+            }
+            
+            var value: DWord?
+            var prop: PTP.DeviceProperty.Other?
+            
+            switch subType {
+            case .PTP_DPC_CANON_EOS_Aperture:
+                value = eventData[dWord: pointer + 12]
+                var tmpProp = PTP.DeviceProperty.Other()
+                tmpProp.type = .uint32
+                tmpProp.code = .fNumber
+                tmpProp.currentValue = value!
+                tmpProp.factoryValue = value!
+                tmpProp.getSetAvailable = .unknown
+                tmpProp.getSetSupported = .unknown
+                tmpProp.length = 4
+
+                prop = tmpProp
+                
+                properties.append(tmpProp)
+            default:
+                break
+            }
+            
+            print("property size:\(size) \(propType) \(subType) \(prop)")
+            
+            
+            pointer += UInt(size!)
+        }
+        
+        return properties
+
+    }
+    
     func getEvent(
         callback: @escaping AllDevicePropertyDescriptionsCompletion
     ) {
@@ -23,7 +72,9 @@ extension CanonPTPIPDevice {
 
             switch dataResult {
             case .success(let data):
-                guard let numberOfProperties = data.data[qWord: 0] else { return }
+                callback(Result.success(self.parseEvent(data: data.data)))
+                
+                /*guard let numberOfProperties = data.data[qWord: 0] else { return }
                 var offset: UInt = UInt(MemoryLayout<QWord>.size)
                 var properties: [PTPDeviceProperty] = []
                 for _ in 0..<numberOfProperties {
@@ -33,7 +84,7 @@ extension CanonPTPIPDevice {
                     properties.append(property)
                     offset += property.length
                 }
-                callback(Result.success(properties))
+                callback(Result.success(properties))*/
             case .failure(let error):
                 callback(Result.failure(error))
             }
@@ -53,9 +104,36 @@ extension CanonPTPIPDevice {
             guard !imageURLs.isEmpty, var lastEvent = lastEvent else {
                 getEvent { (result) in
                     switch result {
-                    case .success(var properties):
+                    case .success(let properties):
                         print("received properties \(properties)")
-                        callback(nil, nil)
+                        
+                        var aperture: (current: Aperture.Value, available: [Aperture.Value], supported: [Aperture.Value])?
+
+                        properties.forEach { (deviceProperty) in
+                            switch deviceProperty.code {
+                            case .fNumber:
+                                // TODO: should be enum type
+                                /*guard let enumProperty = deviceProperty as? PTP.DeviceProperty.Enum else {
+                                    return
+                                }*/
+                                guard let value = Aperture.Value(canonValue: deviceProperty.currentValue) else {
+                                    return
+                                }
+                                /*let available = enumProperty.available.compactMap({ Aperture.Value(sonyValue: $0) })
+                                let supported = enumProperty.supported.compactMap({ Aperture.Value(sonyValue: $0) })*/
+                                
+                                let available = [value]
+                                let supported = [value]
+                                
+                                aperture = (value, available, supported)
+                                break
+                            default:
+                                break
+                            }
+                        }
+                        
+                        let event = CameraEvent(status: nil, liveViewInfo: nil, liveViewQuality: nil, zoomPosition: nil, availableFunctions: nil, supportedFunctions: nil, postViewPictureURLs: nil, storageInformation: nil, beepMode: nil, function: nil, functionResult: false, videoQuality: nil, stillSizeInfo: nil, steadyMode: nil, viewAngle: nil, exposureMode: nil, exposureModeDialControl: nil, exposureSettingsLockStatus: nil, postViewImageSize: nil, selfTimer: nil, shootMode: nil, exposureCompensation: nil, flashMode: nil, aperture: aperture, focusMode: nil, iso: nil, isProgramShifted: nil, shutterSpeed: nil, whiteBalance: nil, touchAF: nil, focusStatus: nil, zoomSetting: nil, stillQuality: nil, stillFormat: nil, continuousShootingMode: nil, continuousShootingSpeed: nil, continuousBracketedShootingBrackets: nil, singleBracketedShootingBrackets: nil, flipSetting: nil, scene: nil, intervalTime: nil, colorSetting: nil, videoFileFormat: nil, videoRecordingTime: nil, highFrameRateCaptureStatus: nil, infraredRemoteControl: nil, tvColorSystem: nil, trackingFocusStatus: nil, trackingFocus: nil, batteryInfo: nil, numberOfShots: nil, autoPowerOff: nil, loopRecordTime: nil, audioRecording: nil, windNoiseReduction: nil, bulbShootingUrl: nil, bulbCapturingTime: nil, bulbShootingURLS: nil)
+                        callback(nil, event as? T.ReturnType)
                     case .failure(let error):
                         print("received error \(error)")
                         callback(error, nil)

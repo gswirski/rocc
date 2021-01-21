@@ -688,6 +688,19 @@ extension PTPOtherDeviceProperty {
         getSetAvailable = header.getSetAvailable
         length = header.length
     }
+    
+    init(header: PTP.DeviceProperty.Header) {
+        self.init()
+
+        type = header.dataType
+        code = header.code
+        rawCode = header.rawCode
+        currentValue = header.current
+        factoryValue = header.factory
+        getSetSupported = header.getSetSupported
+        getSetAvailable = header.getSetAvailable
+        length = header.length
+    }
 }
 
 extension PTP {

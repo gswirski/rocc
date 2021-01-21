@@ -51,8 +51,10 @@ internal final class CanonPTPIPDevice: SonyCamera {
     var highFrameRateCallback: ((Result<HighFrameRateCapture.Status, Error>) -> Void)?
         
     var eventPollingMode: PollingMode {
-        guard let deviceInfo = deviceInfo else { return .timed }
-        return deviceInfo.supportedEventCodes.contains(.propertyChanged) ? .cameraDriven : .timed
+        // TODO: is this right?
+        return .cameraDriven
+        /*guard let deviceInfo = deviceInfo else { return .timed }
+        return deviceInfo.supportedEventCodes.contains(.propertyChanged) ? .cameraDriven : .timed*/
     }
     
     var connectionMode: ConnectionMode = .remoteControl
@@ -333,9 +335,9 @@ internal final class CanonPTPIPDevice: SonyCamera {
     fileprivate func handlePTPIPEvent(_ event: EventPacket) {
         
         lastEventPacket = event
-        
+        print("handlePTPIPEvent \(event)")
         switch event.code {
-        case .propertyChanged:
+        case .propertyChanged, .canonPropertyChanged:
             onEventAvailable?()
         case .objectAdded:
             guard let objectID = event.variables?.first else {

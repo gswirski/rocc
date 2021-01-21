@@ -62,6 +62,8 @@ struct PTP {
     }
     
     enum EventCode: Word {
+        case canonPropertyChanged = 0xc101
+        
         case objectAdded = 0xc201
         case objectRemoved = 0xC202
         case propertyChanged = 0xC203

@@ -220,6 +220,7 @@ final class PTPIPClient {
         case let endDataPacket as EndDataPacket:
             handleEndDataPacket(endDataPacket)
         case let eventPacket as EventPacket:
+            print("Calling onEvent")
             onEvent?(eventPacket)            
         default:
             switch packet.name {
