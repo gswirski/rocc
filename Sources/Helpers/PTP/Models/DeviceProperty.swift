@@ -721,6 +721,12 @@ extension PTP {
                 self.value = convertable.sonyPTPValue
             }
             
+            init(_ convertable: CanonPTPPropValueConvertable) {
+                self.code = convertable.code
+                self.type = convertable.type
+                self.value = convertable.canonPTPValue
+            }
+            
             init(code: Code, type: DataType, value: PTPDevicePropertyDataType) {
                 self.code = code
                 self.type = type

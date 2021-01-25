@@ -154,6 +154,23 @@ final class PTPIPClient {
         sendControlPacket(packet)
     }
     
+    func setDevicePropValueEx(_ value: PTP.DeviceProperty.Value, callback: CommandRequestPacketResponse? = nil) {
+        let transactionID = getNextTransactionId()
+        let opRequestPacket = Packet.commandRequestPacket(code: .canonSetDevicePropValueEx, arguments: [], transactionId: transactionID, dataPhaseInfo: 2)
+        var data = ByteBuffer()
+        data.appendValue(UInt32(12), ofType: .uint32)
+        data.appendValue(UInt32(0xd101), ofType: .uint32) // aperture
+        data.appendValue(value.value, ofType: .uint32)
+        
+        let dataPackets = Packet.dataSendPackets(data: data, transactionId: transactionID)
+        
+        sendCommandRequestPacket(opRequestPacket, callback: callback)
+        dataPackets.forEach { (dataPacket) in
+            sendControlPacket(dataPacket)
+        }
+
+    }
+    
     func sendSetControlDeviceAValue(_ value: PTP.DeviceProperty.Value, callback: CommandRequestPacketResponse? = nil) {
         
         let transactionID = getNextTransactionId()

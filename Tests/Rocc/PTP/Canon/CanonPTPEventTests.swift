@@ -12,44 +12,62 @@ class CanonPTPCameraTests: XCTestCase {
     func testCanonEventParsesCorrectly() {
         let eventData = ByteBuffer(hexString: CanonPTPCameraTests.eventContents)
         
-        var dataSize = eventData.length
+        let dataSize = eventData.length
         var pointer: UInt = 0
-        var entries = 0
-        var i = 0
         
         while (pointer + 8 < dataSize) {
-            var size: DWord? = eventData[dWord: pointer]
-            var type: DWord? = eventData[dWord: pointer + 4]
+            let size: DWord? = eventData[dWord: pointer]
+            let type: DWord? = eventData[dWord: pointer + 4]
             
-            var propType = CanonPropType(rawValue: type!)
+            let propType = CanonPropType(rawValue: type!)
             
             var subType: CanonSubPropType?
             
-            if propType == .PTP_EC_CANON_EOS_PropValueChanged {
+            switch propType {
+            case .PTP_EC_CANON_EOS_PropValueChanged:
                 subType = CanonSubPropType(rawValue: eventData[dWord: pointer + 8]!)
-            }
-            
-            var value: DWord?
-            var prop: PTP.DeviceProperty.Other?
-            
-            switch subType {
-            case .PTP_DPC_CANON_EOS_Aperture:
-                value = eventData[dWord: pointer + 12]
-                var tmpProp = PTP.DeviceProperty.Other()
-                tmpProp.type = .uint32
-                tmpProp.code = .fNumber
-                tmpProp.currentValue = value!
-                tmpProp.factoryValue = value!
-                tmpProp.getSetAvailable = .unknown
-                tmpProp.getSetSupported = .unknown
-                tmpProp.length = 4
+                var value: DWord?
+                var prop: PTP.DeviceProperty.Other?
+                
+                switch subType {
+                case .PTP_DPC_CANON_EOS_Aperture:
+                    value = eventData[dWord: pointer + 12]
+                    var tmpProp = PTP.DeviceProperty.Other()
+                    tmpProp.type = .uint32
+                    tmpProp.code = .fNumber
+                    tmpProp.currentValue = value!
+                    tmpProp.factoryValue = value!
+                    tmpProp.getSetAvailable = .unknown
+                    tmpProp.getSetSupported = .unknown
+                    tmpProp.length = 4
 
-                prop = tmpProp
+                    prop = tmpProp
+                default:
+                    break
+                }
+                
+                print("property size:\(size) \(propType) \(subType) \(prop)")
+
+            case .PTP_EC_CANON_EOS_AvailListChanged:
+                let subType = CanonSubPropType(rawValue: eventData[dWord: pointer + 8]!)
+                let dType = eventData[dWord: pointer + 12]
+                let count = eventData[dWord: pointer + 16]!
+                let dataStart = eventData[dWord: pointer + 20]
+                
+                print("property size:\(size) \(propType) \(subType) \(count)")
+
+                
+                if subType == .PTP_DPC_CANON_EOS_Aperture {
+                    let values = (1...count).map { (index) -> DWord in
+                        let offset = 16 + 4 * UInt(index)
+                        return eventData[dWord: pointer + offset]!
+                    }
+                    
+                    print("values: \(values), last offset: \(16 + 4 * UInt(count))")
+                }
             default:
                 break
             }
-            
-            print("property size:\(size) \(propType) \(subType) \(prop)")
             
             
             pointer += UInt(size!)

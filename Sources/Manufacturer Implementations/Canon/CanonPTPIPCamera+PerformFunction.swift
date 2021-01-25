@@ -16,50 +16,80 @@ extension CanonPTPIPDevice {
     func parseEvent(data eventData: ByteBuffer) -> [PTPDeviceProperty] {
         let dataSize = eventData.length
         var pointer: UInt = 0
-        var properties = [PTPDeviceProperty]()
         
+        if allProperties == nil {
+            var apertureField = PTP.DeviceProperty.Enum()
+            apertureField.type = .uint32
+            apertureField.code = .fNumber
+            apertureField.getSetAvailable = .getSet
+            apertureField.getSetSupported = .getSet
+            apertureField.length = 4
+
+            
+            allProperties = [
+                .fNumber: apertureField
+            ]
+        }
+        
+        guard var allProperties = allProperties else {
+            fatalError("This should never happened. We just initialized all properties")
+        }
+        
+        var apertureField = allProperties[.fNumber] as! PTP.DeviceProperty.Enum
+
         while (pointer + 8 < dataSize) {
             var size: DWord? = eventData[dWord: pointer]
             var type: DWord? = eventData[dWord: pointer + 4]
             
             var propType = CanonPropType(rawValue: type!)
             
-            var subType: CanonSubPropType?
-            
-            if propType == .PTP_EC_CANON_EOS_PropValueChanged {
-                subType = CanonSubPropType(rawValue: eventData[dWord: pointer + 8]!)
-            }
-            
-            var value: DWord?
-            var prop: PTP.DeviceProperty.Other?
-            
-            switch subType {
-            case .PTP_DPC_CANON_EOS_Aperture:
-                value = eventData[dWord: pointer + 12]
-                var tmpProp = PTP.DeviceProperty.Other()
-                tmpProp.type = .uint32
-                tmpProp.code = .fNumber
-                tmpProp.currentValue = value!
-                tmpProp.factoryValue = value!
-                tmpProp.getSetAvailable = .unknown
-                tmpProp.getSetSupported = .unknown
-                tmpProp.length = 4
-
-                prop = tmpProp
+            switch propType {
+            case .PTP_EC_CANON_EOS_PropValueChanged:
+                let subType = CanonSubPropType(rawValue: eventData[dWord: pointer + 8]!)
                 
-                properties.append(tmpProp)
+                switch subType {
+                case .PTP_DPC_CANON_EOS_Aperture:
+                    let value = eventData[dWord: pointer + 12]
+                    apertureField.currentValue = value!
+                    apertureField.factoryValue = value!
+                    
+                    print("Received property size:\(size) \(propType) \(subType) \(value)")
+
+                default:
+                    break
+                }
+            case .PTP_EC_CANON_EOS_AvailListChanged:
+                let subType = CanonSubPropType(rawValue: eventData[dWord: pointer + 8]!)
+                let count = eventData[dWord: pointer + 16]!
+                
+                switch subType {
+                case .PTP_DPC_CANON_EOS_Aperture:
+                    let values = (0..<count).map { (index) -> DWord in
+                        let offset = 16 + 4 * UInt(index + 1)
+                        return eventData[dWord: pointer + offset]!
+                    }
+
+                    apertureField.available = values
+                    apertureField.supported = values
+                    
+                    print("Received property values: \(propType) \(subType) \(values)")
+
+                default:
+                    break
+                }
             default:
                 break
             }
-            
-            print("property size:\(size) \(propType) \(subType) \(prop)")
             
             
             pointer += UInt(size!)
         }
         
-        return properties
+        allProperties[.fNumber] = apertureField
+        
+        self.allProperties = allProperties
 
+        return Array(allProperties.values)
     }
     
     func getEvent(
@@ -68,8 +98,6 @@ extension CanonPTPIPDevice {
         
         let packet = Packet.commandRequestPacket(code: .canonGetEvent, arguments: nil, transactionId: ptpIPClient?.getNextTransactionId() ?? 1)
         ptpIPClient?.awaitDataFor(transactionId: packet.transactionId, callback: { (dataResult) in
-            print("Received data \(dataResult)")
-
             switch dataResult {
             case .success(let data):
                 callback(Result.success(self.parseEvent(data: data.data)))
@@ -108,22 +136,54 @@ extension CanonPTPIPDevice {
                         print("received properties \(properties)")
                         
                         var aperture: (current: Aperture.Value, available: [Aperture.Value], supported: [Aperture.Value])?
+                        
+                        var availableFunctions: [_CameraFunction] = []
+                        var supportedFunctions: [_CameraFunction] = []
 
                         properties.forEach { (deviceProperty) in
+                            switch deviceProperty.getSetSupported {
+                            case .get:
+                                if let getFunction = deviceProperty.code.getFunction {
+                                    supportedFunctions.append(getFunction)
+                                }
+                            case .getSet:
+                                if let getFunction = deviceProperty.code.getFunction {
+                                    supportedFunctions.append(getFunction)
+                                }
+                                if let setFunctions = deviceProperty.code.setFunctions {
+                                    supportedFunctions.append(contentsOf: setFunctions)
+                                }
+                            default:
+                                break
+                            }
+                            
+                            switch deviceProperty.getSetAvailable {
+                            case .get:
+                                if let getFunction = deviceProperty.code.getFunction {
+                                    availableFunctions.append(getFunction)
+                                }
+                            case .getSet:
+                                if let getFunction = deviceProperty.code.getFunction {
+                                    availableFunctions.append(getFunction)
+                                }
+                                if let setFunctions = deviceProperty.code.setFunctions {
+                                    availableFunctions.append(contentsOf: setFunctions)
+                                }
+                            default:
+                                break
+                            }
+                            
                             switch deviceProperty.code {
                             case .fNumber:
-                                // TODO: should be enum type
-                                /*guard let enumProperty = deviceProperty as? PTP.DeviceProperty.Enum else {
-                                    return
-                                }*/
-                                guard let value = Aperture.Value(canonValue: deviceProperty.currentValue) else {
+                                guard let enumProperty = deviceProperty as? PTP.DeviceProperty.Enum else {
                                     return
                                 }
-                                /*let available = enumProperty.available.compactMap({ Aperture.Value(sonyValue: $0) })
-                                let supported = enumProperty.supported.compactMap({ Aperture.Value(sonyValue: $0) })*/
+                                guard let value = Aperture.Value(canonValue: enumProperty.currentValue) else {
+                                    return
+                                }
                                 
-                                let available = [value]
-                                let supported = [value]
+                                let available = enumProperty.available.compactMap { Aperture.Value(canonValue: $0) }
+                                let supported = enumProperty.available.compactMap { Aperture.Value(canonValue: $0) }
                                 
                                 aperture = (value, available, supported)
                                 break
@@ -132,7 +192,7 @@ extension CanonPTPIPDevice {
                             }
                         }
                         
-                        let event = CameraEvent(status: nil, liveViewInfo: nil, liveViewQuality: nil, zoomPosition: nil, availableFunctions: nil, supportedFunctions: nil, postViewPictureURLs: nil, storageInformation: nil, beepMode: nil, function: nil, functionResult: false, videoQuality: nil, stillSizeInfo: nil, steadyMode: nil, viewAngle: nil, exposureMode: nil, exposureModeDialControl: nil, exposureSettingsLockStatus: nil, postViewImageSize: nil, selfTimer: nil, shootMode: nil, exposureCompensation: nil, flashMode: nil, aperture: aperture, focusMode: nil, iso: nil, isProgramShifted: nil, shutterSpeed: nil, whiteBalance: nil, touchAF: nil, focusStatus: nil, zoomSetting: nil, stillQuality: nil, stillFormat: nil, continuousShootingMode: nil, continuousShootingSpeed: nil, continuousBracketedShootingBrackets: nil, singleBracketedShootingBrackets: nil, flipSetting: nil, scene: nil, intervalTime: nil, colorSetting: nil, videoFileFormat: nil, videoRecordingTime: nil, highFrameRateCaptureStatus: nil, infraredRemoteControl: nil, tvColorSystem: nil, trackingFocusStatus: nil, trackingFocus: nil, batteryInfo: nil, numberOfShots: nil, autoPowerOff: nil, loopRecordTime: nil, audioRecording: nil, windNoiseReduction: nil, bulbShootingUrl: nil, bulbCapturingTime: nil, bulbShootingURLS: nil)
+                        let event = CameraEvent(status: nil, liveViewInfo: nil, liveViewQuality: nil, zoomPosition: nil, availableFunctions: availableFunctions, supportedFunctions: supportedFunctions, postViewPictureURLs: nil, storageInformation: nil, beepMode: nil, function: nil, functionResult: false, videoQuality: nil, stillSizeInfo: nil, steadyMode: nil, viewAngle: nil, exposureMode: nil, exposureModeDialControl: nil, exposureSettingsLockStatus: nil, postViewImageSize: nil, selfTimer: nil, shootMode: nil, exposureCompensation: nil, flashMode: nil, aperture: aperture, focusMode: nil, iso: nil, isProgramShifted: nil, shutterSpeed: nil, whiteBalance: nil, touchAF: nil, focusStatus: nil, zoomSetting: nil, stillQuality: nil, stillFormat: nil, continuousShootingMode: nil, continuousShootingSpeed: nil, continuousBracketedShootingBrackets: nil, singleBracketedShootingBrackets: nil, flipSetting: nil, scene: nil, intervalTime: nil, colorSetting: nil, videoFileFormat: nil, videoRecordingTime: nil, highFrameRateCaptureStatus: nil, infraredRemoteControl: nil, tvColorSystem: nil, trackingFocusStatus: nil, trackingFocus: nil, batteryInfo: nil, numberOfShots: nil, autoPowerOff: nil, loopRecordTime: nil, audioRecording: nil, windNoiseReduction: nil, bulbShootingUrl: nil, bulbCapturingTime: nil, bulbShootingURLS: nil)
                         callback(nil, event as? T.ReturnType)
                     case .failure(let error):
                         print("received error \(error)")
@@ -230,16 +290,26 @@ extension CanonPTPIPDevice {
             // This isn't a thing via PTP according to Sony's app (Instead we just have multiple continuous shooting speeds) so we just don't do anything!
             callback(nil, nil)
         case .setISO, .setShutterSpeed, .setAperture, .setExposureCompensation, .setFocusMode, .setExposureMode, .setExposureModeDialControl, .setFlashMode, .setContinuousShootingSpeed, .setStillQuality, .setStillFormat, .setVideoFileFormat, .setVideoQuality, .setContinuousBracketedShootingBracket, .setSingleBracketedShootingBracket, .setLiveViewQuality:
-            guard let value = payload as? SonyPTPPropValueConvertable else {
+            
+            print("CANON SET APERTURE \(payload)")
+            guard let value = payload as? CanonPTPPropValueConvertable else {
+                print("CANON INVALID PAYLOAD \(payload)")
                 callback(FunctionError.invalidPayload, nil)
                 return
             }
-            ptpIPClient?.sendSetControlDeviceAValue(
+            
+            ptpIPClient?.setDevicePropValueEx(
                 PTP.DeviceProperty.Value(value),
                 callback: { (response) in
                     callback(response.code.isError ? PTPError.commandRequestFailed(response.code) : nil, nil)
                 }
             )
+            /*ptpIPClient?.sendSetControlDeviceAValue(
+                PTP.DeviceProperty.Value(value),
+                callback: { (response) in
+                    callback(response.code.isError ? PTPError.commandRequestFailed(response.code) : nil, nil)
+                }
+            )*/
         case .getISO:
             getDevicePropDescriptionFor(propCode: .ISO, callback: { (result) in
                 switch result {

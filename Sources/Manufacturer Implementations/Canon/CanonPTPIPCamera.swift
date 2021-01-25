@@ -107,7 +107,7 @@ internal final class CanonPTPIPDevice: SonyCamera {
     /// The last set of `PTPDeviceProperty`s that we received from the camera
     /// retained so we can avoid asking the camera for the full array every time
     /// we need to fetch an event
-    var lastAllDeviceProps: [PTPDeviceProperty]?
+    var allProperties: [PTP.DeviceProperty.Code: PTPDeviceProperty]?
     
     var lastEventPacket: EventPacket?
     
@@ -384,7 +384,7 @@ extension CanonPTPIPDevice: Camera {
         lastEvent = nil
         lastEventPacket = nil
         lastStillCaptureModes = nil
-        lastAllDeviceProps = nil
+        allProperties = nil
         zoomingDirection = nil
         highFrameRateCallback = nil
         
