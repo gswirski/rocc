@@ -300,6 +300,7 @@ extension CanonPTPIPDevice {
             
             ptpIPClient?.setDevicePropValueEx(
                 PTP.DeviceProperty.Value(value),
+                0xd101,
                 callback: { (response) in
                     callback(response.code.isError ? PTPError.commandRequestFailed(response.code) : nil, nil)
                 }

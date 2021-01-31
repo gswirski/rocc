@@ -154,12 +154,12 @@ final class PTPIPClient {
         sendControlPacket(packet)
     }
     
-    func setDevicePropValueEx(_ value: PTP.DeviceProperty.Value, callback: CommandRequestPacketResponse? = nil) {
+    func setDevicePropValueEx(_ value: PTP.DeviceProperty.Value, _ code: UInt32, callback: CommandRequestPacketResponse? = nil) {
         let transactionID = getNextTransactionId()
         let opRequestPacket = Packet.commandRequestPacket(code: .canonSetDevicePropValueEx, arguments: [], transactionId: transactionID, dataPhaseInfo: 2)
         var data = ByteBuffer()
         data.appendValue(UInt32(12), ofType: .uint32)
-        data.appendValue(UInt32(0xd101), ofType: .uint32) // aperture
+        data.appendValue(code, ofType: .uint32) // aperture
         data.appendValue(value.value, ofType: .uint32)
         
         let dataPackets = Packet.dataSendPackets(data: data, transactionId: transactionID)
@@ -168,7 +168,17 @@ final class PTPIPClient {
         dataPackets.forEach { (dataPacket) in
             sendControlPacket(dataPacket)
         }
-
+    }
+    
+    func getViewFinderData(callback: @escaping DataResponse) {
+        let transactionID = getNextTransactionId()
+        let opRequestPacket = Packet.commandRequestPacket(code: .canonGetViewFinderData, arguments: [0x00200000, 0x00000001, 0x00000000], transactionId: transactionID, dataPhaseInfo: 1)
+        
+        print("Canon Live View sending")
+        sendCommandRequestPacket(opRequestPacket, callback: { (response) in
+            print("Canon Live View response A")
+        })
+        awaitDataFor(transactionId: transactionID, callback: callback)
     }
     
     func sendSetControlDeviceAValue(_ value: PTP.DeviceProperty.Value, callback: CommandRequestPacketResponse? = nil) {

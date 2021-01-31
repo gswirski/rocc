@@ -174,6 +174,27 @@ public final class LiveViewStream: NSObject {
     
     private var eventTimer: Timer?
     
+    func canonLiveView(_ client: PTPIPClient) {
+        print("Canon Live View loop")
+        client.getViewFinderData { (response) in
+            DispatchQueue.global(qos: .userInteractive).async {
+                
+                switch response {
+                case .success(let data):
+                    print("Canon Live View response START \(data.data.toHex) END")
+
+                    self.receivedData = Data(data.data)
+                    self.attemptImageParse()
+                case .failure(let error):
+                    print("Canon Live View error \(error)")
+                }
+
+                self.canonLiveView(client)
+                
+            }
+        }
+    }
+
     /// Performs all setup of the live view stream and begins streaming images over the network
     public func start() {
         
@@ -185,7 +206,20 @@ public final class LiveViewStream: NSObject {
             return
         }
         #endif
+            
+        if let camera = camera as? CanonPTPIPDevice, let client = camera.ptpIPClient {
+            // 0xd101
+            sleep(1)
+            client.setDevicePropValueEx(PTP.DeviceProperty.Value(code: .canonEVFMode, type: .uint32, value: UInt32(0x0009)), 0xd1b0) { (response) in
+                print("response \(response)")
                 
+                self.canonLiveView(client)
+            }
+            
+
+            return
+        }
+        
         isStarting = true
         
         Logger.log(message: "Starting live view stream", category: "LiveViewStreaming", level: .debug)

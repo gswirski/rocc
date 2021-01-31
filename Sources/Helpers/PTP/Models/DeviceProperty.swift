@@ -153,6 +153,8 @@ extension PTP.DeviceProperty.Code {
             return nil
         case .recordingDuration, .storageState, .liveViewURL, .videoRecordStatusSony:
             return nil
+        case .canonEVFMode:
+            return nil
         }
     }
     
@@ -301,6 +303,8 @@ extension PTP.DeviceProperty.Code {
         case .liveViewQuality:
             return .getLiveViewQuality
         case .recordingDuration, .videoRecordStatusSony:
+            return nil
+        case .canonEVFMode:
             return nil
         }
     }
@@ -1019,6 +1023,8 @@ extension PTP {
             case movie = 0xd2c8
             case exposureSettingsLock = 0xd2d5
             case performZoom = 0xd2dd
+            
+            case canonEVFMode = 0xd1b0
         }
     }
 }
