@@ -10,6 +10,8 @@ protocol CanonPTPPropValueConvertable {
     
     var canonPTPValue: PTPDevicePropertyDataType { get }
     
+    var canonPTPCode: PTPDevicePropertyDataType { get }
+
     var type: PTP.DeviceProperty.DataType { get }
     
     var code: PTP.DeviceProperty.Code { get }

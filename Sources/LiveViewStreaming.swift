@@ -176,7 +176,8 @@ public final class LiveViewStream: NSObject {
     
     func canonLiveView(_ client: PTPIPClient) {
         print("Canon Live View loop")
-        client.getViewFinderData { (response) in
+
+        /*client.getViewFinderData { (response) in
             DispatchQueue.global(qos: .userInteractive).async {
                 
                 switch response {
@@ -192,7 +193,7 @@ public final class LiveViewStream: NSObject {
                 self.canonLiveView(client)
                 
             }
-        }
+        }*/
     }
 
     /// Performs all setup of the live view stream and begins streaming images over the network
@@ -209,8 +210,7 @@ public final class LiveViewStream: NSObject {
             
         if let camera = camera as? CanonPTPIPDevice, let client = camera.ptpIPClient {
             // 0xd101
-            sleep(1)
-            client.setDevicePropValueEx(PTP.DeviceProperty.Value(code: .canonEVFMode, type: .uint32, value: UInt32(0x0009)), 0xd1b0) { (response) in
+            client.setDevicePropValueEx(PTP.DeviceProperty.Value(code: .canonEVFMode, type: .uint32, value: UInt32(0x0009)), UInt32(0xd1b0)) { (response) in
                 print("response \(response)")
                 
                 self.canonLiveView(client)

@@ -200,6 +200,10 @@
 		EF584A5525BA2A0D0063F8CC /* ApertureValue+CanonPTPValueConvertable.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF584A5425BA2A0D0063F8CC /* ApertureValue+CanonPTPValueConvertable.swift */; };
 		EF584A9425C4B6D30063F8CC /* CanonPTPLiveStreamingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF584A9325C4B6D30063F8CC /* CanonPTPLiveStreamingTests.swift */; };
 		EF584A9725C4B9280063F8CC /* liveview-r6-singleimage in Resources */ = {isa = PBXBuildFile; fileRef = EF584A9625C4B9280063F8CC /* liveview-r6-singleimage */; };
+		EF7C4E8A25C6FBAF005BC3AC /* ShutterSpeed+CanonPTPValueConvertable.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF7C4E8925C6FBAF005BC3AC /* ShutterSpeed+CanonPTPValueConvertable.swift */; };
+		EF7C4E8D25C6FC2E005BC3AC /* ISOValue+CanonPTPPropValueConvertable.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF7C4E8C25C6FC2E005BC3AC /* ISOValue+CanonPTPPropValueConvertable.swift */; };
+		EF7C4E9025C6FC3F005BC3AC /* ExposureCompensation+CanonPTPPropValueConvertable.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF7C4E8F25C6FC3F005BC3AC /* ExposureCompensation+CanonPTPPropValueConvertable.swift */; };
+		EF7C4E9325C72979005BC3AC /* ExposureMode+CanonPTPPropValueConvertable.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF7C4E9225C72979005BC3AC /* ExposureMode+CanonPTPPropValueConvertable.swift */; };
 		EF8C238625B5CC1400E90BC7 /* CanonPTPIPCamera.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF8C238525B5CC1400E90BC7 /* CanonPTPIPCamera.swift */; };
 		EF8C238925B61A9F00E90BC7 /* CanonPTPIPCamera+PerformFunction.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF8C238825B61A9F00E90BC7 /* CanonPTPIPCamera+PerformFunction.swift */; };
 		EF8C238C25B61AE700E90BC7 /* CanonPTPIPCamera+FunctionSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF8C238B25B61AE700E90BC7 /* CanonPTPIPCamera+FunctionSupport.swift */; };
@@ -426,6 +430,10 @@
 		EF584A5425BA2A0D0063F8CC /* ApertureValue+CanonPTPValueConvertable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ApertureValue+CanonPTPValueConvertable.swift"; sourceTree = "<group>"; };
 		EF584A9325C4B6D30063F8CC /* CanonPTPLiveStreamingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanonPTPLiveStreamingTests.swift; sourceTree = "<group>"; };
 		EF584A9625C4B9280063F8CC /* liveview-r6-singleimage */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "liveview-r6-singleimage"; sourceTree = "<group>"; };
+		EF7C4E8925C6FBAF005BC3AC /* ShutterSpeed+CanonPTPValueConvertable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ShutterSpeed+CanonPTPValueConvertable.swift"; sourceTree = "<group>"; };
+		EF7C4E8C25C6FC2E005BC3AC /* ISOValue+CanonPTPPropValueConvertable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ISOValue+CanonPTPPropValueConvertable.swift"; sourceTree = "<group>"; };
+		EF7C4E8F25C6FC3F005BC3AC /* ExposureCompensation+CanonPTPPropValueConvertable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ExposureCompensation+CanonPTPPropValueConvertable.swift"; sourceTree = "<group>"; };
+		EF7C4E9225C72979005BC3AC /* ExposureMode+CanonPTPPropValueConvertable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ExposureMode+CanonPTPPropValueConvertable.swift"; sourceTree = "<group>"; };
 		EF8C238525B5CC1400E90BC7 /* CanonPTPIPCamera.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanonPTPIPCamera.swift; sourceTree = "<group>"; };
 		EF8C238825B61A9F00E90BC7 /* CanonPTPIPCamera+PerformFunction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CanonPTPIPCamera+PerformFunction.swift"; sourceTree = "<group>"; };
 		EF8C238B25B61AE700E90BC7 /* CanonPTPIPCamera+FunctionSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CanonPTPIPCamera+FunctionSupport.swift"; sourceTree = "<group>"; };
@@ -890,6 +898,10 @@
 			isa = PBXGroup;
 			children = (
 				EF584A5425BA2A0D0063F8CC /* ApertureValue+CanonPTPValueConvertable.swift */,
+				EF7C4E8925C6FBAF005BC3AC /* ShutterSpeed+CanonPTPValueConvertable.swift */,
+				EF7C4E8C25C6FC2E005BC3AC /* ISOValue+CanonPTPPropValueConvertable.swift */,
+				EF7C4E8F25C6FC3F005BC3AC /* ExposureCompensation+CanonPTPPropValueConvertable.swift */,
+				EF7C4E9225C72979005BC3AC /* ExposureMode+CanonPTPPropValueConvertable.swift */,
 			);
 			path = PropValueConversion;
 			sourceTree = "<group>";
@@ -1064,6 +1076,7 @@
 				B117F52B24027F560055ADF5 /* Array+BringToFront.swift in Sources */,
 				B1F180CE2545792000453668 /* HTTP+Error.swift in Sources */,
 				B1561ED120976B850013D122 /* ShootMode.swift in Sources */,
+				EF7C4E9325C72979005BC3AC /* ExposureMode+CanonPTPPropValueConvertable.swift in Sources */,
 				B1AEE50D2375D19A00224152 /* ApertureValue+SonyPTPPropValueConvertable.swift in Sources */,
 				B100E1C320A0F90A004F7AB8 /* FlipSetting.swift in Sources */,
 				B180A7D9236F1D0F001AAF5D /* CommandRequestPacket.swift in Sources */,
@@ -1167,6 +1180,7 @@
 				B1316A722089C0F6006BD136 /* DeviceDiscovery.swift in Sources */,
 				B1B43450209746B000A81B9D /* CameraFunctions.swift in Sources */,
 				B1EF4CB020A3161700EEDE3E /* CurrentTime.swift in Sources */,
+				EF7C4E8A25C6FBAF005BC3AC /* ShutterSpeed+CanonPTPValueConvertable.swift in Sources */,
 				B1F180E72545792000453668 /* RequestResponse+Codable.swift in Sources */,
 				B115EF2F21E9FC3A00667FB7 /* SonyXMLParsers.swift in Sources */,
 				B180A7CC236F17EE001AAF5D /* PTP.swift in Sources */,
@@ -1203,6 +1217,7 @@
 				B1B4345A209747C200A81B9D /* ISO.swift in Sources */,
 				B1D3591120AADC810069C698 /* Data+Conversion.swift in Sources */,
 				B1F180D82545792000453668 /* JSONRequestBody.swift in Sources */,
+				EF7C4E8D25C6FC2E005BC3AC /* ISOValue+CanonPTPPropValueConvertable.swift in Sources */,
 				B100E1A520A09986004F7AB8 /* ProgramShift.swift in Sources */,
 				B19DDEE82372F211004C0EBF /* PTPDeviceInfo+SDIO.swift in Sources */,
 				B10A22F9237060D3000BEA56 /* EventPacket.swift in Sources */,
@@ -1216,6 +1231,7 @@
 				B162364324C03D9600C6BDD2 /* LiveViewQuality+SonyPTPPropValueConvertable.swift in Sources */,
 				B100E1B720A0D7C7004F7AB8 /* Scene.swift in Sources */,
 				B1CD5CDA24AE7BFC00FCECF1 /* Bracket+SonyPTPPropValueConvertable.swift in Sources */,
+				EF7C4E9025C6FC3F005BC3AC /* ExposureCompensation+CanonPTPPropValueConvertable.swift in Sources */,
 				B1F180DF2545792000453668 /* CustomisableRecoverableError.swift in Sources */,
 				B1F7CEBC236CD326007E3921 /* ByteBuffer.swift in Sources */,
 				B180A7E5236F390B001AAF5D /* EndDataPacket.swift in Sources */,

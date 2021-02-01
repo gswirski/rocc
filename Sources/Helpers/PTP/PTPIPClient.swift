@@ -154,7 +154,7 @@ final class PTPIPClient {
         sendControlPacket(packet)
     }
     
-    func setDevicePropValueEx(_ value: PTP.DeviceProperty.Value, _ code: UInt32, callback: CommandRequestPacketResponse? = nil) {
+    func setDevicePropValueEx(_ value: PTP.DeviceProperty.Value, _ code: PTPDevicePropertyDataType, callback: CommandRequestPacketResponse? = nil) {
         let transactionID = getNextTransactionId()
         let opRequestPacket = Packet.commandRequestPacket(code: .canonSetDevicePropValueEx, arguments: [], transactionId: transactionID, dataPhaseInfo: 2)
         var data = ByteBuffer()

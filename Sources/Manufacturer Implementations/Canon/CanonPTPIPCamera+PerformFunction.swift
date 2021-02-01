@@ -24,10 +24,41 @@ extension CanonPTPIPDevice {
             apertureField.getSetAvailable = .getSet
             apertureField.getSetSupported = .getSet
             apertureField.length = 4
+            
+            var shutterSpeedField = PTP.DeviceProperty.Enum()
+            shutterSpeedField.type = .uint32
+            shutterSpeedField.code = .shutterSpeed
+            shutterSpeedField.getSetAvailable = .getSet
+            shutterSpeedField.getSetSupported = .getSet
+            shutterSpeedField.length = 4
+            
+            var isoField = PTP.DeviceProperty.Enum()
+            isoField.type = .uint32
+            isoField.code = .ISO
+            isoField.getSetAvailable = .getSet
+            isoField.getSetSupported = .getSet
+            isoField.length = 4
+            
+            var exposureCompensationField = PTP.DeviceProperty.Enum()
+            exposureCompensationField.type = .uint32
+            exposureCompensationField.code = .exposureBiasCompensation
+            exposureCompensationField.getSetAvailable = .getSet
+            exposureCompensationField.getSetSupported = .getSet
+            exposureCompensationField.length = 4
 
+            var autoExposureMode = PTP.DeviceProperty.Enum()
+            autoExposureMode.type = .uint32
+            autoExposureMode.code = .exposureProgramMode
+            autoExposureMode.getSetAvailable = .getSet
+            autoExposureMode.getSetSupported = .getSet
+            autoExposureMode.length = 4
             
             allProperties = [
-                .fNumber: apertureField
+                .fNumber: apertureField,
+                .shutterSpeed: shutterSpeedField,
+                .ISO: isoField,
+                .exposureBiasCompensation: exposureCompensationField,
+                .exposureProgramModeControl: autoExposureMode
             ]
         }
         
@@ -36,6 +67,10 @@ extension CanonPTPIPDevice {
         }
         
         var apertureField = allProperties[.fNumber] as! PTP.DeviceProperty.Enum
+        var shutterSpeedField = allProperties[.shutterSpeed] as! PTP.DeviceProperty.Enum
+        var isoField = allProperties[.ISO] as! PTP.DeviceProperty.Enum
+        var exposureCompensationField = allProperties[.exposureBiasCompensation] as! PTP.DeviceProperty.Enum
+        var autoExposureMode = allProperties[.exposureProgramModeControl] as! PTP.DeviceProperty.Enum
 
         while (pointer + 8 < dataSize) {
             var size: DWord? = eventData[dWord: pointer]
@@ -54,6 +89,30 @@ extension CanonPTPIPDevice {
                     apertureField.factoryValue = value!
                     
                     print("Received property size:\(size) \(propType) \(subType) \(value)")
+                case .PTP_DPC_CANON_EOS_ShutterSpeed:
+                    let value = eventData[dWord: pointer + 12]
+                    shutterSpeedField.currentValue = value!
+                    shutterSpeedField.factoryValue = value!
+                    
+                    print("Received property size:\(size) \(propType) \(subType) \(value)")
+                case .PTP_DPC_CANON_EOS_ISOSpeed:
+                    let value = eventData[dWord: pointer + 12]
+                    isoField.currentValue = value!
+                    isoField.factoryValue = value!
+                    
+                    print("Received property size:\(size) \(propType) \(subType) \(value)")
+                case .PTP_DPC_CANON_EOS_ExpCompensation:
+                    let value = eventData[dWord: pointer + 12]
+                    exposureCompensationField.currentValue = value!
+                    exposureCompensationField.factoryValue = value!
+                    
+                    print("Received property size:\(size) \(propType) \(subType) \(value)")
+                case .PTP_DPC_CANON_EOS_AutoExposureMode:
+                    let value = eventData[dWord: pointer + 12]
+                    autoExposureMode.currentValue = value!
+                    autoExposureMode.factoryValue = value!
+                    
+                    print("Received property size:\(size) \(propType) \(subType) \(value)")
 
                 default:
                     break
@@ -62,18 +121,28 @@ extension CanonPTPIPDevice {
                 let subType = CanonSubPropType(rawValue: eventData[dWord: pointer + 8]!)
                 let count = eventData[dWord: pointer + 16]!
                 
+                let values = (0..<count).map { (index) -> DWord in
+                    let offset = 16 + 4 * UInt(index + 1)
+                    return eventData[dWord: pointer + offset]!
+                }
+                
                 switch subType {
                 case .PTP_DPC_CANON_EOS_Aperture:
-                    let values = (0..<count).map { (index) -> DWord in
-                        let offset = 16 + 4 * UInt(index + 1)
-                        return eventData[dWord: pointer + offset]!
-                    }
-
                     apertureField.available = values
                     apertureField.supported = values
-                    
                     print("Received property values: \(propType) \(subType) \(values)")
-
+                case .PTP_DPC_CANON_EOS_ShutterSpeed:
+                    shutterSpeedField.available = values
+                    shutterSpeedField.supported = values
+                    print("Received property values: \(propType) \(subType) \(values)")
+                case .PTP_DPC_CANON_EOS_ISOSpeed:
+                    isoField.available = values
+                    isoField.supported = values
+                    print("Received property values: \(propType) \(subType) \(values)")
+                case .PTP_DPC_CANON_EOS_ExpCompensation:
+                    exposureCompensationField.available = values
+                    exposureCompensationField.supported = values
+                    print("Received property values: \(propType) \(subType) \(values)")
                 default:
                     break
                 }
@@ -86,6 +155,10 @@ extension CanonPTPIPDevice {
         }
         
         allProperties[.fNumber] = apertureField
+        allProperties[.shutterSpeed] = shutterSpeedField
+        allProperties[.ISO] = isoField
+        allProperties[.exposureBiasCompensation] = exposureCompensationField
+        allProperties[.exposureProgramModeControl] = autoExposureMode
         
         self.allProperties = allProperties
 
@@ -135,7 +208,11 @@ extension CanonPTPIPDevice {
                     case .success(let properties):
                         print("received properties \(properties)")
                         
+                        var exposureMode: (current: Exposure.Mode.Value, available: [Exposure.Mode.Value], supported: [Exposure.Mode.Value])?
                         var aperture: (current: Aperture.Value, available: [Aperture.Value], supported: [Aperture.Value])?
+                        var shutterSpeed: (current: ShutterSpeed, available: [ShutterSpeed], supported: [ShutterSpeed])?
+                        var iso: (current: ISO.Value, available: [ISO.Value], supported: [ISO.Value])?
+                        var exposureCompensation: (current: Exposure.Compensation.Value, available: [Exposure.Compensation.Value], supported: [Exposure.Compensation.Value])?
                         
                         var availableFunctions: [_CameraFunction] = []
                         var supportedFunctions: [_CameraFunction] = []
@@ -187,12 +264,62 @@ extension CanonPTPIPDevice {
                                 
                                 aperture = (value, available, supported)
                                 break
+                            case .shutterSpeed:
+                                guard let enumProperty = deviceProperty as? PTP.DeviceProperty.Enum else {
+                                    return
+                                }
+                                guard let value = ShutterSpeed(canonValue: enumProperty.currentValue) else {
+                                    return
+                                }
+                                
+                                let available = enumProperty.available.compactMap { ShutterSpeed(canonValue: $0) }
+                                let supported = enumProperty.available.compactMap { ShutterSpeed(canonValue: $0) }
+                                
+                                shutterSpeed = (value, available, supported)
+                                break
+                            case .ISO:
+                                guard let enumProperty = deviceProperty as? PTP.DeviceProperty.Enum else {
+                                    return
+                                }
+                                guard let value = ISO.Value(canonValue: enumProperty.currentValue) else {
+                                    return
+                                }
+                                
+                                let available = enumProperty.available.compactMap { ISO.Value(canonValue: $0) }
+                                let supported = enumProperty.available.compactMap { ISO.Value(canonValue: $0) }
+                                
+                                iso = (value, available, supported)
+                                break
+                            case .exposureBiasCompensation:
+                                guard let enumProperty = deviceProperty as? PTP.DeviceProperty.Enum else {
+                                    return
+                                }
+                                guard let value = Exposure.Compensation.Value(canonValue: enumProperty.currentValue) else {
+                                    return
+                                }
+                                
+                                let available = enumProperty.available.compactMap { Exposure.Compensation.Value(canonValue: $0) }
+                                let supported = enumProperty.available.compactMap { Exposure.Compensation.Value(canonValue: $0) }
+                                
+                                exposureCompensation = (value, available, supported)
+                                break
+                            case .exposureProgramMode:
+                                guard let enumProperty = deviceProperty as? PTP.DeviceProperty.Enum else {
+                                    return
+                                }
+                                guard let value = Exposure.Mode.Value(canonValue: enumProperty.currentValue) else {
+                                    return
+                                }
+                                
+                                exposureMode = (value, [], [])
+                                break
+
                             default:
                                 break
                             }
                         }
                         
-                        let event = CameraEvent(status: nil, liveViewInfo: nil, liveViewQuality: nil, zoomPosition: nil, availableFunctions: availableFunctions, supportedFunctions: supportedFunctions, postViewPictureURLs: nil, storageInformation: nil, beepMode: nil, function: nil, functionResult: false, videoQuality: nil, stillSizeInfo: nil, steadyMode: nil, viewAngle: nil, exposureMode: nil, exposureModeDialControl: nil, exposureSettingsLockStatus: nil, postViewImageSize: nil, selfTimer: nil, shootMode: nil, exposureCompensation: nil, flashMode: nil, aperture: aperture, focusMode: nil, iso: nil, isProgramShifted: nil, shutterSpeed: nil, whiteBalance: nil, touchAF: nil, focusStatus: nil, zoomSetting: nil, stillQuality: nil, stillFormat: nil, continuousShootingMode: nil, continuousShootingSpeed: nil, continuousBracketedShootingBrackets: nil, singleBracketedShootingBrackets: nil, flipSetting: nil, scene: nil, intervalTime: nil, colorSetting: nil, videoFileFormat: nil, videoRecordingTime: nil, highFrameRateCaptureStatus: nil, infraredRemoteControl: nil, tvColorSystem: nil, trackingFocusStatus: nil, trackingFocus: nil, batteryInfo: nil, numberOfShots: nil, autoPowerOff: nil, loopRecordTime: nil, audioRecording: nil, windNoiseReduction: nil, bulbShootingUrl: nil, bulbCapturingTime: nil, bulbShootingURLS: nil)
+                        let event = CameraEvent(status: nil, liveViewInfo: nil, liveViewQuality: nil, zoomPosition: nil, availableFunctions: availableFunctions, supportedFunctions: supportedFunctions, postViewPictureURLs: nil, storageInformation: nil, beepMode: nil, function: nil, functionResult: false, videoQuality: nil, stillSizeInfo: nil, steadyMode: nil, viewAngle: nil, exposureMode: exposureMode, exposureModeDialControl: nil, exposureSettingsLockStatus: nil, postViewImageSize: nil, selfTimer: nil, shootMode: nil, exposureCompensation: exposureCompensation, flashMode: nil, aperture: aperture, focusMode: nil, iso: iso, isProgramShifted: nil, shutterSpeed: shutterSpeed, whiteBalance: nil, touchAF: nil, focusStatus: nil, zoomSetting: nil, stillQuality: nil, stillFormat: nil, continuousShootingMode: nil, continuousShootingSpeed: nil, continuousBracketedShootingBrackets: nil, singleBracketedShootingBrackets: nil, flipSetting: nil, scene: nil, intervalTime: nil, colorSetting: nil, videoFileFormat: nil, videoRecordingTime: nil, highFrameRateCaptureStatus: nil, infraredRemoteControl: nil, tvColorSystem: nil, trackingFocusStatus: nil, trackingFocus: nil, batteryInfo: nil, numberOfShots: nil, autoPowerOff: nil, loopRecordTime: nil, audioRecording: nil, windNoiseReduction: nil, bulbShootingUrl: nil, bulbCapturingTime: nil, bulbShootingURLS: nil)
                         callback(nil, event as? T.ReturnType)
                     case .failure(let error):
                         print("received error \(error)")
@@ -291,7 +418,7 @@ extension CanonPTPIPDevice {
             callback(nil, nil)
         case .setISO, .setShutterSpeed, .setAperture, .setExposureCompensation, .setFocusMode, .setExposureMode, .setExposureModeDialControl, .setFlashMode, .setContinuousShootingSpeed, .setStillQuality, .setStillFormat, .setVideoFileFormat, .setVideoQuality, .setContinuousBracketedShootingBracket, .setSingleBracketedShootingBracket, .setLiveViewQuality:
             
-            print("CANON SET APERTURE \(payload)")
+            print("CANON SET \(function.function): \(payload)")
             guard let value = payload as? CanonPTPPropValueConvertable else {
                 print("CANON INVALID PAYLOAD \(payload)")
                 callback(FunctionError.invalidPayload, nil)
@@ -300,7 +427,7 @@ extension CanonPTPIPDevice {
             
             ptpIPClient?.setDevicePropValueEx(
                 PTP.DeviceProperty.Value(value),
-                0xd101,
+                value.canonPTPCode,
                 callback: { (response) in
                     callback(response.code.isError ? PTPError.commandRequestFailed(response.code) : nil, nil)
                 }

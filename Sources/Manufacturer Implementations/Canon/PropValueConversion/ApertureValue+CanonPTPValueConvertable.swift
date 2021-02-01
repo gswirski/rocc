@@ -50,7 +50,6 @@ let canonApertureMapping: [Double: DWord] = [
 ]
 
 extension Aperture.Value: CanonPTPPropValueConvertable {
-    
     init?(canonValue: PTPDevicePropertyDataType) {
         
         guard let binaryInt = canonValue.toInt else {
@@ -68,5 +67,9 @@ extension Aperture.Value: CanonPTPPropValueConvertable {
     
     var canonPTPValue: PTPDevicePropertyDataType {
         return canonApertureMapping[value]!
+    }
+    
+    var canonPTPCode: PTPDevicePropertyDataType {
+        return UInt32(0xd101)
     }
 }
