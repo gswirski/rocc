@@ -110,6 +110,7 @@ internal final class CanonPTPIPDevice: SonyCamera {
     var allProperties: [PTP.DeviceProperty.Code: PTPDeviceProperty]?
     
     var lastEventPacket: EventPacket?
+    var lastOLCInfoChanged: ByteBuffer?
     
     var lastEvent: CameraEvent?
     
@@ -383,6 +384,7 @@ extension CanonPTPIPDevice: Camera {
     func connect(completion: @escaping CanonPTPIPDevice.ConnectedCompletion) {
         lastEvent = nil
         lastEventPacket = nil
+        lastOLCInfoChanged = nil
         lastStillCaptureModes = nil
         allProperties = nil
         zoomingDirection = nil

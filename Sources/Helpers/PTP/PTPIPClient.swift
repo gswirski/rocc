@@ -181,6 +181,20 @@ final class PTPIPClient {
         awaitDataFor(transactionId: transactionID, callback: callback)
     }
     
+    func sendRemoteReleaseOn(callback: CommandRequestPacketResponse? = nil) {
+        let transactionID = getNextTransactionId()
+        let opRequestPacket = Packet.commandRequestPacket(code: .canonRemoteReleaseOn, arguments: [0x03, 0x00], transactionId: transactionID, dataPhaseInfo: 1)
+        
+        sendCommandRequestPacket(opRequestPacket, callback: callback)
+    }
+    
+    func sendRemoteReleaseOff(callback: CommandRequestPacketResponse? = nil) {
+        let transactionID = getNextTransactionId()
+        let opRequestPacket = Packet.commandRequestPacket(code: .canonRemoteReleaseOff, arguments: [0x03], transactionId: transactionID, dataPhaseInfo: 1)
+        
+        sendCommandRequestPacket(opRequestPacket, callback: callback)
+    }
+    
     func sendSetControlDeviceAValue(_ value: PTP.DeviceProperty.Value, callback: CommandRequestPacketResponse? = nil) {
         
         let transactionID = getNextTransactionId()

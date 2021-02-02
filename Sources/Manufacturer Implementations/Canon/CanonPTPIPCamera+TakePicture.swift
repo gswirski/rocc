@@ -21,36 +21,55 @@ extension CanonPTPIPDevice {
     
     func takePicture(completion: @escaping CaptureCompletion) {
         
-        Logger.log(message: "Intervalometer - Taking picture...", category: "SonyPTPIPCamera", level: .debug)
+        Logger.log(message: "Intervalometer - Taking picture...", category: "CanonPTPIPCamera", level: .debug)
         os_log("Intervalometer - Taking picture...", log: log, type: .debug)
         
-        self.isAwaitingObject = true
+        ptpIPClient?.sendRemoteReleaseOn(callback: { [weak self] (_) in
+            guard let self = self else { return }
+            
+            self.awaitFocus { [weak self] () in
+                self?.ptpIPClient?.sendRemoteReleaseOff(callback: { (_) in
+                    completion(.success(nil))
+                })
+            }
+        })
+    }
+    
+    
+    func awaitFocus(completion: @escaping () -> Void) {
         
-        startCapturing { [weak self] (error) in
+        Logger.log(message: "Focus mode is AF variant awaiting focus...", category: "SonyPTPIPCamera", level: .debug)
+        os_log("Focus mode is AF variant awaiting focus...", log: self.log, type: .debug)
+                            
+        DispatchQueue.global().asyncWhile({ [weak self] (continueClosure) in
             
             guard let self = self else { return }
             
-            Logger.log(message: "Intervalometer - Taking picture completion A \(error)", category: "SonyPTPIPCamera", level: .debug)
-            os_log("Intervalometer - Taking picture completion A", log: self.log, type: .debug)
+            if let lastOLCChange = self.lastOLCInfoChanged {
+                let len = lastOLCChange[dWord: 0]
+                let mask = lastOLCChange[word: 4]!
+                let val = lastOLCChange[word: 8]!
 
-            if let error = error {
-                self.isAwaitingObject = false
-                completion(Result.failure(error))
-                return
+                if (mask & 0x0001) != 0 {
+                    print("Intervalometer - property size: \(len) BUTTON(\(mask)) - \(val)")
+                    
+                    // 4 is success, 3 is fail, 1 is "normal" after the entire focusing sequence finished
+                    if val != 2 && val != 7 {
+                        continueClosure(true)
+                    }
+                }
             }
             
+            continueClosure(false)
+        }, timeout: 1) { [weak self] in
             
-            self.awaitFocusIfNeeded(completion: { [weak self] (objectId) in
-                if let self = self {
-                    Logger.log(message: "Intervalometer - Taking picture completion B \(objectId)", category: "SonyPTPIPCamera", level: .debug)
-                    os_log("Intervalometer - Taking picture completion B", log: self.log, type: .debug)
-                }
-                self?.cancelShutterPress(objectID: objectId, completion: completion)
-            })
+            guard let self = self else { return }
+            
+            completion()
         }
     }
     
-    func awaitFocusIfNeeded(completion: @escaping (_ objectId: DWord?) -> Void) {
+    func awaitFocusIfNeeded(completion: @escaping () -> Void) {
         
         guard let focusMode = self.lastEvent?.focusMode?.current else {
             
@@ -61,7 +80,7 @@ extension CanonPTPIPDevice {
                 }
                 
                 guard focusMode?.isAutoFocus == true else {
-                    completion(nil)
+                    completion()
                     return
                 }
                 
@@ -72,7 +91,7 @@ extension CanonPTPIPDevice {
         }
         
         guard focusMode.isAutoFocus else {
-            completion(nil)
+            completion()
             return
         }
         
@@ -121,61 +140,6 @@ extension CanonPTPIPDevice {
     func finishCapturing(awaitObjectId: Bool = true, completion: @escaping CaptureCompletion) {
         
         cancelShutterPress(objectID: nil, awaitObjectId: awaitObjectId, completion: completion)
-    }
-    
-    func awaitFocus(completion: @escaping (_ objectId: DWord?) -> Void) {
-        
-        Logger.log(message: "Focus mode is AF variant awaiting focus...", category: "SonyPTPIPCamera", level: .debug)
-        os_log("Focus mode is AF variant awaiting focus...", log: self.log, type: .debug)
-        
-        var newObject: DWord? = awaitingObjectId
-                    
-        DispatchQueue.global().asyncWhile({ [weak self] (continueClosure) in
-            
-            guard let self = self else { return }
-            
-            // If code is property changed, and first variable == "Focus Found"
-            if let lastEvent = self.lastEventPacket, lastEvent.code == .propertyChanged, lastEvent.variables?.first == 0xD213 {
-                
-                Logger.log(message: "Got property changed event and was \"Focus Found\", continuing with capture process", category: "SonyPTPIPCamera", level: .debug)
-                os_log("Got property changed event and was \"Focus Found\", continuing with capture process", log: self.log, type: .debug)
-                continueClosure(true)
-                
-            } else if let lastEvent = self.lastEventPacket, lastEvent.code == .objectAdded, let objectId = lastEvent.variables?.first {
-                
-                self.isAwaitingObject = false
-                self.awaitingObjectId = nil
-                Logger.log(message: "Got property changed event and was \"Object Added\", continuing with capture process", category: "SonyPTPIPCamera", level: .debug)
-                os_log("Got property changed event and was \"Object Added\", continuing with capture process", log: self.log, type: .debug)
-                newObject = objectId
-                continueClosure(true)
-                
-            } else if let awaitingObjectId = self.awaitingObjectId {
-                
-                Logger.log(message: "Got object ID from elsewhere whilst awaiting focus", category: "SonyPTPIPCamera", level: .debug)
-                os_log("Got object ID from elsewhere whilst awaiting focus", log: self.log, type: .debug)
-                
-                self.isAwaitingObject = false
-                newObject = awaitingObjectId
-                self.awaitingObjectId = nil
-                continueClosure(true)
-                
-            } else {
-                
-                continueClosure(false)
-            }
-                        
-        }, timeout: 1) { [weak self] in
-            
-            guard let self = self else { return }
-            
-            Logger.log(message: "Focus awaited \(newObject != nil ? "\(newObject!)" : "null")", category: "SonyPTPIPCamera", level: .debug)
-            os_log("Focus awaited %@", log: self.log, type: .debug, newObject != nil ? "\(newObject!)" : "null")
-            
-            let awaitingObjectId = self.awaitingObjectId
-            self.awaitingObjectId = nil
-            completion(newObject ?? awaitingObjectId)
-        }
     }
     
     private func cancelShutterPress(objectID: DWord?, awaitObjectId: Bool = true, completion: @escaping CaptureCompletion) {

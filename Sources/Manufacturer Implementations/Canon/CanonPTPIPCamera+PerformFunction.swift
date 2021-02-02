@@ -146,6 +146,9 @@ extension CanonPTPIPDevice {
                 default:
                     break
                 }
+            case .PTP_EC_CANON_EOS_OLCInfoChanged:
+                let len = eventData[dWord: pointer + 8]!
+                lastOLCInfoChanged = eventData.sliced(Int(pointer) + 8, Int(pointer) + 8 + Int(len))
             default:
                 break
             }
@@ -776,7 +779,7 @@ extension CanonPTPIPDevice {
                     return
                 }
                 
-                self?.awaitFocusIfNeeded { (_) in
+                self?.awaitFocusIfNeeded { () in
                     callback(nil, nil)
                 }
             }
