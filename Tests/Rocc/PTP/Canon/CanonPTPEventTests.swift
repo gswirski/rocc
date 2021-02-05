@@ -10,7 +10,7 @@ import XCTest
 
 class CanonPTPCameraTests: XCTestCase {
     func testCanonEventParsesCorrectly() {
-        let eventData = ByteBuffer(hexString: CanonPTPCameraTests.focusEventContents)
+        let eventData = ByteBuffer(hexString: CanonPTPCameraTests.eventContents)
         
         let dataSize = eventData.length
         var pointer: UInt = 0

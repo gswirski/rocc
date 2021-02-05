@@ -79,6 +79,9 @@ extension CanonPTPIPDevice {
             var propType = CanonPropType(rawValue: type!)
             
             switch propType {
+            case .PTP_EC_CANON_EOS_CameraStatusChanged:
+                let value = eventData[dWord: pointer + 8]!
+                print("Received property \(propType) \(value)")
             case .PTP_EC_CANON_EOS_PropValueChanged:
                 let subType = CanonSubPropType(rawValue: eventData[dWord: pointer + 8]!)
                 
@@ -88,34 +91,35 @@ extension CanonPTPIPDevice {
                     apertureField.currentValue = value!
                     apertureField.factoryValue = value!
                     
-                    print("Received property size:\(size) \(propType) \(subType) \(value)")
+                    print("Received property \(propType) \(subType) size:\(size) \(value)")
                 case .PTP_DPC_CANON_EOS_ShutterSpeed:
                     let value = eventData[dWord: pointer + 12]
                     shutterSpeedField.currentValue = value!
                     shutterSpeedField.factoryValue = value!
                     
-                    print("Received property size:\(size) \(propType) \(subType) \(value)")
+                    print("Received property \(propType) \(subType) size:\(size) \(value)")
                 case .PTP_DPC_CANON_EOS_ISOSpeed:
                     let value = eventData[dWord: pointer + 12]
                     isoField.currentValue = value!
                     isoField.factoryValue = value!
                     
-                    print("Received property size:\(size) \(propType) \(subType) \(value)")
+                    print("Received property \(propType) \(subType) size:\(size) \(value)")
                 case .PTP_DPC_CANON_EOS_ExpCompensation:
                     let value = eventData[dWord: pointer + 12]
                     exposureCompensationField.currentValue = value!
                     exposureCompensationField.factoryValue = value!
                     
-                    print("Received property size:\(size) \(propType) \(subType) \(value)")
+                    print("Received property \(propType) \(subType) size:\(size) \(value)")
                 case .PTP_DPC_CANON_EOS_AutoExposureMode:
                     let value = eventData[dWord: pointer + 12]
                     autoExposureMode.currentValue = value!
                     autoExposureMode.factoryValue = value!
                     
-                    print("Received property size:\(size) \(propType) \(subType) \(value)")
+                    print("Received property \(propType) \(subType) size:\(size) \(value)")
 
                 default:
-                    break
+                    let bytes = eventData.sliced(Int(pointer), Int(pointer) + Int(size!))
+                    print("Received property \(propType) (\(type)) \(subType) size:\(size) bytes: \(bytes.toHex)")
                 }
             case .PTP_EC_CANON_EOS_AvailListChanged:
                 let subType = CanonSubPropType(rawValue: eventData[dWord: pointer + 8]!)
@@ -144,12 +148,44 @@ extension CanonPTPIPDevice {
                     exposureCompensationField.supported = values
                     print("Received property values: \(propType) \(subType) \(values)")
                 default:
-                    break
+                    let bytes = eventData.sliced(Int(pointer), Int(pointer) + Int(size!))
+                    print("Received property values \(type) size:\(size) bytes: \(bytes.toHex)")
                 }
             case .PTP_EC_CANON_EOS_OLCInfoChanged:
                 let len = eventData[dWord: pointer + 8]!
                 lastOLCInfoChanged = eventData.sliced(Int(pointer) + 8, Int(pointer) + 8 + Int(len))
+                
+                let mask = eventData[word: pointer + 12]!
+                print("Received property OLC mask \(mask): \(lastOLCInfoChanged)")
+
+                var olcOffset: UInt = 0
+                if (mask & 0x0001) != 0 {
+                    olcOffset += 2
+                }
+                if (mask & 0x0002) != 0 {
+                    let value = eventData[word: pointer + 16 + olcOffset + 5]!
+                    print("Received property OLC Shutter Speed: \(propType) (value)")
+                }
+ 
+            case .PTP_EC_CANON_EOS_ObjectAddedEx, .PTP_EC_CANON_EOS_ObjectAddedEx64, .PTP_EC_CANON_EOS_ObjectInfoChangedEx:
+                
+                lastObjectAdded = eventData.sliced(Int(pointer), Int(pointer) + Int(size!))
+
+                let objectID = eventData[dWord: pointer + 8]!
+                let storageID = eventData[dWord: pointer + 12]!
+                let OFC = eventData[dWord: pointer + 16]!
+                let size = eventData[dWord: pointer + 28]!
+                let parent = eventData[dWord: pointer + 36]!
+                
+                print("Received property \(propType) objectID:\(objectID) parent \(parent) storageID \(storageID) OFC \(OFC) size \(size)")
+                
             default:
+                if Int(size!) < 300 {
+                    let bytes = eventData.sliced(Int(pointer), Int(pointer) + Int(size!))
+                    print("Received property \(type) size:\(size) bytes: \(bytes.toHex)")
+                } else {
+                    print("Received property \(type) size:\(size)")
+                }
                 break
             }
             

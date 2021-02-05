@@ -129,5 +129,7 @@ struct PTP {
         case canonGetViewFinderData = 0x9153
         case canonRemoteReleaseOn = 0x9128
         case canonRemoteReleaseOff = 0x9129
+        case canonGetThumbEx = 0x910A
+        case canonGetReducedObject = 0x916F
     }
 }

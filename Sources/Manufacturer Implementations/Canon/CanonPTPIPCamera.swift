@@ -111,6 +111,7 @@ internal final class CanonPTPIPDevice: SonyCamera {
     
     var lastEventPacket: EventPacket?
     var lastOLCInfoChanged: ByteBuffer?
+    var lastObjectAdded: ByteBuffer?
     
     var lastEvent: CameraEvent?
     

@@ -195,6 +195,17 @@ final class PTPIPClient {
         sendCommandRequestPacket(opRequestPacket, callback: callback)
     }
     
+    func getThumbEx(objectId: DWord, callback: @escaping DataResponse) {
+        let transactionID = getNextTransactionId()
+        let opRequestPacket = Packet.commandRequestPacket(code: .canonGetReducedObject, arguments: [objectId, 0x00200000, 0x00000000], transactionId: transactionID, dataPhaseInfo: 1)
+        
+        print("Canon getThumbEx")
+        sendCommandRequestPacket(opRequestPacket, callback: { (response) in
+            print("Canon getThumbEx response A")
+        })
+        awaitDataFor(transactionId: transactionID, callback: callback)
+    }
+
     func sendSetControlDeviceAValue(_ value: PTP.DeviceProperty.Value, callback: CommandRequestPacketResponse? = nil) {
         
         let transactionID = getNextTransactionId()
