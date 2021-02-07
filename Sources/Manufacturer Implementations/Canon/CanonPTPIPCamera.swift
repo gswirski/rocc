@@ -51,11 +51,12 @@ internal final class CanonPTPIPDevice: SonyCamera {
     var highFrameRateCallback: ((Result<HighFrameRateCapture.Status, Error>) -> Void)?
         
     var eventPollingMode: PollingMode {
-        // TODO: is this right?
         return .cameraDriven
         /*guard let deviceInfo = deviceInfo else { return .timed }
         return deviceInfo.supportedEventCodes.contains(.propertyChanged) ? .cameraDriven : .timed*/
     }
+    
+    var pingTimer: Timer?
     
     var connectionMode: ConnectionMode = .remoteControl
     
@@ -162,15 +163,27 @@ internal final class CanonPTPIPDevice: SonyCamera {
     }
     
     private func unknownConnectionCommand(completion: @escaping CanonPTPIPDevice.ConnectedCompletion) {
-        let packet = Packet.commandRequestPacket(code: .canonUnknownInitCommand, arguments: nil, transactionId: ptpIPClient?.getNextTransactionId() ?? 1)
+        let packet = Packet.commandRequestPacket(code: .canonPing, arguments: nil, transactionId: ptpIPClient?.getNextTransactionId() ?? 1)
         
         ptpIPClient?.sendCommandRequestPacket(packet, callback: { [weak self] (response) in
+            guard let self = self else { return }
+
             guard response.code == .okay else {
                 completion(PTPError.commandRequestFailed(response.code), false)
                 return
             }
-            self?.setEventMode(completion: completion)
+            
+            // this also starts a timer to keep pinging the camera
+            self.pingTimer = Timer.scheduledTimer(withTimeInterval: TimeInterval(5), repeats: true) { [weak self] (timer) in
+                guard let self = self else {
+                    timer.invalidate()
+                    return
+                }
+                let packet = Packet.commandRequestPacket(code: .canonPing, arguments: nil, transactionId: self.ptpIPClient?.getNextTransactionId() ?? 1)
+                self.ptpIPClient?.sendCommandRequestPacket(packet, callback: nil)
+            }
 
+            self.setEventMode(completion: completion)
         })
 
     }
@@ -429,6 +442,7 @@ extension CanonPTPIPDevice: Camera {
     }
 
     func disconnect(completion: @escaping DisconnectedCompletion) {
+        pingTimer?.invalidate()
         ptpIPClient?.onDisconnect = nil
         ptpIPClient?.disconnect()
         completion(nil)

@@ -16,7 +16,10 @@ import AppKit
 #endif
 
 extension CanonPTPIPDevice {
-    
+    enum CaptureError: Error {
+        case noObjectId
+    }
+
     typealias CaptureCompletion = (Result<URL?, Error>) -> Void
     
     func takePicture(completion: @escaping CaptureCompletion) {
@@ -31,10 +34,15 @@ extension CanonPTPIPDevice {
                 self?.ptpIPClient?.sendRemoteReleaseOff(callback: { (_) in
                     guard let self = self else { return }
 
-                    self.awaitObject { [weak self] (_ objectId: DWord) in
+                    self.awaitObject { [weak self] (_ objectId: DWord?) in
                         guard let self = self else { return }
                         
-                        self.ptpIPClient?.getThumbEx(objectId: objectId) { (data) in
+                        guard let objectId = objectId else {
+                            completion(.failure(CaptureError.noObjectId))
+                            return
+                        }
+                        
+                        self.ptpIPClient?.getReducedObject(objectId: objectId) { (data) in
                             switch data {
                             case .success(let container):
                                 let data = Data(container.data)
@@ -67,7 +75,7 @@ extension CanonPTPIPDevice {
         })
     }
     
-    func awaitObject(completion: @escaping (_ objectID: DWord) -> Void) {
+    func awaitObject(completion: @escaping (_ objectID: DWord?) -> Void) {
         Logger.log(message: "Awaiting object after capture", category: "SonyPTPIPCamera", level: .debug)
         os_log("Awaiting object after capture", log: self.log, type: .debug)
         
@@ -76,8 +84,9 @@ extension CanonPTPIPDevice {
             
             guard let self = self else { return }
             
-            if let lastObjectAdded = self.lastObjectAdded {
-                objectID = lastObjectAdded[dWord: 8]!
+            print("Last Object Added: \(self.lastObjectAdded)")
+            if let lastObjectAdded = self.lastObjectAdded, let id = lastObjectAdded[dWord: 8] {
+                objectID = id
                 /*let storageID = lastObjectAdded[dWord: 12]!
                 let OFC = lastObjectAdded[dWord: 16]!
                 let size = lastObjectAdded[dWord: 28]!
@@ -85,11 +94,12 @@ extension CanonPTPIPDevice {
 
                 self.lastObjectAdded = nil
                 continueClosure(true)
+                return
             }
             
             continueClosure(false)
-        }, timeout: 2) {
-            completion(objectID!)
+        }, timeout: 10) {
+            completion(objectID)
         }
     }
     

@@ -118,8 +118,9 @@ extension CanonPTPIPDevice {
                     print("Received property \(propType) \(subType) size:\(size) \(value)")
 
                 default:
-                    let bytes = eventData.sliced(Int(pointer), Int(pointer) + Int(size!))
-                    print("Received property \(propType) (\(type)) \(subType) size:\(size) bytes: \(bytes.toHex)")
+                    /*let bytes = eventData.sliced(Int(pointer), Int(pointer) + Int(size!))
+                    print("Received property \(propType) (\(type)) \(subType) size:\(size) bytes: \(bytes.toHex)")*/
+                    break
                 }
             case .PTP_EC_CANON_EOS_AvailListChanged:
                 let subType = CanonSubPropType(rawValue: eventData[dWord: pointer + 8]!)
@@ -148,8 +149,9 @@ extension CanonPTPIPDevice {
                     exposureCompensationField.supported = values
                     print("Received property values: \(propType) \(subType) \(values)")
                 default:
-                    let bytes = eventData.sliced(Int(pointer), Int(pointer) + Int(size!))
-                    print("Received property values \(type) size:\(size) bytes: \(bytes.toHex)")
+                    /*let bytes = eventData.sliced(Int(pointer), Int(pointer) + Int(size!))
+                    print("Received property values \(type) size:\(size) bytes: \(bytes.toHex)")*/
+                    break
                 }
             case .PTP_EC_CANON_EOS_OLCInfoChanged:
                 let len = eventData[dWord: pointer + 8]!
@@ -167,7 +169,7 @@ extension CanonPTPIPDevice {
                     print("Received property OLC Shutter Speed: \(propType) (value)")
                 }
  
-            case .PTP_EC_CANON_EOS_ObjectAddedEx, .PTP_EC_CANON_EOS_ObjectAddedEx64, .PTP_EC_CANON_EOS_ObjectInfoChangedEx:
+            case .PTP_EC_CANON_EOS_ObjectAddedEx, .PTP_EC_CANON_EOS_ObjectAddedEx64:
                 
                 lastObjectAdded = eventData.sliced(Int(pointer), Int(pointer) + Int(size!))
 
@@ -180,12 +182,12 @@ extension CanonPTPIPDevice {
                 print("Received property \(propType) objectID:\(objectID) parent \(parent) storageID \(storageID) OFC \(OFC) size \(size)")
                 
             default:
-                if Int(size!) < 300 {
+                /*if Int(size!) < 300 {
                     let bytes = eventData.sliced(Int(pointer), Int(pointer) + Int(size!))
                     print("Received property \(type) size:\(size) bytes: \(bytes.toHex)")
                 } else {
                     print("Received property \(type) size:\(size)")
-                }
+                }*/
                 break
             }
             

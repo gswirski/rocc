@@ -195,7 +195,7 @@ final class PTPIPClient {
         sendCommandRequestPacket(opRequestPacket, callback: callback)
     }
     
-    func getThumbEx(objectId: DWord, callback: @escaping DataResponse) {
+    func getReducedObject(objectId: DWord, callback: @escaping DataResponse) {
         let transactionID = getNextTransactionId()
         let opRequestPacket = Packet.commandRequestPacket(code: .canonGetReducedObject, arguments: [objectId, 0x00200000, 0x00000000], transactionId: transactionID, dataPhaseInfo: 1)
         

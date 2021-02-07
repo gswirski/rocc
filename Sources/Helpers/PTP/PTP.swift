@@ -125,7 +125,7 @@ struct PTP {
         case canonSetRemoteMode = 0x9114
         case canonSetEventMode = 0x9115
         case canonGetEvent = 0x9116
-        case canonUnknownInitCommand = 0x902f
+        case canonPing = 0x902f
         case canonGetViewFinderData = 0x9153
         case canonRemoteReleaseOn = 0x9128
         case canonRemoteReleaseOff = 0x9129
