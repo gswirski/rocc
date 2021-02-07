@@ -174,7 +174,7 @@ public final class LiveViewStream: NSObject {
     
     private var eventTimer: Timer?
     
-    func canonLiveView(_ client: PTPIPClient) {
+    func canonLiveView(_ client: PTPIPClientNext) {
         print("Canon Live View loop")
 
         /*client.getViewFinderData { (response) in

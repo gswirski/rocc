@@ -60,9 +60,9 @@ internal final class CanonPTPIPDevice: SonyCamera {
     
     var connectionMode: ConnectionMode = .remoteControl
     
-    private var cachedPTPIPClient: PTPIPClient?
+    private var cachedPTPIPClient: PTPIPClientNext?
     
-    var ptpIPClient: PTPIPClient? {
+    var ptpIPClient: PTPIPClientNext? {
         get {
             if let cachedPTPIPClient = cachedPTPIPClient {
                 return cachedPTPIPClient
@@ -70,7 +70,7 @@ internal final class CanonPTPIPDevice: SonyCamera {
             guard let stream = InputOutputPacketStream(camera: self, port: 15740) else {
                 return nil
             }
-            cachedPTPIPClient = PTPIPClient(camera: self, packetStream: stream)
+            cachedPTPIPClient = PTPIPClientNext(camera: self, packetStream: stream)
             return cachedPTPIPClient
         }
         set {
