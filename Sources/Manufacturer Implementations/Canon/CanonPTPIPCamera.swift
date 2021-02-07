@@ -392,6 +392,8 @@ extension CanonPTPIPDevice: Camera {
             self?.handlePTPIPEvent(event)
         }
         ptpIPClient?.onDisconnect = { [weak self] in
+            self?.pingTimer?.invalidate()
+            self?.pingTimer = nil
             self?.onDisconnected?()
         }
 
@@ -425,6 +427,7 @@ extension CanonPTPIPDevice: Camera {
 
     func disconnect(completion: @escaping DisconnectedCompletion) {
         pingTimer?.invalidate()
+        pingTimer = nil
         ptpIPClient?.onDisconnect = nil
         ptpIPClient?.disconnect()
         completion(nil)

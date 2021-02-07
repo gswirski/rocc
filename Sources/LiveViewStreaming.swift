@@ -177,23 +177,17 @@ public final class LiveViewStream: NSObject {
     func canonLiveView(_ client: PTPIPClientNext) {
         print("Canon Live View loop")
 
-        /*client.getViewFinderData { (response) in
-            DispatchQueue.global(qos: .userInteractive).async {
-                
-                switch response {
-                case .success(let data):
-                    print("Canon Live View response START \(data.data.toHex) END")
-
-                    self.receivedData = Data(data.data)
-                    self.attemptImageParse()
-                case .failure(let error):
-                    print("Canon Live View error \(error)")
-                }
-
-                self.canonLiveView(client)
-                
+        client.getViewFinderData { (response) in
+            switch response {
+            case .success(let data):
+                self.receivedData = Data(data.data)
+                self.attemptImageParse()
+            case .failure(let error):
+                print("Canon Live View error \(error)")
             }
-        }*/
+
+            self.canonLiveView(client)
+        }
     }
 
     /// Performs all setup of the live view stream and begins streaming images over the network
