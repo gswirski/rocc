@@ -210,31 +210,16 @@ extension CanonPTPIPDevice {
         callback: @escaping AllDevicePropertyDescriptionsCompletion
     ) {
         
-        let packet = Packet.commandRequestPacket(code: .canonGetEvent, arguments: nil, transactionId: ptpIPClient?.getNextTransactionId() ?? 1)
-        ptpIPClient?.awaitDataFor(transactionId: packet.transactionId, callback: { (dataResult) in
+        let packet = CommandRequestPacketArguments(commandCode: .canonGetEvent, arguments: nil)
+        ptpIPClient?.sendCommandRequestPacket(packet, responseCallback: nil, dataCallback: { (dataResult) in
             switch dataResult {
             case .success(let data):
                 callback(Result.success(self.parseEvent(data: data.data)))
-                
-                /*guard let numberOfProperties = data.data[qWord: 0] else { return }
-                var offset: UInt = UInt(MemoryLayout<QWord>.size)
-                var properties: [PTPDeviceProperty] = []
-                for _ in 0..<numberOfProperties {
-                    guard let property = data.data.getDeviceProperty(at: offset) else {
-                        break
-                    }
-                    properties.append(property)
-                    offset += property.length
-                }
-                callback(Result.success(properties))*/
             case .failure(let error):
                 callback(Result.failure(error))
             }
-        })
-        ptpIPClient?.sendCommandRequestPacket(packet, callback: { (response) in
-            print("Received data in response \(response)")
-        })
 
+        })
     }
 
     
@@ -726,22 +711,24 @@ extension CanonPTPIPDevice {
                 }
             }
         case .startContinuousShooting, .startContinuousBracketShooting:
-            startCapturing { (error) in
+            /*startCapturing { (error) in
                 callback(error, nil)
             }
+            callback(nil, nil)*/
             callback(nil, nil)
         case .endContinuousShooting, .stopContinuousBracketShooting:
             // Only await image if we're continuous shooting, continuous bracket behaves strangely
             // in that the user must manually trigger the completion and so `ObjectID` event will have been received
             // long ago!
-            finishCapturing(awaitObjectId: function.function == .endContinuousShooting) { (result) in
+            /*finishCapturing(awaitObjectId: function.function == .endContinuousShooting) { (result) in
                 switch result {
                 case .failure(let error):
                     callback(error, nil)
                 case .success(let url):
                     callback(nil, url as? T.ReturnType)
                 }
-            }
+            }*/
+            callback(nil, nil)
         case .startVideoRecording:
             self.ptpIPClient?.sendSetControlDeviceBValue(
                 PTP.DeviceProperty.Value(
@@ -810,7 +797,7 @@ extension CanonPTPIPDevice {
             //TODO: Unable to reverse engineer as not supported on RX100 VII
             callback(nil, nil)
         case .startBulbCapture:
-            startCapturing { [weak self] (error) in
+            /*startCapturing { [weak self] (error) in
                 
                 guard error == nil else {
                     callback(error, nil)
@@ -820,16 +807,18 @@ extension CanonPTPIPDevice {
                 self?.awaitFocusIfNeeded { () in
                     callback(nil, nil)
                 }
-            }
+            }*/
+            callback(nil, nil)
         case .endBulbCapture:
-            finishCapturing() { (result) in
+            /*finishCapturing() { (result) in
                 switch result {
                 case .failure(let error):
                     callback(error, nil)
                 case .success(let url):
                     callback(nil, url as? T.ReturnType)
                 }
-            }
+            }*/
+            callback(nil, nil)
         case .startLiveView, .startLiveViewWithQuality, .endLiveView:
             getDevicePropDescriptionFor(propCode: .liveViewURL) { [weak self] (result) in
                 

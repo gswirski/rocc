@@ -16,7 +16,7 @@ struct CommandRequestPacket: Packetable {
                 
     var data: ByteBuffer = ByteBuffer()
     
-    let transactionId: DWord
+    var transactionId: DWord
     
     init?(length: DWord, name: Packet.Name, data: ByteBuffer) {
         

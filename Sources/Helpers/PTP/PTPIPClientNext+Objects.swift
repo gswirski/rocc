@@ -14,8 +14,8 @@ extension PTPIPClientNext {
     
     func getObjectInfoFor(objectId: DWord, callback: @escaping ObjectInfoCompletion) {
         
-        let packet = Packet.commandRequestPacket(code: .getObjectInfo, arguments: [objectId], transactionId: getNextTransactionId())
-        awaitDataFor(transactionId: packet.transactionId) { (dataResult) in
+        let packet = CommandRequestPacketArguments(commandCode: .getObjectInfo, arguments: [objectId])
+        sendCommandRequestPacket(packet, responseCallback: nil) { (dataResult) in
             switch dataResult {
             case .success(let data):
                 guard let objectInfo = PTP.ObjectInfo(data: data.data) else {
@@ -27,6 +27,5 @@ extension PTPIPClientNext {
                 callback(Result.failure(error))
             }
         }
-        sendCommandRequestPacket(packet, callback: nil)
     }
 }

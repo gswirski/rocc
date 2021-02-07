@@ -16,8 +16,8 @@ extension PTPIPClientNext {
     
     func getDevicePropDescFor(propCode: PTP.DeviceProperty.Code,  callback: @escaping DevicePropertyDescriptionCompletion) {
         
-        let packet = Packet.commandRequestPacket(code: .getDevicePropDesc, arguments: [DWord(propCode.rawValue)], transactionId: getNextTransactionId())
-        awaitDataFor(transactionId: packet.transactionId) { (dataResult) in
+        let packet = CommandRequestPacketArguments(commandCode: .getDevicePropDesc, arguments: [DWord(propCode.rawValue)])
+        sendCommandRequestPacket(packet, responseCallback: nil) { (dataResult) in
             switch dataResult {
             case .success(let data):
                 guard let property = data.data.getDeviceProperty(at: 0) else {
@@ -29,7 +29,6 @@ extension PTPIPClientNext {
                 callback(Result.failure(error))
             }
         }
-        sendCommandRequestPacket(packet, callback: nil)
     }
 
     /// Gets all device prop desc data from the camera
@@ -42,9 +41,8 @@ extension PTPIPClientNext {
         partial: Bool = false
     ) {
         
-        let packet = Packet.commandRequestPacket(code: .getAllDevicePropData, arguments: [partial ? 1 : 0], transactionId: getNextTransactionId())
-        awaitDataFor(transactionId: packet.transactionId, callback: { (dataResult) in
-            
+        let packet = CommandRequestPacketArguments(commandCode: .getAllDevicePropData, arguments: [partial ? 1 : 0])
+        sendCommandRequestPacket(packet, responseCallback: nil) { (dataResult) in
             switch dataResult {
             case .success(let data):
                 guard let numberOfProperties = data.data[qWord: 0] else { return }
@@ -61,7 +59,6 @@ extension PTPIPClientNext {
             case .failure(let error):
                 callback(Result.failure(error))
             }
-        })
-        sendCommandRequestPacket(packet, callback: nil)
+        }
     }
 }

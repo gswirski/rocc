@@ -140,7 +140,7 @@ internal final class CanonPTPIPDevice: SonyCamera {
             arguments: [0x00000041],
             transactionId: ptpIPClient?.getNextTransactionId() ?? 0
         )
-        ptpIPClient?.sendCommandRequestPacket(packet, callback: { [weak self] (response) in
+        ptpIPClient?.sendCommandRequestPacketRestrictedToInitialization(packet, callback: { [weak self] (response) in
             guard response.code == .okay else {
                 completion(PTPError.commandRequestFailed(response.code), false)
                 return
@@ -150,22 +150,20 @@ internal final class CanonPTPIPDevice: SonyCamera {
     }
     
     private func setRemoteMode(completion: @escaping CanonPTPIPDevice.ConnectedCompletion) {
-        let packet = Packet.commandRequestPacket(code: .canonSetRemoteMode, arguments: [0x00000015], transactionId: ptpIPClient?.getNextTransactionId() ?? 1)
+        let packet = CommandRequestPacketArguments(commandCode: .canonSetRemoteMode, arguments: [0x00000015])
         
-        ptpIPClient?.sendCommandRequestPacket(packet, callback: { [weak self] (response) in
+        ptpIPClient?.sendCommandRequestPacket(packet, responseCallback: { [weak self] (response) in
             guard response.code == .okay else {
                 completion(PTPError.commandRequestFailed(response.code), false)
                 return
             }
-            self?.unknownConnectionCommand(completion: completion)
+            self?.sendFirstPing(completion: completion)
 
-        })
+        }, dataCallback: nil)
     }
     
-    private func unknownConnectionCommand(completion: @escaping CanonPTPIPDevice.ConnectedCompletion) {
-        let packet = Packet.commandRequestPacket(code: .canonPing, arguments: nil, transactionId: ptpIPClient?.getNextTransactionId() ?? 1)
-        
-        ptpIPClient?.sendCommandRequestPacket(packet, callback: { [weak self] (response) in
+    private func sendFirstPing(completion: @escaping CanonPTPIPDevice.ConnectedCompletion) {
+        ptpIPClient?.sendCanonPing { [weak self] (response) in
             guard let self = self else { return }
 
             guard response.code == .okay else {
@@ -179,32 +177,31 @@ internal final class CanonPTPIPDevice: SonyCamera {
                     timer.invalidate()
                     return
                 }
-                let packet = Packet.commandRequestPacket(code: .canonPing, arguments: nil, transactionId: self.ptpIPClient?.getNextTransactionId() ?? 1)
-                self.ptpIPClient?.sendCommandRequestPacket(packet, callback: nil)
+                self.ptpIPClient?.sendCanonPing()
             }
 
             self.setEventMode(completion: completion)
-        })
+        }
 
     }
     
     private func setEventMode(completion: @escaping CanonPTPIPDevice.ConnectedCompletion) {
-        let packet = Packet.commandRequestPacket(code: .canonSetEventMode, arguments: [0x00000002], transactionId: ptpIPClient?.getNextTransactionId() ?? 1)
+        let packet = CommandRequestPacketArguments(commandCode: .canonSetEventMode, arguments: [0x00000002])
         
-        ptpIPClient?.sendCommandRequestPacket(packet, callback: { [weak self] (response) in
+        ptpIPClient?.sendCommandRequestPacket(packet, responseCallback: { [weak self] (response) in
             guard response.code == .okay else {
                 completion(PTPError.commandRequestFailed(response.code), false)
                 return
             }
             self?.performInitialEventFetch(completion: completion)
 
-        })
+        }, dataCallback: nil)
 
     }
 
     private func performCloseSession(completion: @escaping CanonPTPIPDevice.ConnectedCompletion) {
         let packet = Packet.commandRequestPacket(code: .closeSession, arguments: nil, transactionId: ptpIPClient?.getNextTransactionId() ?? 1)
-        ptpIPClient?.sendCommandRequestPacket(packet, callback: { (response) in
+        ptpIPClient?.sendCommandRequestPacketRestrictedToInitialization(packet, callback: { (response) in
             completion(PTPError.anotherSessionOpen, false)
         }, callCallbackForAnyResponse: true)
     }
@@ -245,8 +242,8 @@ internal final class CanonPTPIPDevice: SonyCamera {
             
             propCodes.forEach { (propCode) in
                 
-                let packet = Packet.commandRequestPacket(code: .sonyGetDevicePropDesc, arguments: [DWord(propCode.rawValue)], transactionId: ptpIPClient.getNextTransactionId())
-                ptpIPClient.awaitDataFor(transactionId: packet.transactionId) { (dataResult) in
+                let packet = CommandRequestPacketArguments(commandCode: .sonyGetDevicePropDesc, arguments: [DWord(propCode.rawValue)])
+                ptpIPClient.sendCommandRequestPacket(packet, responseCallback: nil) { (dataResult) in
                     
                     remainingCodes.removeAll(where: { $0 == propCode })
                     
@@ -264,7 +261,6 @@ internal final class CanonPTPIPDevice: SonyCamera {
                     guard remainingCodes.isEmpty else { return }
                     callback(returnProperties.count == propCodes.count ? Result.success(returnProperties) : Result.failure(PTPError.propCodeNotFound))
                 }
-                ptpIPClient.sendCommandRequestPacket(packet, callback: nil)
             }
             
             
@@ -318,8 +314,8 @@ internal final class CanonPTPIPDevice: SonyCamera {
             
         } else if deviceInfo?.supportedOperations.contains(.sonyGetDevicePropDesc) ?? false {
             
-            let packet = Packet.commandRequestPacket(code: .sonyGetDevicePropDesc, arguments: [DWord(propCode.rawValue)], transactionId: ptpIPClient.getNextTransactionId())
-            ptpIPClient.awaitDataFor(transactionId: packet.transactionId) { (dataResult) in
+            let packet = CommandRequestPacketArguments(commandCode: .sonyGetDevicePropDesc, arguments: [DWord(propCode.rawValue)])
+            ptpIPClient.sendCommandRequestPacket(packet, responseCallback: nil)  { (dataResult) in
                 switch dataResult {
                 case .success(let data):
                     guard let property = data.data.getDeviceProperty(at: 0) else {
@@ -331,7 +327,6 @@ internal final class CanonPTPIPDevice: SonyCamera {
                     callback(Result.failure(error))
                 }
             }
-            ptpIPClient.sendCommandRequestPacket(packet, callback: nil)
             
         } else if deviceInfo?.supportedOperations.contains(.getDevicePropDesc) ?? false {
             
@@ -354,21 +349,8 @@ internal final class CanonPTPIPDevice: SonyCamera {
         switch event.code {
         case .propertyChanged, .canonPropertyChanged:
             onEventAvailable?()
-        case .objectAdded:
-            guard let objectID = event.variables?.first else {
-                return
-            }
-            if isAwaitingObject {
-                awaitingObjectId = objectID
-            }
-            Logger.log(message: "Handling \"Object Added\" event, initiating transfer", category: "SonyPTPIPCamera", level: .debug)
-            os_log("Handling \"Object Added\" event, initiating transfer. Awaiting object: %@", log: self.log, type: .debug, isAwaitingObject ? "true" : "false")
-            handleObjectId(objectID: objectID, shootingMode: lastEvent?.shootMode?.current ?? .photo) { (result) in
-                
-            }
-            break
-        case .objectRemoved:
-            // If object was removed, we are done with capture
+        case .objectAdded, .objectRemoved:
+            // I think Canon doesn't send those events
             break
         default:
             break

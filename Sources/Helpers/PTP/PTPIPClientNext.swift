@@ -15,6 +15,11 @@ import UIKit
 import AppKit
 #endif
 
+struct CommandRequestPacketArguments {
+    let commandCode: PTP.CommandCode
+    let arguments: [DWord]?
+}
+
 /// A client for transferring images using the PTP IP protocol
 final class PTPIPClientNext {
 
@@ -99,6 +104,16 @@ final class PTPIPClientNext {
     
     var onEventStreamsOpened: (() -> Void)?
     
+    
+    struct PendingCommandRequest {
+        let packet: CommandRequestPacketArguments
+        let responseHandler: CommandRequestPacketResponse?
+        let dataHandler: DataResponse?
+    }
+
+    fileprivate var pendingCommandPackets: [PendingCommandRequest] = []
+    fileprivate var isExecutingCommandPacket: Bool = false
+    
     /// Sends a packet to the event loop of the PTP IP connection
     /// - Parameter packet: The packet to send
     fileprivate func sendEventPacket(_ packet: Packetable) {
@@ -107,7 +122,7 @@ final class PTPIPClientNext {
     
     /// Sends a packet to the control loop of the PTP IP connection
     /// - Parameter packet: The packet to send
-    func sendControlPacket(_ packet: Packetable) {
+    private func sendControlPacket(_ packet: Packetable) {
         packetStream.sendControlPacket(packet)
     }
     
@@ -122,13 +137,63 @@ final class PTPIPClientNext {
     /// - Parameter packet: The packet to send
     /// - Parameter callback: An optional callback which will be called with the received CommandResponse packet
     /// - Parameter callCallbackForAnyResponse: Whether the callback should be called for any response received regardless of whether it contains a transaction ID or what it's transaction ID is. This fixes issues with the OpenSession command response Sony sends which doesn't contain a transaction ID.
-    func sendCommandRequestPacket(_ packet: CommandRequestPacket, callback: CommandRequestPacketResponse?, callCallbackForAnyResponse: Bool = false) {
+    private func sendCommandRequestPacket(_ packet: CommandRequestPacket, callback: CommandRequestPacketResponse?, callCallbackForAnyResponse: Bool = false) {
         if let _callback = callback {
             commandRequestCallbacks[packet.transactionId] = (_callback, callCallbackForAnyResponse)
         }
         sendControlPacket(packet)
     }
     
+    func processNextPendingCommandPacket() {
+        print("PTPQueue - start isExecutingAlready: \(isExecutingCommandPacket)")
+        guard !isExecutingCommandPacket else { return }
+        guard pendingCommandPackets.count > 0 else { return }
+
+        let pending = pendingCommandPackets.removeFirst()
+        
+        isExecutingCommandPacket = true
+        
+        var awaitingResponse = (pending.responseHandler != nil)
+        var awaitingData = (pending.dataHandler != nil)
+        
+        let checkConditionsAndProceed = { [weak self] () in
+            guard let self = self else { return }
+            guard !awaitingResponse && !awaitingData else { return }
+
+            self.isExecutingCommandPacket = false
+            self.processNextPendingCommandPacket()
+        }
+        
+        let packet = Packet.commandRequestPacket(code: pending.packet.commandCode, arguments: pending.packet.arguments, transactionId: getNextTransactionId())
+        print("PTPQueue - setting transaction id: \(packet.transactionId), awaiting respo \(awaitingResponse) awaitingData \(awaitingData) -> \(packet.name)")
+        
+        sendCommandRequestPacket(packet, callback: { (response) in
+            print("PTPQueue - received response \(response)")
+            pending.responseHandler?(response)
+            awaitingResponse = false
+            checkConditionsAndProceed()
+        }, callCallbackForAnyResponse: false)
+        
+        if let dataHandler = pending.dataHandler {
+            awaitDataFor(transactionId: packet.transactionId) { (response) in
+                print("PTPQueue - received data \(response)")
+                dataHandler(response)
+                awaitingData = false
+                checkConditionsAndProceed()
+            }
+        }
+        
+    }
+
+    func sendCommandRequestPacketRestrictedToInitialization(_ packet: CommandRequestPacket, callback: CommandRequestPacketResponse?, callCallbackForAnyResponse: Bool = false) {
+        sendCommandRequestPacket(packet, callback: callback, callCallbackForAnyResponse: callCallbackForAnyResponse)
+    }
+    
+    func sendCommandRequestPacket(_ packet: CommandRequestPacketArguments, responseCallback: CommandRequestPacketResponse?, dataCallback: DataResponse?) {
+        pendingCommandPackets.append(PendingCommandRequest(packet: packet, responseHandler: responseCallback, dataHandler: dataCallback))
+        processNextPendingCommandPacket()
+    }
+
     func setDevicePropValueEx(_ value: PTP.DeviceProperty.Value, _ code: PTPDevicePropertyDataType, callback: CommandRequestPacketResponse? = nil) {
         let transactionID = getNextTransactionId()
         let opRequestPacket = Packet.commandRequestPacket(code: .canonSetDevicePropValueEx, arguments: [], transactionId: transactionID, dataPhaseInfo: 2)
@@ -143,6 +208,13 @@ final class PTPIPClientNext {
         dataPackets.forEach { (dataPacket) in
             sendControlPacket(dataPacket)
         }
+    }
+    
+    func sendCanonPing(callback: CommandRequestPacketResponse? = nil) {
+        let transactionID = getNextTransactionId()
+        let packet = Packet.commandRequestPacket(code: .canonPing, arguments: nil, transactionId: transactionID)
+
+        sendCommandRequestPacket(packet, callback: callback)
     }
     
     func getViewFinderData(callback: @escaping DataResponse) {
