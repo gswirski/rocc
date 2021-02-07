@@ -23,6 +23,8 @@ struct CommandRequestPacketArguments {
 /// A client for transferring images using the PTP IP protocol
 final class PTPIPClientNext {
 
+    let ptpQueue = DispatchQueue(label: "PTPIPDispatchQueue", qos: .userInteractive, attributes: DispatchQueue.Attributes(), autoreleaseFrequency: .inherit, target: nil)
+
     //MARK: - Initialisation -
     
     internal let ptpClientLog = OSLog(subsystem: "com.yellow-brick-bear.rocc", category: "PTPIPClient")
@@ -145,44 +147,51 @@ final class PTPIPClientNext {
     }
     
     func processNextPendingCommandPacket() {
-        print("PTPQueue - start isExecutingAlready: \(isExecutingCommandPacket) count: \(pendingCommandPackets.count)")
-        guard !isExecutingCommandPacket else { return }
-        guard pendingCommandPackets.count > 0 else { return }
+        ptpQueue.async {
+            print("PTPQueue - start isExecutingAlready: \(self.isExecutingCommandPacket) count: \(self.pendingCommandPackets.count)")
+            guard !self.isExecutingCommandPacket else { return }
+            guard self.pendingCommandPackets.count > 0 else { return }
 
-        let pending = pendingCommandPackets.removeFirst()
-        
-        isExecutingCommandPacket = true
-        
-        var awaitingResponse = true
-        var awaitingData = (pending.dataHandler != nil)
-        
-        let checkConditionsAndProceed = { [weak self] () in
-            guard let self = self else { return }
-            guard !awaitingResponse && !awaitingData else { return }
+            let pending = self.pendingCommandPackets.removeFirst()
+            
+            self.isExecutingCommandPacket = true
+            
+            var awaitingResponse = true
+            var awaitingData = (pending.dataHandler != nil)
+            
+            let checkConditionsAndProceed = { [weak self] () in
+                guard let self = self else { return }
+                guard !awaitingResponse && !awaitingData else { return }
 
-            self.isExecutingCommandPacket = false
-            self.processNextPendingCommandPacket()
-        }
-        
-        let packet = Packet.commandRequestPacket(code: pending.packet.commandCode, arguments: pending.packet.arguments, transactionId: getNextTransactionId())
-        print("PTPQueue - setting transaction id: \(packet.transactionId), awaiting respo \(awaitingResponse) awaitingData \(awaitingData) -> \(pending.packet.commandCode)")
-        
-        sendCommandRequestPacket(packet, callback: { (response) in
-            print("PTPQueue - received response \(response)")
-            pending.responseHandler?(response)
-            awaitingResponse = false
-            checkConditionsAndProceed()
-        }, callCallbackForAnyResponse: false)
-        
-        if let dataHandler = pending.dataHandler {
-            awaitDataFor(transactionId: packet.transactionId) { (response) in
-                print("PTPQueue - received data \(response)")
-                dataHandler(response)
-                awaitingData = false
+                self.isExecutingCommandPacket = false
+                self.processNextPendingCommandPacket()
+            }
+            
+            let packet = Packet.commandRequestPacket(code: pending.packet.commandCode, arguments: pending.packet.arguments, transactionId: self.getNextTransactionId())
+            print("PTPQueue - setting transaction id: \(packet.transactionId), awaiting respo \(awaitingResponse) awaitingData \(awaitingData) -> \(pending.packet.commandCode)")
+            
+            self.sendCommandRequestPacket(packet, callback: { (response) in
+                print("PTPQueue - received response \(response)")
+                if let responseHandler = pending.responseHandler {
+                    DispatchQueue.global(qos: .userInteractive).async {
+                        responseHandler(response)
+                    }
+                }
+                awaitingResponse = false
                 checkConditionsAndProceed()
+            }, callCallbackForAnyResponse: false)
+            
+            if let dataHandler = pending.dataHandler {
+                self.awaitDataFor(transactionId: packet.transactionId) { (response) in
+                    print("PTPQueue - received data for transaction \(packet.transactionId)")
+                    DispatchQueue.global(qos: .userInteractive).async {
+                        dataHandler(response)
+                    }
+                    awaitingData = false
+                    checkConditionsAndProceed()
+                }
             }
         }
-        
     }
 
     func sendCommandRequestPacketRestrictedToInitialization(_ packet: CommandRequestPacket, callback: CommandRequestPacketResponse?, callCallbackForAnyResponse: Bool = false) {
@@ -190,8 +199,10 @@ final class PTPIPClientNext {
     }
     
     func sendCommandRequestPacket(_ packet: CommandRequestPacketArguments, responseCallback: CommandRequestPacketResponse?, dataCallback: DataResponse?) {
-        pendingCommandPackets.append(PendingCommandRequest(packet: packet, responseHandler: responseCallback, dataHandler: dataCallback))
-        processNextPendingCommandPacket()
+        ptpQueue.async {
+            self.pendingCommandPackets.append(PendingCommandRequest(packet: packet, responseHandler: responseCallback, dataHandler: dataCallback))
+            self.processNextPendingCommandPacket()
+        }
     }
 
     func setDevicePropValueEx(_ value: PTP.DeviceProperty.Value, _ code: PTPDevicePropertyDataType, callback: CommandRequestPacketResponse? = nil) {
