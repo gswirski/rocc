@@ -145,7 +145,7 @@ final class PTPIPClientNext {
     }
     
     func processNextPendingCommandPacket() {
-        print("PTPQueue - start isExecutingAlready: \(isExecutingCommandPacket)")
+        print("PTPQueue - start isExecutingAlready: \(isExecutingCommandPacket) count: \(pendingCommandPackets.count)")
         guard !isExecutingCommandPacket else { return }
         guard pendingCommandPackets.count > 0 else { return }
 
@@ -153,7 +153,7 @@ final class PTPIPClientNext {
         
         isExecutingCommandPacket = true
         
-        var awaitingResponse = (pending.responseHandler != nil)
+        var awaitingResponse = true
         var awaitingData = (pending.dataHandler != nil)
         
         let checkConditionsAndProceed = { [weak self] () in
@@ -165,7 +165,7 @@ final class PTPIPClientNext {
         }
         
         let packet = Packet.commandRequestPacket(code: pending.packet.commandCode, arguments: pending.packet.arguments, transactionId: getNextTransactionId())
-        print("PTPQueue - setting transaction id: \(packet.transactionId), awaiting respo \(awaitingResponse) awaitingData \(awaitingData) -> \(packet.name)")
+        print("PTPQueue - setting transaction id: \(packet.transactionId), awaiting respo \(awaitingResponse) awaitingData \(awaitingData) -> \(pending.packet.commandCode)")
         
         sendCommandRequestPacket(packet, callback: { (response) in
             print("PTPQueue - received response \(response)")
@@ -195,6 +195,7 @@ final class PTPIPClientNext {
     }
 
     func setDevicePropValueEx(_ value: PTP.DeviceProperty.Value, _ code: PTPDevicePropertyDataType, callback: CommandRequestPacketResponse? = nil) {
+        // TODO: this doesn't quite fit my data model :D
         let transactionID = getNextTransactionId()
         let opRequestPacket = Packet.commandRequestPacket(code: .canonSetDevicePropValueEx, arguments: [], transactionId: transactionID, dataPhaseInfo: 2)
         var data = ByteBuffer()
@@ -211,46 +212,38 @@ final class PTPIPClientNext {
     }
     
     func sendCanonPing(callback: CommandRequestPacketResponse? = nil) {
-        let transactionID = getNextTransactionId()
-        let packet = Packet.commandRequestPacket(code: .canonPing, arguments: nil, transactionId: transactionID)
-
-        sendCommandRequestPacket(packet, callback: callback)
+        let packet = CommandRequestPacketArguments(commandCode: .canonPing, arguments: nil)
+        sendCommandRequestPacket(packet, responseCallback: callback, dataCallback: nil)
     }
     
     func getViewFinderData(callback: @escaping DataResponse) {
-        let transactionID = getNextTransactionId()
-        let opRequestPacket = Packet.commandRequestPacket(code: .canonGetViewFinderData, arguments: [0x00200000, 0x00000001, 0x00000000], transactionId: transactionID, dataPhaseInfo: 1)
+        let opRequestPacket = CommandRequestPacketArguments(commandCode: .canonGetViewFinderData, arguments: [0x00200000, 0x00000001, 0x00000000])
         
         print("Canon Live View sending")
-        sendCommandRequestPacket(opRequestPacket, callback: { (response) in
+        sendCommandRequestPacket(opRequestPacket, responseCallback: { (response) in
             print("Canon Live View response A")
-        })
-        awaitDataFor(transactionId: transactionID, callback: callback)
+        }, dataCallback: callback)
     }
     
     func sendRemoteReleaseOn(callback: CommandRequestPacketResponse? = nil) {
-        let transactionID = getNextTransactionId()
-        let opRequestPacket = Packet.commandRequestPacket(code: .canonRemoteReleaseOn, arguments: [0x03, 0x00], transactionId: transactionID, dataPhaseInfo: 1)
+        let opRequestPacket = CommandRequestPacketArguments(commandCode: .canonRemoteReleaseOn, arguments: [0x03, 0x00])
         
-        sendCommandRequestPacket(opRequestPacket, callback: callback)
+        sendCommandRequestPacket(opRequestPacket, responseCallback: callback, dataCallback: nil)
     }
     
     func sendRemoteReleaseOff(callback: CommandRequestPacketResponse? = nil) {
-        let transactionID = getNextTransactionId()
-        let opRequestPacket = Packet.commandRequestPacket(code: .canonRemoteReleaseOff, arguments: [0x03], transactionId: transactionID, dataPhaseInfo: 1)
+        let opRequestPacket = CommandRequestPacketArguments(commandCode: .canonRemoteReleaseOff, arguments: [0x03])
         
-        sendCommandRequestPacket(opRequestPacket, callback: callback)
+        sendCommandRequestPacket(opRequestPacket, responseCallback: callback, dataCallback: nil)
     }
     
     func getReducedObject(objectId: DWord, callback: @escaping DataResponse) {
-        let transactionID = getNextTransactionId()
-        let opRequestPacket = Packet.commandRequestPacket(code: .canonGetReducedObject, arguments: [objectId, 0x00200000, 0x00000000], transactionId: transactionID, dataPhaseInfo: 1)
+        let opRequestPacket = CommandRequestPacketArguments(commandCode: .canonGetReducedObject, arguments: [objectId, 0x00200000, 0x00000000])
         
         print("Canon getThumbEx")
-        sendCommandRequestPacket(opRequestPacket, callback: { (response) in
+        sendCommandRequestPacket(opRequestPacket, responseCallback: { (response) in
             print("Canon getThumbEx response A")
-        })
-        awaitDataFor(transactionId: transactionID, callback: callback)
+        }, dataCallback: callback)
     }
 
     func sendSetControlDeviceAValue(_ value: PTP.DeviceProperty.Value, callback: CommandRequestPacketResponse? = nil) {
