@@ -87,7 +87,7 @@ struct NetworkInterface {
     
     let broadcastAddress: String?
     
-    init(data: ifaddrs) {
+    init?(data: ifaddrs) {
         
         let flags = Int32(data.ifa_flags)
         let broadcastValid : Bool = ((flags & IFF_BROADCAST) == IFF_BROADCAST)
@@ -103,6 +103,10 @@ struct NetworkInterface {
             }
         } else {
             family = nil
+        }
+        
+        guard family == .ipv4 else {
+            return nil
         }
         
         name = String(cString: data.ifa_name)

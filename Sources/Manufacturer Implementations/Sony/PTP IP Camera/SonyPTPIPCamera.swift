@@ -34,6 +34,10 @@ internal final class SonyPTPIPDevice: SonyCamera {
     var remoteAppVersion: String? = nil
     
     var latestRemoteAppVersion: String? = nil
+
+    var eventVersion: String? {
+        return "2.0"
+    }
     
     var lensModelName: String? = nil
     
@@ -127,6 +131,11 @@ internal final class SonyPTPIPDevice: SonyCamera {
     var isConnected: Bool = false
     
     var deviceInfo: PTP.DeviceInfo?
+
+    /// The last set of `PTPDeviceProperty`s that we received from the camera
+    /// retained so we can avoid asking the camera for the full array every time
+    /// we need to fetch an event
+    var lastAllDeviceProps: [PTPDeviceProperty]?
     
     var lastEventPacket: EventPacket?
     
@@ -470,6 +479,7 @@ extension SonyPTPIPDevice: Camera {
         lastEvent = nil
         lastEventPacket = nil
         lastStillCaptureModes = nil
+        lastAllDeviceProps = nil
         zoomingDirection = nil
         highFrameRateCallback = nil
         
@@ -509,7 +519,7 @@ extension SonyPTPIPDevice: Camera {
             })
         }, attempts: 3)        
     }
-    
+
     func disconnect(completion: @escaping DisconnectedCompletion) {
         ptpIPClient?.onDisconnect = nil
         ptpIPClient?.disconnect()

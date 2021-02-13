@@ -17,11 +17,25 @@ extension SonyPTPIPDevice {
         case .getEvent:
             
             guard !imageURLs.isEmpty, var lastEvent = lastEvent else {
-                
                 ptpIPClient?.getAllDevicePropDesc(callback: { [weak self] (result) in
                     guard let self = self else { return }
                     switch result {
-                    case .success(let properties):
+                    case .success(var properties):
+
+                        if var lastProperties = self.lastAllDeviceProps {
+                            properties.forEach { (property) in
+                                // If the property is already present in received properties, just directly replace it!
+                                if let existingIndex = lastProperties.firstIndex(where: { (existingProperty) -> Bool in
+                                    return property.code == existingProperty.code
+                                }) {
+                                    lastProperties[existingIndex] = property
+                                } else { // Otherwise append it to the array
+                                    lastProperties.append(property)
+                                }
+                            }
+                            properties = lastProperties
+                        }
+
                         let eventAndStillModes = CameraEvent.fromSonyDeviceProperties(properties)
                         var event = eventAndStillModes.event
 //                        print("""
@@ -32,19 +46,23 @@ extension SonyPTPIPDevice {
                         event.postViewPictureURLs = self.imageURLs.compactMapValues({ (urls) -> [(postView: URL, thumbnail: URL?)]? in
                             return urls.map({ ($0, nil) })
                         })
+                        event.bulbShootingURLS = self.imageURLs[.bulb].flatMap({ return [$0] })
+
                         self.imageURLs = [:]
                         callback(nil, event as? T.ReturnType)
                     case .failure(let error):
                         callback(error, nil)
                     }
-                })
-                
+                }, partial: lastAllDeviceProps != nil)
+                                
                 return
             }
             
             lastEvent.postViewPictureURLs = self.imageURLs.compactMapValues({ (urls) -> [(postView: URL, thumbnail: URL?)]? in
                 return urls.map({ ($0, nil) })
             })
+            lastEvent.bulbShootingURLS = self.imageURLs[.bulb].flatMap({ return [$0] })
+            
             imageURLs = [:]
             callback(nil, lastEvent as? T.ReturnType)
             
@@ -335,6 +353,9 @@ extension SonyPTPIPDevice {
             callback(FunctionError.notSupportedByAvailableVersion, nil)
         case .takePicture, .takeSingleBracketShot:
             takePicture { (result) in
+                Logger.log(message: "Intervalometer - Taking picture RESULT \(result)", category: "SonyPTPIPCamera", level: .debug)
+                os_log("Intervalometer - Taking picture RESULT", log: self.log, type: .debug)
+
                 switch result {
                 case .success(let url):
                     callback(nil, url as? T.ReturnType)

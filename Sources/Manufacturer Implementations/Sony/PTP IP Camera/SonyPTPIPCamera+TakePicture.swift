@@ -21,21 +21,30 @@ extension SonyPTPIPDevice {
     
     func takePicture(completion: @escaping CaptureCompletion) {
         
-        Logger.log(message: "Taking picture...", category: "SonyPTPIPCamera", level: .debug)
-        os_log("Taking picture...", log: log, type: .debug)
+        Logger.log(message: "Intervalometer - Taking picture...", category: "SonyPTPIPCamera", level: .debug)
+        os_log("Intervalometer - Taking picture...", log: log, type: .debug)
         
         self.isAwaitingObject = true
         
         startCapturing { [weak self] (error) in
             
             guard let self = self else { return }
+            
+            Logger.log(message: "Intervalometer - Taking picture completion A \(error)", category: "SonyPTPIPCamera", level: .debug)
+            os_log("Intervalometer - Taking picture completion A", log: self.log, type: .debug)
+
             if let error = error {
                 self.isAwaitingObject = false
                 completion(Result.failure(error))
                 return
             }
             
+            
             self.awaitFocusIfNeeded(completion: { [weak self] (objectId) in
+                if let self = self {
+                    Logger.log(message: "Intervalometer - Taking picture completion B \(objectId)", category: "SonyPTPIPCamera", level: .debug)
+                    os_log("Intervalometer - Taking picture completion B", log: self.log, type: .debug)
+                }
                 self?.cancelShutterPress(objectID: objectId, completion: completion)
             })
         }
@@ -85,6 +94,9 @@ extension SonyPTPIPDevice {
                 
                 guard let self = self else { return }
                 
+                Logger.log(message: "Intervalometer - Starting capture completion A", category: "SonyPTPIPCamera", level: .debug)
+                os_log("Intervalometer - Starting capture completion A", log: self.log, type: .debug)
+                
                 self.ptpIPClient?.sendSetControlDeviceBValue(
                     PTP.DeviceProperty.Value(
                         code: .capture,
@@ -92,6 +104,9 @@ extension SonyPTPIPDevice {
                         value: Word(2)
                     ),
                     callback: { (shutterResponse) in
+                        Logger.log(message: "Intervalometer - Starting capture completion B \(shutterResponse)", category: "SonyPTPIPCamera", level: .debug)
+                        os_log("Intervalometer - Starting capture completion B", log: self.log, type: .debug)
+
                         guard !shutterResponse.code.isError else {
                             completion(PTPError.commandRequestFailed(shutterResponse.code))
                             return
@@ -165,8 +180,8 @@ extension SonyPTPIPDevice {
     
     private func cancelShutterPress(objectID: DWord?, awaitObjectId: Bool = true, completion: @escaping CaptureCompletion) {
         
-        Logger.log(message: "Cancelling shutter press \(objectID != nil ? "\(objectID!)" : "null")", category: "SonyPTPIPCamera", level: .debug)
-        os_log("Cancelling shutter press %@", log: self.log, type: .debug, objectID != nil ? "\(objectID!)" : "null")
+        Logger.log(message: "Intervalometer - Cancelling shutter press \(objectID != nil ? "\(objectID!)" : "null")", category: "SonyPTPIPCamera", level: .debug)
+        os_log("Intervalometer - Cancelling shutter press %@", log: self.log, type: .debug, objectID != nil ? "\(objectID!)" : "null")
                 
         ptpIPClient?.sendSetControlDeviceBValue(
             PTP.DeviceProperty.Value(
@@ -178,8 +193,8 @@ extension SonyPTPIPDevice {
                 
                 guard let self = self else { return }
                 
-                Logger.log(message: "Shutter press set to 1", category: "SonyPTPIPCamera", level: .debug)
-                os_log("Shutter press set to 1", log: self.log, type: .debug, objectID != nil ? "\(objectID!)" : "null")
+                Logger.log(message: "Intervalometer - Shutter press set to 1", category: "SonyPTPIPCamera", level: .debug)
+                os_log("Intervalometer - Shutter press set to 1", log: self.log, type: .debug, objectID != nil ? "\(objectID!)" : "null")
                 
                 self.ptpIPClient?.sendSetControlDeviceBValue(
                     PTP.DeviceProperty.Value(
@@ -190,10 +205,14 @@ extension SonyPTPIPDevice {
                     callback: { [weak self] (_) in
                         guard let self = self else { return }
                         
-                        Logger.log(message: "Autofocus set to 1 \(objectID ?? 0)", category: "SonyPTPIPCamera", level: .debug)
-                        os_log("Autofocus set to 1", log: self.log, type: .debug, objectID != nil ? "\(objectID!)"
+                        Logger.log(message: "Intervalometer - Autofocus set to 1 \(String(describing: objectID))", category: "SonyPTPIPCamera", level: .debug)
+                        os_log("Intervalometer - Autofocus set to 1", log: self.log, type: .debug, objectID != nil ? "\(objectID!)"
                             : "null")
                         guard objectID != nil || !awaitObjectId else {
+                            Logger.log(message: "Intervalometer - awaiting object id \(String(describing: objectID)) with \(awaitObjectId)", category: "SonyPTPIPCamera", level: .debug)
+                            os_log("Intervalometer - awaiting object id", log: self.log, type: .debug, objectID != nil ? "\(objectID!)"
+                                : "null")
+
                             self.awaitObjectId(completion: completion)
                             return
                         }
@@ -254,7 +273,7 @@ extension SonyPTPIPDevice {
             
             self.getDevicePropDescriptionFor(propCode: .objectInMemory, callback: { (result) in
                 
-                Logger.log(message: "Got device prop description for 'objectInMemory'", category: "SonyPTPIPCamera", level: .debug)
+                Logger.log(message: "Intervalometer - Got device prop description for 'objectInMemory': \(result)", category: "SonyPTPIPCamera", level: .debug)
                 os_log("Got device prop description for 'objectInMemory'", log: self.log, type: .debug)
                 
                 switch result {
@@ -265,6 +284,10 @@ extension SonyPTPIPDevice {
                     // This variable also turns to 1 , but downloading then will crash the firmware
                     // we seem to need to wait for 0x8000 (See https://github.com/gphoto/libgphoto2/blob/de98b151bce6b0aa70157d6c0ebb7f59b4da3792/camlibs/ptp2/library.c#L4330)
                     guard let value = property.currentValue.toInt, value >= 0x8000 else {
+                        Logger.log(message: "Intervalometer - Got device prop description for 'objectInMemory' value \(property.currentValue.toInt)", category: "SonyPTPIPCamera", level: .debug)
+                        os_log("Intervalometer - Got device prop description for 'objectInMemory' wrong value", log: self.log, type: .debug)
+
+                        
                         continueClosure(false)
                         return
                     }
@@ -278,7 +301,6 @@ extension SonyPTPIPDevice {
                     continueClosure(true)
                 }
             })
-            
 
         }, timeout: 35) { [weak self] in
             
