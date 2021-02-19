@@ -18,6 +18,7 @@ public class ApertureFormatter {
             return nil
         }
         let numberFormatter = NumberFormatter()
+        numberFormatter.decimalSeparator = "."
         
         // Some apertures are represented as a decimal even when they're a whole number:
         // "9.0" vs "11". We'll use the nullability of `decimalSeperator` to unwind
