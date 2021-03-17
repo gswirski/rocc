@@ -139,6 +139,9 @@ public final class LiveViewStream: NSObject {
     public let camera: Camera
     
     /// Whether the stream is currently running
+    public var isStarted: Bool = false
+    
+    /// Whether the stream is currently running
     public var isStreaming: Bool = false
     
     /// Whether the stream is currently starting
@@ -176,8 +179,8 @@ public final class LiveViewStream: NSObject {
     
     func canonLiveView(_ client: PTPIPClientNext) {
         print("Canon Live View loop")
-
-        client.getViewFinderData { (response) in
+        
+        /*client.getViewFinderData { (response) in
             switch response {
             case .success(let data):
                 self.receivedData = Data(data.data)
@@ -185,9 +188,11 @@ public final class LiveViewStream: NSObject {
             case .failure(let error):
                 print("Canon Live View error \(error)")
             }
-
-            self.canonLiveView(client)
-        }
+            
+            if self.isStreaming {
+                self.canonLiveView(client)
+            }
+        }*/
     }
 
     /// Performs all setup of the live view stream and begins streaming images over the network
@@ -204,12 +209,20 @@ public final class LiveViewStream: NSObject {
             
         if let camera = camera as? CanonPTPIPDevice, let client = camera.ptpIPClient {
             // 0xd101
-            client.setDevicePropValueEx(PTP.DeviceProperty.Value(code: .canonEVFMode, type: .uint32, value: UInt32(0x0009)), UInt32(0xd1b0)) { (response) in
-                print("response \(response)")
-                
+            
+            if !isStarted {
+                client.setDevicePropValueEx(PTP.DeviceProperty.Value(code: .canonEVFMode, type: .uint32, value: UInt32(0x0009)), UInt32(0xd1b0)) { (response) in
+                    print("response \(response)")
+                    
+                    self.isStarted = true
+                    self.isStreaming = true
+                    self.canonLiveView(client)
+                }
+            } else {
+                self.isStreaming = true
                 self.canonLiveView(client)
             }
-            
+                        
 
             return
         }
@@ -297,8 +310,9 @@ public final class LiveViewStream: NSObject {
     
     /// Stops the stream
     public func stop() {
+        isStreaming = false
         
-        Logger.log(message: "Stopping live view stream", category: "LiveViewStreaming", level: .debug)
+        /*Logger.log(message: "Stopping live view stream", category: "LiveViewStreaming", level: .debug)
         os_log("Stopping live view stream", log: log, type: .debug)
         
         isStreaming = false
@@ -311,7 +325,7 @@ public final class LiveViewStream: NSObject {
         
         camera.performFunction(LiveView.stop, payload: nil) { (error, void) in
             
-        }
+        }*/
     }
     
     internal struct Payload {

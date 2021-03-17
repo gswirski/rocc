@@ -171,15 +171,20 @@ internal final class CanonPTPIPDevice: SonyCamera {
                 return
             }
             
+            print("SENDING PING SET")
             // this also starts a timer to keep pinging the camera
-            self.pingTimer = Timer.scheduledTimer(withTimeInterval: TimeInterval(5), repeats: true) { [weak self] (timer) in
-                guard let self = self else {
-                    timer.invalidate()
-                    return
+            DispatchQueue.main.async {
+                self.pingTimer = Timer.scheduledTimer(withTimeInterval: TimeInterval(5), repeats: true) { [weak self] (timer) in
+                    print("SENDING PING \(self)")
+                    guard let self = self else {
+                        timer.invalidate()
+                        return
+                    }
+                    
+                    self.ptpIPClient?.sendCanonPing()
                 }
-                self.ptpIPClient?.sendCanonPing()
             }
-
+            
             self.setEventMode(completion: completion)
         }
 

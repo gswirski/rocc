@@ -223,6 +223,7 @@ final class PTPIPClientNext {
     }
     
     func sendCanonPing(callback: CommandRequestPacketResponse? = nil) {
+        print("SENDING PING!!")
         let packet = CommandRequestPacketArguments(commandCode: .canonPing, arguments: nil)
         sendCommandRequestPacket(packet, responseCallback: callback, dataCallback: nil)
     }
