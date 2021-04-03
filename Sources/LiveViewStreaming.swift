@@ -180,7 +180,7 @@ public final class LiveViewStream: NSObject {
     func canonLiveView(_ client: PTPIPClientNext) {
         print("Canon Live View loop")
         
-        /*client.getViewFinderData { (response) in
+        client.getViewFinderData { (response) in
             switch response {
             case .success(let data):
                 self.receivedData = Data(data.data)
@@ -192,7 +192,7 @@ public final class LiveViewStream: NSObject {
             if self.isStreaming {
                 self.canonLiveView(client)
             }
-        }*/
+        }
     }
 
     /// Performs all setup of the live view stream and begins streaming images over the network

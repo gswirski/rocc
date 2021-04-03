@@ -278,10 +278,22 @@ extension InputOutputPacketStream: StreamDelegate {
         switch eventCode {
         case Stream.Event.errorOccurred:
             guard let error = aStream.streamError else { return }
-            Logger.log(message: "Stream error: \(error.localizedDescription)", category: "PTPIPClient", level: .error)
-            os_log("Stream error: %@", log: log, type: .error, error.localizedDescription)
+            
+            let streamName: String
+            switch aStream {
+            case eventReadStream: streamName = "eventRead"
+            case eventWriteStream: streamName = "eventWrite"
+            case controlReadStream: streamName = "controlRead"
+            case controlWriteStream: streamName = "controlWrite"
+            default: streamName = "unknown"
+            }
+            
+            Logger.log(message: "Stream error: \(error.localizedDescription) in stream \(streamName)", category: "PTPIPClient", level: .error)
+            os_log("Stream error: %@ in stream %@", log: log, type: .error, error.localizedDescription, streamName)
+            
             disconnect()
             delegate?.packetStreamDidDisconnect(self)
+            
             break
         case Stream.Event.hasSpaceAvailable:
             Logger.log(message: "Stream has space available", category: "PTPIPClient", level: .debug)

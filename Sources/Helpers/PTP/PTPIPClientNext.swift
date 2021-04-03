@@ -18,6 +18,15 @@ import AppKit
 struct CommandRequestPacketArguments {
     let commandCode: PTP.CommandCode
     let arguments: [DWord]?
+    let data: ByteBuffer?
+    let phaseInfo: Int?
+    
+    init(commandCode: PTP.CommandCode, arguments: [DWord]? = nil, data: ByteBuffer? = nil, phaseInfo: Int? = nil){
+        self.commandCode = commandCode
+        self.arguments = arguments
+        self.data = data
+        self.phaseInfo = phaseInfo
+    }
 }
 
 /// A client for transferring images using the PTP IP protocol
@@ -148,11 +157,12 @@ final class PTPIPClientNext {
     
     func processNextPendingCommandPacket() {
         ptpQueue.async {
-            print("PTPQueue - start isExecutingAlready: \(self.isExecutingCommandPacket) count: \(self.pendingCommandPackets.count)")
+            print("PTPQueue - start isExecutingAlready: \(self.isExecutingCommandPacket) count: \(self.pendingCommandPackets.count) \(self.pendingCommandPackets.map { $0.packet.commandCode })")
             guard !self.isExecutingCommandPacket else { return }
             guard self.pendingCommandPackets.count > 0 else { return }
 
             let pending = self.pendingCommandPackets.removeFirst()
+            print("PTPQueue - executing \(pending)")
             
             self.isExecutingCommandPacket = true
             
@@ -161,13 +171,18 @@ final class PTPIPClientNext {
             
             let checkConditionsAndProceed = { [weak self] () in
                 guard let self = self else { return }
+                
+                print("PTPQueue - awaiting \(awaitingResponse) \(awaitingData)")
                 guard !awaitingResponse && !awaitingData else { return }
 
                 self.isExecutingCommandPacket = false
                 self.processNextPendingCommandPacket()
             }
             
-            let packet = Packet.commandRequestPacket(code: pending.packet.commandCode, arguments: pending.packet.arguments, transactionId: self.getNextTransactionId())
+            let transactionId = self.getNextTransactionId()
+            let phaseInfo = pending.packet.phaseInfo.map { DWord($0) } ?? 1
+            let packet = Packet.commandRequestPacket(code: pending.packet.commandCode, arguments: pending.packet.arguments, transactionId: transactionId, dataPhaseInfo: phaseInfo)
+            
             print("PTPQueue - setting transaction id: \(packet.transactionId), awaiting respo \(awaitingResponse) awaitingData \(awaitingData) -> \(pending.packet.commandCode)")
             
             self.sendCommandRequestPacket(packet, callback: { (response) in
@@ -178,8 +193,23 @@ final class PTPIPClientNext {
                     }
                 }
                 awaitingResponse = false
+                if let dataHandler = pending.dataHandler, response.code != .okay, awaitingData {
+                    // TODO: send error
+                    DispatchQueue.global(qos: .userInteractive).async {
+                        dataHandler(.failure(PTPIPClientNextError.invalidResponse))
+                    }
+                    awaitingData = false
+                }
                 checkConditionsAndProceed()
             }, callCallbackForAnyResponse: false)
+            
+            if let data = pending.packet.data {
+                let dataPackets = Packet.dataSendPackets(data: data, transactionId: transactionId)
+                dataPackets.forEach { (dataPacket) in
+                    self.sendControlPacket(dataPacket)
+                }
+            }
+
             
             if let dataHandler = pending.dataHandler {
                 self.awaitDataFor(transactionId: packet.transactionId) { (response) in
@@ -207,19 +237,16 @@ final class PTPIPClientNext {
 
     func setDevicePropValueEx(_ value: PTP.DeviceProperty.Value, _ code: PTPDevicePropertyDataType, callback: CommandRequestPacketResponse? = nil) {
         // TODO: this doesn't quite fit my data model :D
-        let transactionID = getNextTransactionId()
-        let opRequestPacket = Packet.commandRequestPacket(code: .canonSetDevicePropValueEx, arguments: [], transactionId: transactionID, dataPhaseInfo: 2)
+        
         var data = ByteBuffer()
         data.appendValue(UInt32(12), ofType: .uint32)
         data.appendValue(code, ofType: .uint32) // aperture
         data.appendValue(value.value, ofType: .uint32)
+
+        let packet = CommandRequestPacketArguments(commandCode: .canonSetDevicePropValueEx, arguments: [], data: data, phaseInfo: 2)
         
-        let dataPackets = Packet.dataSendPackets(data: data, transactionId: transactionID)
+        sendCommandRequestPacket(packet, responseCallback: callback, dataCallback: nil)
         
-        sendCommandRequestPacket(opRequestPacket, callback: callback)
-        dataPackets.forEach { (dataPacket) in
-            sendControlPacket(dataPacket)
-        }
     }
     
     func sendCanonPing(callback: CommandRequestPacketResponse? = nil) {

@@ -29,19 +29,25 @@ extension ByteBuffer {
             
             // First make sure have non-zero length!
             guard let length = self[dWord: UInt(offset)], length > 0 else {
-                offset += 1
-                continue
+                if offset == 0 { // we haven't made any progress, that's bad
+                    fatalError("Packet lenght was \(self[dWord: UInt(offset)]), offset \(offset) length \(length)")
+                } else {
+                    print("ByteBuffer - Packet lenght was \(self[dWord: UInt(offset)]), offset \(offset) length \(length)")
+                    break
+                }
             }
             // Then make sure we can get type int
             guard let typeInt = self[dWord: UInt(offset + MemoryLayout<DWord>.size)] else {
-                offset += 1
-                continue
+                if offset == 0 { // we haven't made any progress, that's bad
+                    fatalError("Type was not int?, offset \(offset) length \(length)")
+                } else {
+                    print("ByteBuffer - Type was not int?, offset \(offset) length \(length)")
+                    break
+                }
             }
             // Then check if we can get valid packet name
             guard Packet.Name(rawValue: typeInt) != nil else {
-                // Only move 1 byte on, because we may have a single spurious pre-pended byte!
-                offset += 1
-                continue
+                fatalError("Unrecognized packet type \(typeInt), offset \(offset) length \(length)")
             }
             
             // Parse actual packet!
