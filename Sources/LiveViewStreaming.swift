@@ -122,6 +122,20 @@ public struct FrameInfo {
             status = .invalid
         }
     }
+    
+    init?(canonData: ByteBuffer, viewfinder: (width: CGFloat, height: CGFloat)) {
+        let unknownA = canonData[dWord: 0]
+        let unknownB = canonData[dWord: 4]!
+        let x = canonData[dWord: 8]!
+        let y = canonData[dWord: 12]!
+        let width = canonData[dWord: 16]!
+        let height = canonData[dWord: 20]!
+        
+        area = CGRect(x: CGFloat(x)/viewfinder.width, y: CGFloat(y)/viewfinder.height, width: CGFloat(width)/viewfinder.width, height: CGFloat(height)/viewfinder.height)
+        
+        category = Category(rawValue: UInt8(unknownB)) ?? .invalid
+        status = .normal
+    }
 }
 
 /// A class for streaming the live view data from a particular instance of a Camera.
@@ -183,8 +197,7 @@ public final class LiveViewStream: NSObject {
         client.getViewFinderData { (response) in
             switch response {
             case .success(let data):
-                self.receivedData = Data(data.data)
-                self.attemptImageParse()
+                self.parseLiveViewData(data: ByteBuffer(bytes: data.data.bytes))
             case .failure(let error):
                 print("Canon Live View error \(error)")
             }
@@ -433,6 +446,54 @@ public final class LiveViewStream: NSObject {
             
             dataRange = 0..<(136+payloadBytes+paddingSize)
         }
+    }
+    
+    func parseLiveViewData(data: ByteBuffer) {
+        let dataSize = data.length
+        var pointer: UInt = 0
+        
+        var viewfinderWidth: CGFloat = 0
+        var viewfinderHeight: CGFloat = 0
+    
+        while (pointer + 8 < dataSize) {
+            let size: DWord = data[dWord: pointer]!
+            let type: DWord = data[dWord: pointer + 4]!
+            
+            switch type {
+            case 1, 9, 11:
+                print("field JPEG size: \(size) type: \(type)")
+                receivedData = Data(data.sliced(Int(pointer) + 8, Int(pointer) + Int(size)))
+                let payloads = parseJPEGs()
+                var lastImage: Image?
+
+                payloads?.forEach({ (payload) in
+                    if let image = payload.image {
+                        lastImage = image
+                    }
+                })
+
+                if let image = lastImage {
+                    delegate?.liveViewStream(self, didReceive: image)
+                }
+            case 14:
+                viewfinderWidth = CGFloat(data[dWord: pointer + 8]!)
+                viewfinderHeight = CGFloat(data[dWord: pointer + 12]!)
+            case 8:
+                let points = data[dWord: pointer + 8]!
+                let frames = (1...points).flatMap { (index) -> FrameInfo? in
+                    let start = Int(pointer) + (Int(index)-1) * 24 + 12
+                    let frame = FrameInfo(canonData: data.sliced(start, start + 24), viewfinder: (viewfinderWidth, viewfinderHeight))
+                    
+                    return frame
+                }
+                delegate?.liveViewStream(self, didReceive: frames)
+            default:
+                print("field unknown size: \(size) type: \(type)")
+            }
+                        
+            pointer += UInt(size)
+        }
+
     }
     
     @discardableResult internal func attemptImageParse() -> [Payload]? {

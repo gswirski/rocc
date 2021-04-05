@@ -213,6 +213,7 @@
 		EF8C238C25B61AE700E90BC7 /* CanonPTPIPCamera+FunctionSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF8C238B25B61AE700E90BC7 /* CanonPTPIPCamera+FunctionSupport.swift */; };
 		EF8C238F25B61AF600E90BC7 /* CanonPTPIPCamera+FunctionAvailability.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF8C238E25B61AF600E90BC7 /* CanonPTPIPCamera+FunctionAvailability.swift */; };
 		EF8C239225B61B3300E90BC7 /* CanonPTPIPCamera+TakePicture.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF8C239125B61B3300E90BC7 /* CanonPTPIPCamera+TakePicture.swift */; };
+		EFD5BD37261B735200C3E3E3 /* liveview-focus-9-points.txt in Resources */ = {isa = PBXBuildFile; fileRef = EFD5BD36261B735200C3E3E3 /* liveview-focus-9-points.txt */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -447,6 +448,7 @@
 		EF8C238B25B61AE700E90BC7 /* CanonPTPIPCamera+FunctionSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CanonPTPIPCamera+FunctionSupport.swift"; sourceTree = "<group>"; };
 		EF8C238E25B61AF600E90BC7 /* CanonPTPIPCamera+FunctionAvailability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CanonPTPIPCamera+FunctionAvailability.swift"; sourceTree = "<group>"; };
 		EF8C239125B61B3300E90BC7 /* CanonPTPIPCamera+TakePicture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CanonPTPIPCamera+TakePicture.swift"; sourceTree = "<group>"; };
+		EFD5BD36261B735200C3E3E3 /* liveview-focus-9-points.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "liveview-focus-9-points.txt"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -746,6 +748,7 @@
 			isa = PBXGroup;
 			children = (
 				EF584A9625C4B9280063F8CC /* liveview-r6-singleimage */,
+				EFD5BD36261B735200C3E3E3 /* liveview-focus-9-points.txt */,
 				B1F180F625458D9200453668 /* PTPFlow_Sony_GetEvent.json */,
 				B1F180F725458D9200453668 /* CmsDesc.xml */,
 				B1F180F825458D9200453668 /* PTPFlow_Sony_FunctionAvailability.json */,
@@ -1045,6 +1048,7 @@
 				B1F1810825458D9300453668 /* PTPFlow_Sony_FunctionSupport.json in Resources */,
 				B1F1810425458D9300453668 /* CmsDesc.xml in Resources */,
 				B1F1810625458D9300453668 /* liveview-rx100m7-singleimage in Resources */,
+				EFD5BD37261B735200C3E3E3 /* liveview-focus-9-points.txt in Resources */,
 				B1F1810F25458D9300453668 /* PTPFlow_Sony_Connect_Already_Open.json in Resources */,
 				B1F1810925458D9300453668 /* CdsDesc.xml in Resources */,
 			);

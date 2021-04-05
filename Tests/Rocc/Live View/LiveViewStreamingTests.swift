@@ -9,8 +9,48 @@
 import XCTest
 @testable import Rocc
 
+
 class LiveViewStreamingTests: XCTestCase {
 
+    func testCanonR6LiveViewDataParsedCorrectly() {
+        guard let hexString = try? String(contentsOf: Bundle(for: LiveViewStreamingTests.self).url(forResource: "liveview-focus-9-points.txt", withExtension: nil)!) else {
+            XCTFail("Couldn't get hex string from file: liveview-rx100m7-singleimage")
+            return
+        }
+        
+        let byteBuffer = ByteBuffer(hexString: hexString)
+        
+        let dataSize = byteBuffer.length
+        var pointer: UInt = 0
+        
+        while (pointer + 8 < dataSize) {
+            let size: DWord? = byteBuffer[dWord: pointer]
+            let type: DWord? = byteBuffer[dWord: pointer + 4]
+            
+            switch type {
+            case 1, 9, 11:
+                print("field JPEG size: \(size) type: \(type)")
+            case 14:
+                let width = byteBuffer[dWord: pointer + 8]
+                let height = byteBuffer[dWord: pointer + 12]
+                print("field viewfinder size \(width) \(height)")
+            case 8:
+                let points = byteBuffer[dWord: pointer + 8]!
+                let frames = (1...points).map { (index) -> FrameInfo? in
+                    let start = Int(pointer) + (Int(index)-1) * 24 + 12
+                    let frame = FrameInfo(canonData: byteBuffer.sliced(start, start + 24))
+                    
+                    return frame
+                }
+                print("field focus \(frames)")
+            default:
+                print("field unknown size: \(size) type: \(type)")
+            }
+                        
+            pointer += UInt(size!)
+        }
+    }
+    
     func testRX100M7SingleImageDataIsParsedCorrectly() {
         
         guard let hexString = try? String(contentsOf: Bundle(for: LiveViewStreamingTests.self).url(forResource: "liveview-rx100m7-singleimage", withExtension: nil)!) else {
