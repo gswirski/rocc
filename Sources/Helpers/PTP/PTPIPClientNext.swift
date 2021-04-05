@@ -236,8 +236,6 @@ final class PTPIPClientNext {
     }
 
     func setDevicePropValueEx(_ value: PTP.DeviceProperty.Value, _ code: PTPDevicePropertyDataType, callback: CommandRequestPacketResponse? = nil) {
-        // TODO: this doesn't quite fit my data model :D
-        
         var data = ByteBuffer()
         data.appendValue(UInt32(12), ofType: .uint32)
         data.appendValue(code, ofType: .uint32) // aperture
