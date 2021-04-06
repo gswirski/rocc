@@ -124,17 +124,33 @@ public struct FrameInfo {
     }
     
     init?(canonData: ByteBuffer, viewfinder: (width: CGFloat, height: CGFloat)) {
-        let unknownA = canonData[dWord: 0]
+        let statusBitmask = canonData[dWord: 0]!
         let unknownB = canonData[dWord: 4]!
+        
         let x = canonData[dWord: 8]!
         let y = canonData[dWord: 12]!
         let width = canonData[dWord: 16]!
         let height = canonData[dWord: 20]!
         
+        let boundryPoint = statusBitmask & UInt32(32)
+        let regularPoint = statusBitmask & UInt32(16)
+        let trackingFocus = statusBitmask & UInt32(4)
+        let failedFocus = statusBitmask & UInt32(2)
+        let focused = statusBitmask & UInt32(1)
+        
+        //print("FocusPoint - status bitmask \(statusBitmask) type \(unknownB) width \(width)")
+        
         area = CGRect(x: CGFloat(x)/viewfinder.width, y: CGFloat(y)/viewfinder.height, width: CGFloat(width)/viewfinder.width, height: CGFloat(height)/viewfinder.height)
         
         category = Category(rawValue: UInt8(unknownB)) ?? .invalid
-        status = .normal
+        
+        if trackingFocus != 0 || focused != 0 {
+            status = .focussed
+        } else if failedFocus != 0 {
+            status = .invalid
+        } else {
+            status = .normal
+        }
     }
 }
 
@@ -454,14 +470,13 @@ public final class LiveViewStream: NSObject {
         
         var viewfinderWidth: CGFloat = 0
         var viewfinderHeight: CGFloat = 0
-    
+        
         while (pointer + 8 < dataSize) {
             let size: DWord = data[dWord: pointer]!
             let type: DWord = data[dWord: pointer + 4]!
             
             switch type {
             case 1, 9, 11:
-                print("field JPEG size: \(size) type: \(type)")
                 receivedData = Data(data.sliced(Int(pointer) + 8, Int(pointer) + Int(size)))
                 let payloads = parseJPEGs()
                 var lastImage: Image?
@@ -480,7 +495,7 @@ public final class LiveViewStream: NSObject {
                 viewfinderHeight = CGFloat(data[dWord: pointer + 12]!)
             case 8:
                 let points = data[dWord: pointer + 8]!
-                let frames = (1...points).flatMap { (index) -> FrameInfo? in
+                let frames = (1...points).compactMap { (index) -> FrameInfo? in
                     let start = Int(pointer) + (Int(index)-1) * 24 + 12
                     let frame = FrameInfo(canonData: data.sliced(start, start + 24), viewfinder: (viewfinderWidth, viewfinderHeight))
                     
@@ -488,7 +503,8 @@ public final class LiveViewStream: NSObject {
                 }
                 delegate?.liveViewStream(self, didReceive: frames)
             default:
-                print("field unknown size: \(size) type: \(type)")
+                //print("Viewfinder frame - \(type) - \(size)")
+                break
             }
                         
             pointer += UInt(size)

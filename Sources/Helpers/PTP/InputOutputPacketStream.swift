@@ -30,6 +30,8 @@ final class InputOutputPacketStream: NSObject, PTPPacketStream {
     private var openStreams: [Stream] = []
     
     internal var awaitingFurtherDataControlPacket: Packetable?
+    
+    private var thread: Thread?
 
     init?(camera: Camera, port: Int = 15740) {
         
@@ -67,11 +69,21 @@ final class InputOutputPacketStream: NSObject, PTPPacketStream {
         controlReadStream.delegate = self
         controlWriteStream.delegate = self
         
-        controlReadStream.schedule(in: RunLoop.current, forMode: .default)
-        controlWriteStream.schedule(in: RunLoop.current, forMode: .default)
-        
-        controlReadStream.open()
-        controlWriteStream.open()
+        thread = Thread {
+            let runLoop = RunLoop.current
+            
+            controlReadStream.schedule(in: runLoop, forMode: .default)
+            controlWriteStream.schedule(in: runLoop, forMode: .default)
+            
+            controlReadStream.open()
+            controlWriteStream.open()
+            
+            print("RunLoop start")
+            runLoop.run()
+            
+            print("RunLoop end")
+        }
+        thread?.start()
         
         // We don't do anything else... we need to call `sendInitCommandAck` but we need the stream delegate
         // to tell us that the control write stream was opened!
