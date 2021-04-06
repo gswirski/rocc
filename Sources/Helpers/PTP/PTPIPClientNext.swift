@@ -253,6 +253,11 @@ final class PTPIPClientNext {
         sendCommandRequestPacket(packet, responseCallback: callback, dataCallback: nil)
     }
     
+    func canonSetAFPoint(_ point: CGPoint, callback: CommandRequestPacketResponse? = nil) {
+        let packet = CommandRequestPacketArguments(commandCode: .canonTouchAfPosition, arguments: [0x03, UInt32(point.x), UInt32(point.y), 0x00])
+        sendCommandRequestPacket(packet, responseCallback: callback, dataCallback: nil)
+    }
+    
     func getViewFinderData(callback: @escaping DataResponse) {
         let opRequestPacket = CommandRequestPacketArguments(commandCode: .canonGetViewFinderData, arguments: [0x00200000, 0x00000001, 0x00000000])
         

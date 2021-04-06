@@ -879,7 +879,19 @@ extension CanonPTPIPDevice {
                     callback(response.code.isError ? PTPError.commandRequestFailed(response.code) : nil, nil)
                 }
             )
-        case .setTouchAFPosition, .getTouchAFPosition, .cancelTouchAFPosition, .startTrackingFocus, .stopTrackingFocus, .setTrackingFocus, .getTrackingFocus:
+        case .setTouchAFPosition:
+            guard let position = payload as? CGPoint else {
+                fatalError("invalid position payload")
+            }
+            ptpIPClient?.canonSetAFPoint(position, callback: { (response) in
+                if response.code == .okay {
+                    callback(nil, TouchAF.Information(isSet: true, points: []) as? T.ReturnType)
+                } else {
+                    callback(PTPError.commandRequestFailed(response.code), nil)
+                }
+            })
+            
+        case .getTouchAFPosition, .cancelTouchAFPosition, .startTrackingFocus, .stopTrackingFocus, .setTrackingFocus, .getTrackingFocus:
             // Doesn't seem to be available via PTP/IP
             callback(FunctionError.notSupportedByAvailableVersion, nil)
         case .getContinuousShootingMode:
