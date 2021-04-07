@@ -398,7 +398,9 @@ extension SonyCamera {
         
         var requiresHalfPressToCapture: Bool {
             let modelsWhichRequireHalfPressToCapture: [Model] = [
+                .a6100,
                 .a6400,
+                .a6600,
                 .a7iii,
                 .a7riii,
                 .a9,
