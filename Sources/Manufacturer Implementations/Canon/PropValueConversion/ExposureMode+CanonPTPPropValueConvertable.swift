@@ -30,7 +30,7 @@ extension Exposure.Mode.Value: CanonPTPPropValueConvertable {
          */
         switch binaryInt {
         case 0x04:
-            self = .manual // TODO: implement BULB
+            self = .bulb
         case 0x03:
             self = .manual
         case 0x02:
@@ -40,7 +40,7 @@ extension Exposure.Mode.Value: CanonPTPPropValueConvertable {
         case 0x00:
             self = .programmedAuto
         case 0x37:
-            self = .superiorAuto // TODO: implement Fv
+            self = .flexiblePriority
         case 0x16:
             self = .intelligentAuto
         default:

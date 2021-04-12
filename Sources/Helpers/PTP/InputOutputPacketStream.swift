@@ -138,8 +138,8 @@ final class InputOutputPacketStream: NSObject, PTPPacketStream {
         
         var bytes: [Byte] = Array<Byte>.init(repeating: .zero, count: 1024)
         
-        Logger.log(message: "Start reading available bytes", category: "PTPIPClient", level: .debug)
-        os_log("Start reading available bytes", log: log, type: .debug)
+        //Logger.log(message: "Start reading available bytes", category: "PTPIPClient", level: .debug)
+        //os_log("Start reading available bytes", log: log, type: .debug)
         
         while stream.hasBytesAvailable {
             
@@ -173,8 +173,8 @@ final class InputOutputPacketStream: NSObject, PTPPacketStream {
             packets = eventLoopByteBuffer.parsePackets()
         case controlReadStream:
             
-            Logger.log(message: "Read control available bytes (\(mainLoopByteBuffer.length))", category: "PTPIPClient", level: .debug)
-            os_log("Read control available bytes (%i)", log: log, type: .debug, mainLoopByteBuffer.length)
+            //Logger.log(message: "Read control available bytes (\(mainLoopByteBuffer.length))", category: "PTPIPClient", level: .debug)
+            //os_log("Read control available bytes (%i)", log: log, type: .debug, mainLoopByteBuffer.length)
             
             // If we have a command response packet awaiting further data
             if var awaitingCommandResponsePacket = awaitingFurtherDataControlPacket {
@@ -308,8 +308,8 @@ extension InputOutputPacketStream: StreamDelegate {
             
             break
         case Stream.Event.hasSpaceAvailable:
-            Logger.log(message: "Stream has space available", category: "PTPIPClient", level: .debug)
-            os_log("Stream has space available", log: log, type: .debug)
+            //Logger.log(message: "Stream has space available", category: "PTPIPClient", level: .debug)
+            //os_log("Stream has space available", log: log, type: .debug)
             switch aStream {
             case eventWriteStream:
                 sendQueuedEventPackets()
@@ -321,8 +321,8 @@ extension InputOutputPacketStream: StreamDelegate {
                 break
             }
         case Stream.Event.hasBytesAvailable:
-            Logger.log(message: "Stream has bytes available", category: "PTPIPClient", level: .debug)
-            os_log("Stream has bytes available", log: log, type: .debug)
+            //Logger.log(message: "Stream has bytes available", category: "PTPIPClient", level: .debug)
+            //os_log("Stream has bytes available", log: log, type: .debug)
             readAvailableBytes(stream: aStream as! InputStream)
             break
         case Stream.Event.openCompleted:

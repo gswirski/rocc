@@ -105,6 +105,10 @@ extension Exposure.Mode.Value: SonyPTPPropValueConvertable {
             return DWord(0x00020003)
         case .shutterPriority:
             return DWord(0x00030004)
+        case .flexiblePriority:
+            fatalError("Sony does not support Fv exposure mode")
+        case .bulb:
+            fatalError("Sony does not support BULB as exposure mode")
         case .manual:
             return DWord(0x000000001)
         case .videoProgrammedAuto:

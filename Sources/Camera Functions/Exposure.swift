@@ -80,6 +80,8 @@ public struct Exposure {
             case programmedAuto
             case aperturePriority
             case shutterPriority
+            case flexiblePriority
+            case bulb
             case manual
             case panorama
             case videoProgrammedAuto
