@@ -194,10 +194,10 @@ final class PTPIPClientNext {
                 }
                 awaitingResponse = false
                 if let dataHandler = pending.dataHandler, response.code != .okay, awaitingData {
-                    // TODO: send error
-                    DispatchQueue.global(qos: .userInteractive).async {
-                        dataHandler(.failure(PTPIPClientNextError.invalidResponse))
-                    }
+                    // TODO: this might be required for Sony?
+                    /*DispatchQueue.global(qos: .userInteractive).async {
+                        dataHandler(Result.failure(response.code))
+                    }*/
                     awaitingData = false
                 }
                 checkConditionsAndProceed()
@@ -230,6 +230,11 @@ final class PTPIPClientNext {
     
     func sendCommandRequestPacket(_ packet: CommandRequestPacketArguments, responseCallback: CommandRequestPacketResponse?, dataCallback: DataResponse?) {
         ptpQueue.async {
+            if packet.commandCode == .canonGetViewFinderData && self.pendingCommandPackets.contains(where: { pendingCommand in
+                return pendingCommand.packet.commandCode == .canonGetViewFinderData
+            }) {
+                fatalError("requesting a frame before the previous one finished processing")
+            }
             self.pendingCommandPackets.append(PendingCommandRequest(packet: packet, responseHandler: responseCallback, dataHandler: dataCallback))
             self.processNextPendingCommandPacket()
         }
@@ -262,6 +267,8 @@ final class PTPIPClientNext {
         let opRequestPacket = CommandRequestPacketArguments(commandCode: .canonGetViewFinderData, arguments: [0x00200000, 0x00000001, 0x00000000])
         
         print("Canon Live View sending")
+        
+        
         sendCommandRequestPacket(opRequestPacket, responseCallback: { (response) in
             print("Canon Live View response A")
         }, dataCallback: callback)

@@ -797,28 +797,28 @@ extension CanonPTPIPDevice {
             //TODO: Unable to reverse engineer as not supported on RX100 VII
             callback(nil, nil)
         case .startBulbCapture:
-            /*startCapturing { [weak self] (error) in
-                
+            startTakingPicture { [weak self] (error) in
                 guard error == nil else {
                     callback(error, nil)
                     return
                 }
-                
-                self?.awaitFocusIfNeeded { () in
-                    callback(nil, nil)
-                }
-            }*/
-            callback(nil, nil)
+
+                /*
+                 self?.awaitFocusIfNeeded { () in
+                     callback(nil, nil)
+                 }
+                 */
+                callback(nil, nil)
+            }
         case .endBulbCapture:
-            /*finishCapturing() { (result) in
+            stopTakingPicture { (result) in
                 switch result {
-                case .failure(let error):
-                    callback(error, nil)
                 case .success(let url):
                     callback(nil, url as? T.ReturnType)
+                case .failure(let error):
+                    callback(error, nil)
                 }
-            }*/
-            callback(nil, nil)
+            }
         case .startLiveView, .startLiveViewWithQuality, .endLiveView:
             getDevicePropDescriptionFor(propCode: .liveViewURL) { [weak self] (result) in
                 

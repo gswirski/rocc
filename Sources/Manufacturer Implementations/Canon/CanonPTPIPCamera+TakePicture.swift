@@ -20,7 +20,64 @@ extension CanonPTPIPDevice {
         case noObjectId
     }
 
+    typealias CaptureResponse = (Error?) -> Void
     typealias CaptureCompletion = (Result<URL?, Error>) -> Void
+    
+    func startTakingPicture(completion: @escaping CaptureResponse) {
+        Logger.log(message: "Intervalometer - Taking picture...", category: "CanonPTPIPCamera", level: .debug)
+        os_log("Intervalometer - Taking picture...", log: log, type: .debug)
+        
+        ptpIPClient?.sendRemoteReleaseOn(callback: { [weak self] (_) in
+            guard let self = self else { return }
+            
+            self.awaitFocus { [weak self] () in
+                completion(nil)
+            }
+        })
+    }
+    
+    func stopTakingPicture(completion: @escaping CaptureCompletion) {
+        ptpIPClient?.sendRemoteReleaseOff(callback: { [weak self] (_) in
+            guard let self = self else { return }
+
+            self.awaitObject { [weak self] (_ objectId: DWord?) in
+                guard let self = self else { return }
+                
+                guard let objectId = objectId else {
+                    completion(.failure(CaptureError.noObjectId))
+                    return
+                }
+                
+                self.ptpIPClient?.getReducedObject(objectId: objectId) { (data) in
+                    switch data {
+                    case .success(let container):
+                        let data = Data(container.data)
+                        guard let image = UIImage(data: data) else {
+                            completion(.success(nil))
+                            return
+                        }
+                        
+                        let temporaryDirectoryURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+                        let fileName = "\(ProcessInfo().globallyUniqueString).jpg"
+                        let imageURL = temporaryDirectoryURL.appendingPathComponent(fileName)
+                        do {
+                            try data.write(to: imageURL)
+                            completion(.success(imageURL))
+                        } catch let error {
+                            Logger.log(message: "Failed to save image to disk: \(error.localizedDescription)", category: "SonyPTPIPCamera", level: .error)
+                            os_log("Failed to save image to disk", log: self.log, type: .error)
+                            completion(.success(nil))
+                        }
+                        print("Received Thumbnail data \(image)") //" \(container.data.toHex)")
+                    case .failure(let error):
+                        print("Received Thumbnail error \(error)")
+                    }
+                    
+                    completion(.success(nil))
+                }
+            }
+        })
+    }
     
     func takePicture(completion: @escaping CaptureCompletion) {
         
