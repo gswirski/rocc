@@ -156,20 +156,16 @@ struct CommandResponsePacket: Packetable {
         self.length = length
         
         guard let responseWord = data[word: 0] else {
-            // Some manufacturers *coughs* Sony, send malformed packets... we handle this by hard-coding the length and code!
             self.code = .okay
             self.originalLength  = length
-            self.length = 8
             transactionId = nil
             awaitingFurtherData = length > Packet.headerLength
             originalData = data
             return
         }
         guard let code = Code(rawValue: responseWord) else {
-            // Some manufacturers *coughs* Sony, send malformed packets... we handle this by hard-coding the length and code!
             self.code = .okay
             self.originalLength  = length
-            self.length = 8
             transactionId = nil
             awaitingFurtherData = length > Packet.headerLength
             originalData = data
