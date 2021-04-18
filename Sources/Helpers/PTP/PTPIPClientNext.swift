@@ -213,7 +213,10 @@ final class PTPIPClientNext {
             
             if let dataHandler = pending.dataHandler {
                 self.awaitDataFor(transactionId: packet.transactionId) { (response) in
-                    print("PTPQueue - received data for transaction \(packet.transactionId)")
+                    let length = response.map { (data) in
+                        return data.data.length
+                    }
+                    print("PTPQueue - received data for transaction \(packet.transactionId), length: \(length)")
                     DispatchQueue.global(qos: .userInteractive).async {
                         dataHandler(response)
                     }

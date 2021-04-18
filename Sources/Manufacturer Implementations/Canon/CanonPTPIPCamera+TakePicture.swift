@@ -43,6 +43,7 @@ extension CanonPTPIPDevice {
             self.awaitObject { [weak self] (_ objectId: DWord?) in
                 guard let self = self else { return }
                 
+                print("BULB capture objectId \(objectId)")
                 guard let objectId = objectId else {
                     completion(.failure(CaptureError.noObjectId))
                     return
@@ -56,6 +57,7 @@ extension CanonPTPIPDevice {
                             completion(.success(nil))
                             return
                         }
+                        print("Received Thumbnail data \(image)")
                         
                         let temporaryDirectoryURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
                         let fileName = "\(ProcessInfo().globallyUniqueString).jpg"
@@ -68,12 +70,11 @@ extension CanonPTPIPDevice {
                             os_log("Failed to save image to disk", log: self.log, type: .error)
                             completion(.success(nil))
                         }
-                        print("Received Thumbnail data \(image)") //" \(container.data.toHex)")
+                         //" \(container.data.toHex)")
                     case .failure(let error):
                         print("Received Thumbnail error \(error)")
+                        completion(.failure(error))
                     }
-                    
-                    completion(.success(nil))
                 }
             }
         })
@@ -122,9 +123,8 @@ extension CanonPTPIPDevice {
                                 print("Received Thumbnail data \(image)") //" \(container.data.toHex)")
                             case .failure(let error):
                                 print("Received Thumbnail error \(error)")
+                                completion(.failure(error))
                             }
-                            
-                            completion(.success(nil))
                         }
                     }
                 })
@@ -141,7 +141,6 @@ extension CanonPTPIPDevice {
             
             guard let self = self else { return }
             
-            print("Last Object Added: \(self.lastObjectAdded)")
             if let lastObjectAdded = self.lastObjectAdded, let id = lastObjectAdded[dWord: 8] {
                 objectID = id
                 /*let storageID = lastObjectAdded[dWord: 12]!
@@ -155,39 +154,58 @@ extension CanonPTPIPDevice {
             }
             
             continueClosure(false)
-        }, timeout: 10) {
+        }, timeout: 3) {
             completion(objectID)
         }
     }
     
     func awaitFocus(completion: @escaping () -> Void) {
         
-        Logger.log(message: "Focus mode is AF variant awaiting focus...", category: "SonyPTPIPCamera", level: .debug)
-        os_log("Focus mode is AF variant awaiting focus...", log: self.log, type: .debug)
+        Logger.log(message: "Intervalometer - Focus mode is AF variant awaiting focus...", category: "SonyPTPIPCamera", level: .debug)
+        os_log("Intervalometer - Focus mode is AF variant awaiting focus...", log: self.log, type: .debug)
+        
+        var result: Word?
+        
+        var prevMask: Word?
+        var prevVal: Word?
         
         DispatchQueue.global().asyncWhile({ [weak self] (continueClosure) in
             
             guard let self = self else { return }
             
             if let lastOLCChange = self.lastOLCInfoChanged {
+                
                 let len = lastOLCChange[dWord: 0]
                 let mask = lastOLCChange[word: 4]!
                 let val = lastOLCChange[word: 8]!
 
+                //print("Intervalometer - last OLC info \(len), \(mask), \(val)")
+                
                 if (mask & 0x0001) != 0 {
-                    print("Intervalometer - property size: \(len) BUTTON(\(mask)) - \(val)")
+                    
+                    if mask != prevMask || val != prevVal {
+                        print("Intervalometer - OLC size: \(len) BUTTON(\(mask)) - \(val)")
+                        prevMask = mask
+                        prevVal = val
+                    }
                     
                     // 4 is success, 3 is fail, 1 is "normal" after the entire focusing sequence finished
-                    if val != 2 && val != 7 {
-                        continueClosure(true)
+                    //if val != 2 && val != 7 {
+                    if val == 3 || val == 4 {
+                        result = val
+                        return continueClosure(true)
                     }
                 }
+            } else {
+                //print("Intervalometer - no OLC")
             }
             
             continueClosure(false)
-        }, timeout: 1) { [weak self] in
+        }, timeout: 10) { [weak self] in
             
             guard let self = self else { return }
+            
+            print("Intervalometer - focus completion \(result)")
             
             completion()
         }

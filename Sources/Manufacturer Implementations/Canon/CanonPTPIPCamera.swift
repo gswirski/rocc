@@ -216,6 +216,14 @@ internal final class CanonPTPIPDevice: SonyCamera {
         self.performFunction(Event.get, payload: nil, callback: { [weak self] (error, event) in
             self?.lastEvent = event
             // Can ignore errors as we don't really require this event for the connection process to complete!
+            self?.performSetRequestOLCInfoGroup(completion: completion)
+            
+        })
+    }
+    
+    private func performSetRequestOLCInfoGroup(completion: @escaping CanonPTPIPDevice.ConnectedCompletion) {
+        let packet = Packet.commandRequestPacket(code: .canonSetRequestOLCInfoGroup, arguments: [0x0fff], transactionId: ptpIPClient?.getNextTransactionId() ?? 1)
+        ptpIPClient?.sendCommandRequestPacketRestrictedToInitialization(packet, callback: { (response) in
             completion(nil, false)
         })
     }

@@ -30,7 +30,7 @@ extension ByteBuffer {
             // First make sure have non-zero length!
             guard let length = self[dWord: UInt(offset)], length > 0 else {
                 if offset == 0 { // we haven't made any progress, that's bad
-                    fatalError("Packet lenght was \(self[dWord: UInt(offset)]), offset \(offset) length \(self.length)")
+                    fatalError("Packet lenght was \(self[dWord: UInt(offset)]), offset \(offset) length \(self.length): \(self.toHex)")
                 } else {
                     print("ByteBuffer - Packet lenght was \(self[dWord: UInt(offset)]), offset \(offset) length \(self.length)")
                     break

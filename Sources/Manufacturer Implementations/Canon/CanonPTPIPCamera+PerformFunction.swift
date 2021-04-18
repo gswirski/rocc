@@ -14,9 +14,6 @@ extension CanonPTPIPDevice {
     typealias AllDevicePropertyDescriptionsCompletion = (_ result: Result<[PTPDeviceProperty], Error>) -> Void
     
     func parseEvent(data eventData: ByteBuffer) -> [PTPDeviceProperty] {
-        let dataSize = eventData.length
-        var pointer: UInt = 0
-        
         if allProperties == nil {
             var apertureField = PTP.DeviceProperty.Enum()
             apertureField.type = .uint32
@@ -72,7 +69,11 @@ extension CanonPTPIPDevice {
         var exposureCompensationField = allProperties[.exposureBiasCompensation] as! PTP.DeviceProperty.Enum
         var autoExposureMode = allProperties[.exposureProgramModeControl] as! PTP.DeviceProperty.Enum
 
-        while (pointer + 8 < dataSize) {
+        let dataSize = eventData.length
+        var pointer: UInt = 0
+        
+        
+        while (pointer + 8 <= dataSize) {
             var size: DWord? = eventData[dWord: pointer]
             var type: DWord? = eventData[dWord: pointer + 4]
             
@@ -118,9 +119,8 @@ extension CanonPTPIPDevice {
                     print("Received property \(propType) \(subType) size:\(size) \(value)")
 
                 default:
-                    /*let bytes = eventData.sliced(Int(pointer), Int(pointer) + Int(size!))
-                    print("Received property \(propType) (\(type)) \(subType) size:\(size) bytes: \(bytes.toHex)")*/
-                    break
+                    let bytes = eventData.sliced(Int(pointer), Int(pointer) + Int(size!))
+                    print("Received property \(propType) (\(type)) \(subType) size:\(size) bytes: \(bytes.toHex)")
                 }
             case .PTP_EC_CANON_EOS_AvailListChanged:
                 let subType = CanonSubPropType(rawValue: eventData[dWord: pointer + 8]!)
@@ -149,16 +149,15 @@ extension CanonPTPIPDevice {
                     exposureCompensationField.supported = values
                     print("Received property values: \(propType) \(subType) \(values)")
                 default:
-                    /*let bytes = eventData.sliced(Int(pointer), Int(pointer) + Int(size!))
-                    print("Received property values \(type) size:\(size) bytes: \(bytes.toHex)")*/
-                    break
+                    let bytes = eventData.sliced(Int(pointer), Int(pointer) + Int(size!))
+                    print("Received property values \(type) size:\(size) bytes: \(bytes.toHex)")
                 }
             case .PTP_EC_CANON_EOS_OLCInfoChanged:
                 let len = eventData[dWord: pointer + 8]!
                 lastOLCInfoChanged = eventData.sliced(Int(pointer) + 8, Int(pointer) + 8 + Int(len))
                 
                 let mask = eventData[word: pointer + 12]!
-                print("Received property OLC mask \(mask): \(lastOLCInfoChanged)")
+                print("Intervalometer - Received property OLC mask \(mask): \(lastOLCInfoChanged)")
 
                 var olcOffset: UInt = 0
                 if (mask & 0x0001) != 0 {
@@ -182,13 +181,12 @@ extension CanonPTPIPDevice {
                 print("Received property \(propType) objectID:\(objectID) parent \(parent) storageID \(storageID) OFC \(OFC) size \(size)")
                 
             default:
-                /*if Int(size!) < 300 {
+                if Int(size!) < 300 {
                     let bytes = eventData.sliced(Int(pointer), Int(pointer) + Int(size!))
-                    print("Received property \(type) size:\(size) bytes: \(bytes.toHex)")
+                    print("Received property \(propType) \(type) size:\(size) bytes: \(bytes.toHex)")
                 } else {
-                    print("Received property \(type) size:\(size)")
-                }*/
-                break
+                    print("Received property \(propType) \(type) size:\(size)")
+                }
             }
             
             
@@ -214,6 +212,7 @@ extension CanonPTPIPDevice {
         ptpIPClient?.sendCommandRequestPacket(packet, responseCallback: nil, dataCallback: { (dataResult) in
             switch dataResult {
             case .success(let data):
+                print("Parsing data of length \(data.data.length)")
                 callback(Result.success(self.parseEvent(data: data.data)))
             case .failure(let error):
                 callback(Result.failure(error))
@@ -232,7 +231,7 @@ extension CanonPTPIPDevice {
                 getEvent { (result) in
                     switch result {
                     case .success(let properties):
-                        print("received properties \(properties)")
+                        //print("received properties \(properties)")
                         
                         var exposureMode: (current: Exposure.Mode.Value, available: [Exposure.Mode.Value], supported: [Exposure.Mode.Value])?
                         var aperture: (current: Aperture.Value, available: [Aperture.Value], supported: [Aperture.Value])?
@@ -812,6 +811,9 @@ extension CanonPTPIPDevice {
             }
         case .endBulbCapture:
             stopTakingPicture { (result) in
+                Logger.log(message: "Intervalometer - Taking picture BULB RESULT \(result)", category: "SonyPTPIPCamera", level: .debug)
+                os_log("Intervalometer - Taking picture BULB RESULT", log: self.log, type: .debug)
+
                 switch result {
                 case .success(let url):
                     callback(nil, url as? T.ReturnType)

@@ -38,7 +38,7 @@ class LiveViewStreamingTests: XCTestCase {
                 let points = byteBuffer[dWord: pointer + 8]!
                 let frames = (1...points).map { (index) -> FrameInfo? in
                     let start = Int(pointer) + (Int(index)-1) * 24 + 12
-                    let frame = FrameInfo(canonData: byteBuffer.sliced(start, start + 24))
+                    let frame = FrameInfo(canonData: byteBuffer.sliced(start, start + 24), viewfinder: (width: 100, height: 100))
                     
                     return frame
                 }

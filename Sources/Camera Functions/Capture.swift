@@ -561,7 +561,7 @@ public struct BulbCapture: CameraFunction {
     
     public typealias SendType = Wrapper<Void>
     
-    public typealias ReturnType = Wrapper<Void>
+    public typealias ReturnType = URL
     
     /// Start capturing a bulb exposure
     public static let start = BulbCapture(function: .startBulbCapture)

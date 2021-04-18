@@ -126,6 +126,7 @@ struct PTP {
         case canonSetEventMode = 0x9115
         case canonGetEvent = 0x9116
         case canonPing = 0x902f
+        case canonSetRequestOLCInfoGroup = 0x913d
         case canonGetViewFinderData = 0x9153
         case canonTouchAfPosition = 0x915b
         case canonRemoteReleaseOn = 0x9128
