@@ -177,6 +177,9 @@ public final class LiveViewStream: NSObject {
     /// Whether the stream is currently starting
     public var isStarting: Bool = false
     
+    /// Whether the stream is currently awaiting a response from the camera
+    public var isAwaitingResponse: Bool = false
+    
     /// The size of the stream (M/L)
     public var streamSize: String?
     
@@ -210,7 +213,11 @@ public final class LiveViewStream: NSObject {
     func canonLiveView(_ client: PTPIPClientNext) {
         print("Canon Live View loop")
         
+        isAwaitingResponse = true
+        
         client.getViewFinderData { (response) in
+            self.isAwaitingResponse = false
+
             switch response {
             case .success(let data):
                 self.parseLiveViewData(data: ByteBuffer(bytes: data.data.bytes))
@@ -249,7 +256,12 @@ public final class LiveViewStream: NSObject {
                 }
             } else {
                 self.isStreaming = true
-                self.canonLiveView(client)
+                
+                print("LiveViewer start - isAwaitingResponse \(isAwaitingResponse)")
+                
+                if !isAwaitingResponse {
+                    self.canonLiveView(client)
+                }
             }
                         
 

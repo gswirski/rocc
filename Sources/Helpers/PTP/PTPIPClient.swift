@@ -172,7 +172,7 @@ final class PTPIPClient {
     
     func getViewFinderData(callback: @escaping DataResponse) {
         let transactionID = getNextTransactionId()
-        let opRequestPacket = Packet.commandRequestPacket(code: .canonGetViewFinderData, arguments: [0x00200000, 0x00000001, 0x00000000], transactionId: transactionID, dataPhaseInfo: 1)
+        let opRequestPacket = Packet.commandRequestPacket(code: .canonGetViewFinderData, arguments: [0x200000, 0x00000001, 0x00000000], transactionId: transactionID, dataPhaseInfo: 1)
         
         print("Canon Live View sending")
         sendCommandRequestPacket(opRequestPacket, callback: { (response) in

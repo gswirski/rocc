@@ -155,6 +155,11 @@ struct CommandResponsePacket: Packetable {
         self.name = name
         self.length = length
         
+        guard data.length >= length - 8 else {
+            print("Command Response Packet not ready: length \(length) data \(data.toHex)")
+            return nil
+        }
+    
         guard let responseWord = data[word: 0] else {
             self.code = .okay
             self.originalLength  = length
