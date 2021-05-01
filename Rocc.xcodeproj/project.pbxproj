@@ -200,6 +200,7 @@
 		EF584A5525BA2A0D0063F8CC /* ApertureValue+CanonPTPValueConvertable.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF584A5425BA2A0D0063F8CC /* ApertureValue+CanonPTPValueConvertable.swift */; };
 		EF584A9425C4B6D30063F8CC /* CanonPTPLiveStreamingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF584A9325C4B6D30063F8CC /* CanonPTPLiveStreamingTests.swift */; };
 		EF584A9725C4B9280063F8CC /* liveview-r6-singleimage in Resources */ = {isa = PBXBuildFile; fileRef = EF584A9625C4B9280063F8CC /* liveview-r6-singleimage */; };
+		EF5D0373263DF5AC003F09F7 /* CanonOLCInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF5D0372263DF5AC003F09F7 /* CanonOLCInfo.swift */; };
 		EF7C4E8A25C6FBAF005BC3AC /* ShutterSpeed+CanonPTPValueConvertable.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF7C4E8925C6FBAF005BC3AC /* ShutterSpeed+CanonPTPValueConvertable.swift */; };
 		EF7C4E8D25C6FC2E005BC3AC /* ISOValue+CanonPTPPropValueConvertable.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF7C4E8C25C6FC2E005BC3AC /* ISOValue+CanonPTPPropValueConvertable.swift */; };
 		EF7C4E9025C6FC3F005BC3AC /* ExposureCompensation+CanonPTPPropValueConvertable.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF7C4E8F25C6FC3F005BC3AC /* ExposureCompensation+CanonPTPPropValueConvertable.swift */; };
@@ -435,6 +436,7 @@
 		EF584A5425BA2A0D0063F8CC /* ApertureValue+CanonPTPValueConvertable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ApertureValue+CanonPTPValueConvertable.swift"; sourceTree = "<group>"; };
 		EF584A9325C4B6D30063F8CC /* CanonPTPLiveStreamingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanonPTPLiveStreamingTests.swift; sourceTree = "<group>"; };
 		EF584A9625C4B9280063F8CC /* liveview-r6-singleimage */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "liveview-r6-singleimage"; sourceTree = "<group>"; };
+		EF5D0372263DF5AC003F09F7 /* CanonOLCInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanonOLCInfo.swift; sourceTree = "<group>"; };
 		EF7C4E8925C6FBAF005BC3AC /* ShutterSpeed+CanonPTPValueConvertable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ShutterSpeed+CanonPTPValueConvertable.swift"; sourceTree = "<group>"; };
 		EF7C4E8C25C6FC2E005BC3AC /* ISOValue+CanonPTPPropValueConvertable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ISOValue+CanonPTPPropValueConvertable.swift"; sourceTree = "<group>"; };
 		EF7C4E8F25C6FC3F005BC3AC /* ExposureCompensation+CanonPTPPropValueConvertable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ExposureCompensation+CanonPTPPropValueConvertable.swift"; sourceTree = "<group>"; };
@@ -921,9 +923,18 @@
 			path = PropValueConversion;
 			sourceTree = "<group>";
 		};
+		EF5D0371263DF5A1003F09F7 /* API */ = {
+			isa = PBXGroup;
+			children = (
+				EF5D0372263DF5AC003F09F7 /* CanonOLCInfo.swift */,
+			);
+			path = API;
+			sourceTree = "<group>";
+		};
 		EF8C238425B5CC0000E90BC7 /* Canon */ = {
 			isa = PBXGroup;
 			children = (
+				EF5D0371263DF5A1003F09F7 /* API */,
 				EF584A5025BA29C40063F8CC /* PropValueConversion */,
 				EF8C238525B5CC1400E90BC7 /* CanonPTPIPCamera.swift */,
 				EF8C238825B61A9F00E90BC7 /* CanonPTPIPCamera+PerformFunction.swift */,
@@ -1203,6 +1214,7 @@
 				B115EF2F21E9FC3A00667FB7 /* SonyXMLParsers.swift in Sources */,
 				B180A7CC236F17EE001AAF5D /* PTP.swift in Sources */,
 				B19BD29F2413C4A100111539 /* SimulatedCamera.swift in Sources */,
+				EF5D0373263DF5AC003F09F7 /* CanonOLCInfo.swift in Sources */,
 				B1F180D02545792000453668 /* Authenticator.swift in Sources */,
 				EF8C238925B61A9F00E90BC7 /* CanonPTPIPCamera+PerformFunction.swift in Sources */,
 				B1F180CF2545792000453668 /* Request.swift in Sources */,

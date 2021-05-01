@@ -154,20 +154,95 @@ extension CanonPTPIPDevice {
                 }
             case .PTP_EC_CANON_EOS_OLCInfoChanged:
                 let len = eventData[dWord: pointer + 8]!
-                lastOLCInfoChanged = eventData.sliced(Int(pointer) + 8, Int(pointer) + 8 + Int(len))
-                
-                let mask = eventData[word: pointer + 12]!
-                print("Intervalometer - Received property OLC mask \(mask): \(lastOLCInfoChanged)")
+                let mask = eventData[dWord: pointer + 12]!
+                print("Intervalometer - OLC")
 
                 var olcOffset: UInt = 0
-                if (mask & 0x0001) != 0 {
+                if (mask & 0x0001) != 0 {  // BUTTON
+                    lastOLCInfoChanged.button = eventData[word: UInt(pointer) + 16 + UInt(olcOffset)]
+                    
+                    let hex = eventData.sliced(Int(pointer) + 16 + Int(olcOffset), Int(pointer) + 16 + Int(olcOffset) + 2).toHex
+                    print("Intervalometer - OLC(0x0001 button) - \(hex)")
                     olcOffset += 2
                 }
-                if (mask & 0x0002) != 0 {
+                if (mask & 0x0002) != 0 { // SHUTTERSPEED
+                    let data = eventData.sliced(Int(pointer) + 16 + Int(olcOffset), Int(pointer) + 16 + Int(olcOffset) + 7)
+                    lastOLCInfoChanged.shutterSpeed = ByteBuffer(bytes: data.bytes)
+                
+                    print("Intervalometer - OLC(0x0002 shutter) - \(data.toHex)")
                     let value = eventData[word: pointer + 16 + olcOffset + 5]!
-                    print("Received property OLC Shutter Speed: \(propType) (value)")
+                    olcOffset += 7
                 }
- 
+                if (mask & 0x0004) != 0 { // APERTURE
+                    let data = eventData.sliced(Int(pointer) + 16 + Int(olcOffset), Int(pointer) + 16 + Int(olcOffset) + 9)
+                    lastOLCInfoChanged.aperture = ByteBuffer(bytes: data.bytes)
+
+                    print("Intervalometer - OLC(0x0004 aperture) - \(data.toHex)")
+                    olcOffset += 9
+                }
+                if (mask & 0x0008) != 0 { // ISO
+                    let data = eventData.sliced(Int(pointer) + 16 + Int(olcOffset), Int(pointer) + 16 + Int(olcOffset) + 6)
+                    lastOLCInfoChanged.iso = ByteBuffer(bytes: data.bytes)
+
+                    print("Intervalometer - OLC(0x0008 iso) - \(data.toHex)")
+                    olcOffset += 6
+                }
+                if (mask & 0x0010) != 0 { // UNKNOWN
+                    let data = eventData.sliced(Int(pointer) + 16 + Int(olcOffset), Int(pointer) + 16 + Int(olcOffset) + 4)
+                    lastOLCInfoChanged.unknown1 = ByteBuffer(bytes: data.bytes)
+
+                    print("Intervalometer - OLC(0x0010 unknown) - \(data.toHex)")
+                    olcOffset += 4
+                }
+                if (mask & 0x0020) != 0 { // SELF TIMER?
+                    let data = eventData.sliced(Int(pointer) + 16 + Int(olcOffset), Int(pointer) + 16 + Int(olcOffset) + 6)
+                    lastOLCInfoChanged.selfTimer = ByteBuffer(bytes: data.bytes)
+
+                    print("Intervalometer - OLC(0x0020 self timer) - \(data.toHex)")
+                    olcOffset += 6
+                }
+                if (mask & 0x0040) != 0 { // EXPOSURE INDICATOR
+                    let data = eventData.sliced(Int(pointer) + 16 + Int(olcOffset), Int(pointer) + 16 + Int(olcOffset) + 8)
+                    lastOLCInfoChanged.exposureMeter = ByteBuffer(bytes: data.bytes)
+
+                    print("Intervalometer - OLC(0x0040 metering) - \(data.toHex)")
+                    olcOffset += 8
+                }
+                if (mask & 0x0080) != 0 { // UNKNOWN
+                    let data = eventData.sliced(Int(pointer) + 16 + Int(olcOffset), Int(pointer) + 16 + Int(olcOffset) + 4)
+                    lastOLCInfoChanged.unknown2 = ByteBuffer(bytes: data.bytes)
+
+                    print("Intervalometer - OLC(0x0080 unknown) - \(data.toHex)")
+                    olcOffset += 4
+                }
+                if (mask & 0x0100) != 0 { // FOCUS INFO
+                    let data = eventData.sliced(Int(pointer) + 16 + Int(olcOffset), Int(pointer) + 16 + Int(olcOffset) + 7)
+                    lastOLCInfoChanged.focusInfo = ByteBuffer(bytes: data.bytes)
+
+                    print("Intervalometer - OLC(0x0100 focus info) - \(data.toHex)")
+                    olcOffset += 7
+                }
+                if (mask & 0x0200) != 0 { // FOCUS MASK?
+                    let data = eventData.sliced(Int(pointer) + 16 + Int(olcOffset), Int(pointer) + 16 + Int(olcOffset) + 7)
+                    lastOLCInfoChanged.unknown3 = ByteBuffer(bytes: data.bytes)
+
+                    print("Intervalometer - OLC(0x0200 focus mask A?) - \(data.toHex)")
+                    olcOffset += 7
+                }
+                if (mask & 0x0400) != 0 { // FOCUS MASK?
+                    let data = eventData.sliced(Int(pointer) + 16 + Int(olcOffset), Int(pointer) + 16 + Int(olcOffset) + 7)
+                    lastOLCInfoChanged.unknown4 = ByteBuffer(bytes: data.bytes)
+
+                    print("Intervalometer - OLC(0x0400 focus mask B?) - \(data.toHex)")
+                    olcOffset += 7
+                }
+                if (mask & 0x0800) != 0 { // FOCUS MASK?
+                    let data = eventData.sliced(Int(pointer) + 16 + Int(olcOffset), Int(pointer) + 16 + Int(olcOffset) + 8)
+                    lastOLCInfoChanged.unknown5 = ByteBuffer(bytes: data.bytes)
+
+                    print("Intervalometer - OLC(0x0800 focus mask B?) - \(data.toHex)")
+                    olcOffset += 8
+                }
             case .PTP_EC_CANON_EOS_ObjectAddedEx, .PTP_EC_CANON_EOS_ObjectAddedEx64:
                 
                 lastObjectAdded = eventData.sliced(Int(pointer), Int(pointer) + Int(size!))
@@ -209,7 +284,7 @@ extension CanonPTPIPDevice {
     ) {
         
         let packet = CommandRequestPacketArguments(commandCode: .canonGetEvent, arguments: nil)
-        ptpIPClient?.sendCommandRequestPacket(packet, responseCallback: nil, dataCallback: { (dataResult) in
+        ptpIPClient?.sendCommandRequestPacket(packet, priority: .high, responseCallback: nil, dataCallback: { (dataResult) in
             switch dataResult {
             case .success(let data):
                 print("Parsing data of length \(data.data.length)")

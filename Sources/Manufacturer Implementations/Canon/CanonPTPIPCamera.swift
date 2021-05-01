@@ -111,7 +111,7 @@ internal final class CanonPTPIPDevice: SonyCamera {
     var allProperties: [PTP.DeviceProperty.Code: PTPDeviceProperty]?
     
     var lastEventPacket: EventPacket?
-    var lastOLCInfoChanged: ByteBuffer?
+    var lastOLCInfoChanged = CanonOLCInfo()
     var lastObjectAdded: ByteBuffer?
     
     var lastEvent: CameraEvent?
@@ -152,7 +152,7 @@ internal final class CanonPTPIPDevice: SonyCamera {
     private func setRemoteMode(completion: @escaping CanonPTPIPDevice.ConnectedCompletion) {
         let packet = CommandRequestPacketArguments(commandCode: .canonSetRemoteMode, arguments: [0x00000015])
         
-        ptpIPClient?.sendCommandRequestPacket(packet, responseCallback: { [weak self] (response) in
+        ptpIPClient?.sendCommandRequestPacket(packet, priority: .normal, responseCallback: { [weak self] (response) in
             guard response.code == .okay else {
                 completion(PTPError.commandRequestFailed(response.code), false)
                 return
@@ -193,7 +193,7 @@ internal final class CanonPTPIPDevice: SonyCamera {
     private func setEventMode(completion: @escaping CanonPTPIPDevice.ConnectedCompletion) {
         let packet = CommandRequestPacketArguments(commandCode: .canonSetEventMode, arguments: [0x00000002])
         
-        ptpIPClient?.sendCommandRequestPacket(packet, responseCallback: { [weak self] (response) in
+        ptpIPClient?.sendCommandRequestPacket(packet, priority: .normal, responseCallback: { [weak self] (response) in
             guard response.code == .okay else {
                 completion(PTPError.commandRequestFailed(response.code), false)
                 return
@@ -256,7 +256,7 @@ internal final class CanonPTPIPDevice: SonyCamera {
             propCodes.forEach { (propCode) in
                 
                 let packet = CommandRequestPacketArguments(commandCode: .sonyGetDevicePropDesc, arguments: [DWord(propCode.rawValue)])
-                ptpIPClient.sendCommandRequestPacket(packet, responseCallback: nil) { (dataResult) in
+                ptpIPClient.sendCommandRequestPacket(packet, priority: .normal, responseCallback: nil) { (dataResult) in
                     
                     remainingCodes.removeAll(where: { $0 == propCode })
                     
@@ -328,7 +328,7 @@ internal final class CanonPTPIPDevice: SonyCamera {
         } else if deviceInfo?.supportedOperations.contains(.sonyGetDevicePropDesc) ?? false {
             
             let packet = CommandRequestPacketArguments(commandCode: .sonyGetDevicePropDesc, arguments: [DWord(propCode.rawValue)])
-            ptpIPClient.sendCommandRequestPacket(packet, responseCallback: nil)  { (dataResult) in
+            ptpIPClient.sendCommandRequestPacket(packet, priority: .normal, responseCallback: nil)  { (dataResult) in
                 switch dataResult {
                 case .success(let data):
                     guard let property = data.data.getDeviceProperty(at: 0) else {
@@ -393,7 +393,7 @@ extension CanonPTPIPDevice: Camera {
     func connect(completion: @escaping CanonPTPIPDevice.ConnectedCompletion) {
         lastEvent = nil
         lastEventPacket = nil
-        lastOLCInfoChanged = nil
+        lastOLCInfoChanged = CanonOLCInfo()
         lastStillCaptureModes = nil
         allProperties = nil
         zoomingDirection = nil

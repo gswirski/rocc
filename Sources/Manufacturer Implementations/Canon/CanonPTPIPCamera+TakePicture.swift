@@ -173,31 +173,14 @@ extension CanonPTPIPDevice {
             
             guard let self = self else { return }
             
-            if let lastOLCChange = self.lastOLCInfoChanged {
-                
-                let len = lastOLCChange[dWord: 0]
-                let mask = lastOLCChange[word: 4]!
-                let val = lastOLCChange[word: 8]!
+            let lastOLCChange = self.lastOLCInfoChanged
 
-                //print("Intervalometer - last OLC info \(len), \(mask), \(val)")
-                
-                if (mask & 0x0001) != 0 {
-                    
-                    if mask != prevMask || val != prevVal {
-                        print("Intervalometer - OLC size: \(len) BUTTON(\(mask)) - \(val)")
-                        prevMask = mask
-                        prevVal = val
-                    }
-                    
-                    // 4 is success, 3 is fail, 1 is "normal" after the entire focusing sequence finished
-                    //if val != 2 && val != 7 {
-                    if val == 3 || val == 4 {
-                        result = val
-                        return continueClosure(true)
-                    }
-                }
-            } else {
-                //print("Intervalometer - no OLC")
+            if lastOLCChange.button == 3 || lastOLCChange.button == 4 {
+                result = lastOLCChange.button
+                return continueClosure(true)
+            } else if let focusInfo = lastOLCChange.focusInfo, (focusInfo[word: 5] ?? 0) > 0 {
+                result = (focusInfo[word: 5] ?? 0)
+                return continueClosure(true)
             }
             
             continueClosure(false)

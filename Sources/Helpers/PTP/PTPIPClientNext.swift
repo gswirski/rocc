@@ -121,8 +121,18 @@ final class PTPIPClientNext {
         let responseHandler: CommandRequestPacketResponse?
         let dataHandler: DataResponse?
     }
+    
+    enum PendingCommandPriority: Int, CaseIterable {
+        case high
+        case normal
+        case low
+    }
 
-    fileprivate var pendingCommandPackets: [PendingCommandRequest] = []
+    fileprivate var pendingCommandPackets: [PendingCommandPriority: [PendingCommandRequest]] = [
+        .high: [],
+        .normal: [],
+        .low: []
+    ]
     fileprivate var isExecutingCommandPacket: Bool = false
     
     /// Sends a packet to the event loop of the PTP IP connection
@@ -157,11 +167,11 @@ final class PTPIPClientNext {
     
     func processNextPendingCommandPacket() {
         ptpQueue.async {
-            print("PTPQueue - start isExecutingAlready: \(self.isExecutingCommandPacket) count: \(self.pendingCommandPackets.count) \(self.pendingCommandPackets.map { $0.packet.commandCode })")
+            print("PTPQueue - start isExecutingAlready: \(self.isExecutingCommandPacket) \(self.debugPendingCommandQueue())")
             guard !self.isExecutingCommandPacket else { return }
-            guard self.pendingCommandPackets.count > 0 else { return }
+            guard self.hasPendingCommands() else { return }
 
-            let pending = self.pendingCommandPackets.removeFirst()
+            let pending = self.removeFirstPendingCommand()
             print("PTPQueue - executing \(pending)")
             
             self.isExecutingCommandPacket = true
@@ -231,14 +241,14 @@ final class PTPIPClientNext {
         sendCommandRequestPacket(packet, callback: callback, callCallbackForAnyResponse: callCallbackForAnyResponse)
     }
     
-    func sendCommandRequestPacket(_ packet: CommandRequestPacketArguments, responseCallback: CommandRequestPacketResponse?, dataCallback: DataResponse?) {
+    func sendCommandRequestPacket(_ packet: CommandRequestPacketArguments, priority: PendingCommandPriority, responseCallback: CommandRequestPacketResponse?, dataCallback: DataResponse?) {
         ptpQueue.async {
-            if packet.commandCode == .canonGetViewFinderData && self.pendingCommandPackets.contains(where: { pendingCommand in
+            if packet.commandCode == .canonGetViewFinderData && self.pendingCommandPackets[.low]!.contains(where: { pendingCommand in
                 return pendingCommand.packet.commandCode == .canonGetViewFinderData
             }) {
                 fatalError("requesting a frame before the previous one finished processing")
             }
-            self.pendingCommandPackets.append(PendingCommandRequest(packet: packet, responseHandler: responseCallback, dataHandler: dataCallback))
+            self.pendingCommandPackets[priority]!.append(PendingCommandRequest(packet: packet, responseHandler: responseCallback, dataHandler: dataCallback))
             self.processNextPendingCommandPacket()
         }
     }
@@ -251,19 +261,19 @@ final class PTPIPClientNext {
 
         let packet = CommandRequestPacketArguments(commandCode: .canonSetDevicePropValueEx, arguments: [], data: data, phaseInfo: 2)
         
-        sendCommandRequestPacket(packet, responseCallback: callback, dataCallback: nil)
+        sendCommandRequestPacket(packet, priority: .normal, responseCallback: callback, dataCallback: nil)
         
     }
     
     func sendCanonPing(callback: CommandRequestPacketResponse? = nil) {
         print("SENDING PING!!")
         let packet = CommandRequestPacketArguments(commandCode: .canonPing, arguments: nil)
-        sendCommandRequestPacket(packet, responseCallback: callback, dataCallback: nil)
+        sendCommandRequestPacket(packet, priority: .low, responseCallback: callback, dataCallback: nil)
     }
     
     func canonSetAFPoint(_ point: CGPoint, callback: CommandRequestPacketResponse? = nil) {
         let packet = CommandRequestPacketArguments(commandCode: .canonTouchAfPosition, arguments: [0x03, UInt32(point.x), UInt32(point.y), 0x00])
-        sendCommandRequestPacket(packet, responseCallback: callback, dataCallback: nil)
+        sendCommandRequestPacket(packet, priority: .normal, responseCallback: callback, dataCallback: nil)
     }
     
     func getViewFinderData(callback: @escaping DataResponse) {
@@ -272,7 +282,7 @@ final class PTPIPClientNext {
         print("Canon Live View sending")
         
         
-        sendCommandRequestPacket(opRequestPacket, responseCallback: { (response) in
+        sendCommandRequestPacket(opRequestPacket, priority: .low, responseCallback: { (response) in
             print("Canon Live View response A")
         }, dataCallback: callback)
     }
@@ -280,20 +290,20 @@ final class PTPIPClientNext {
     func sendRemoteReleaseOn(callback: CommandRequestPacketResponse? = nil) {
         let opRequestPacket = CommandRequestPacketArguments(commandCode: .canonRemoteReleaseOn, arguments: [0x03, 0x00])
         
-        sendCommandRequestPacket(opRequestPacket, responseCallback: callback, dataCallback: nil)
+        sendCommandRequestPacket(opRequestPacket, priority: .normal, responseCallback: callback, dataCallback: nil)
     }
     
     func sendRemoteReleaseOff(callback: CommandRequestPacketResponse? = nil) {
         let opRequestPacket = CommandRequestPacketArguments(commandCode: .canonRemoteReleaseOff, arguments: [0x03])
         
-        sendCommandRequestPacket(opRequestPacket, responseCallback: callback, dataCallback: nil)
+        sendCommandRequestPacket(opRequestPacket, priority: .normal, responseCallback: callback, dataCallback: nil)
     }
     
     func getReducedObject(objectId: DWord, callback: @escaping DataResponse) {
         let opRequestPacket = CommandRequestPacketArguments(commandCode: .canonGetReducedObject, arguments: [objectId, 0x00200000, 0x00000000])
         
         print("Canon getThumbEx")
-        sendCommandRequestPacket(opRequestPacket, responseCallback: { (response) in
+        sendCommandRequestPacket(opRequestPacket, priority: .normal, responseCallback: { (response) in
             print("Canon getThumbEx response A")
         }, dataCallback: callback)
     }
@@ -463,6 +473,33 @@ extension PTPIPClientNext: PTPPacketStreamDelegate {
     
     func packetStreamDidOpenEventStream(_ stream: PTPPacketStream) {
         self.onEventStreamsOpened?()
+    }
+}
+
+extension PTPIPClientNext {
+    func hasPendingCommands() -> Bool {
+        for priority in PendingCommandPriority.allCases {
+            if pendingCommandPackets[priority]?.count ?? 0 > 0 {
+                return true
+            }
+        }
+        
+        return false
+    }
+
+    func removeFirstPendingCommand() -> PendingCommandRequest {
+        for priority in PendingCommandPriority.allCases {
+            if pendingCommandPackets[priority]?.count ?? 0 > 0 {
+                return pendingCommandPackets[priority]!.removeFirst()
+            }
+        }
+        
+        fatalError("Cannot dequeue from an empty pending command queue")
+    }
+    
+    func debugPendingCommandQueue() -> String {
+        return ""
+        //count: \(self.pendingCommandPackets.count) \(self.pendingCommandPackets.map { $0.packet.commandCode })
     }
 }
 
