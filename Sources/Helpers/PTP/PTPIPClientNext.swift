@@ -97,8 +97,6 @@ final class PTPIPClientNext {
     }
     
     private func sendInitCommandRequest() {
-        
-        let guidData = "8810B99668841894".data(using: .utf8)
         let guidBytes = ByteBuffer(hexString: "41 86 d4 f7 1f 9b 42 86  88 4d fb c1 1e e8 8b d9").bytes.compactMap { $0 }
         let connectPacket = Packet.initCommandPacket(guid: guidBytes, name: deviceName)
         sendControlPacket(connectPacket)
@@ -208,7 +206,7 @@ final class PTPIPClientNext {
                     /*DispatchQueue.global(qos: .userInteractive).async {
                         dataHandler(Result.failure(response.code))
                     }*/
-                    awaitingData = false
+                    //awaitingData = false
                 }
                 checkConditionsAndProceed()
             }, callCallbackForAnyResponse: false)
