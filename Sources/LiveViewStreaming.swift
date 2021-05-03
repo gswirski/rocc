@@ -218,15 +218,22 @@ public final class LiveViewStream: NSObject {
         client.getViewFinderData { (response) in
             self.isAwaitingResponse = false
 
+            var delay = false
+
             switch response {
             case .success(let data):
                 self.parseLiveViewData(data: ByteBuffer(bytes: data.data.bytes))
             case .failure(let error):
+                if (error as? CommandResponsePacket.Code) == .nikon_notReady {
+                    delay = true
+                }
                 print("Canon Live View error \(error)")
             }
             
             if self.isStreaming {
-                self.canonLiveView(client)
+                DispatchQueue.global().asyncAfter(deadline: .now() + 0.015) {
+                    self.canonLiveView(client)
+                }
             }
         }
     }

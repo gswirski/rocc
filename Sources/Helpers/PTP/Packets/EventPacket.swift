@@ -72,13 +72,6 @@ struct EventPacket: Packetable {
     }
     
     var description: String {
-        return """
-        {
-            length: \(length)
-            code: \(name)
-            event: \(code)
-            data: \(data.toHex)
-        }
-        """
+        return "\(length) | n:\(name) | e:\(code) | \(data.toHex)"
     }
 }

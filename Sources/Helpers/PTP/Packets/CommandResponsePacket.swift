@@ -189,15 +189,7 @@ struct CommandResponsePacket: Packetable {
     }
     
     var description: String {
-        return """
-        {
-            length: \(length)
-            code: \(name)
-            transactionId: \(transactionId ?? 0)
-            responseCode: \(code)
-            data: \(data.toHex)
-        }
-        """
+        return "\(length) | n:\(name) | t:\(transactionId ?? 0) | c:\(code) | \(data.toHex)"
     }
 }
 

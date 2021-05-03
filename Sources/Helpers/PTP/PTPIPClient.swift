@@ -24,13 +24,7 @@ extension Packetable {
     }
     
     var description: String {
-        return """
-        {
-            length: \(length)
-            code: \(name)
-            data: \(data.toHex)
-        }
-        """
+        return "\(length) | n:\(name) | \(data.toHex)"
     }
 }
 

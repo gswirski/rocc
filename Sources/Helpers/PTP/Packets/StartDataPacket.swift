@@ -49,14 +49,6 @@ struct StartDataPacket: Packetable {
     }
     
     var description: String {
-        return """
-        {
-            length: \(length)
-            code: \(name)
-            transactionId: \(transactionId)
-            dataLength:  \(dataLength)
-            data: \(data.toHex)
-        }
-        """
+        return "\(length) | n:\(name) | t:\(transactionId) | dl:\(dataLength) | \(data.toHex)"
     }
 }

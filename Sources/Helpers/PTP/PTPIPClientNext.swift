@@ -350,8 +350,21 @@ final class PTPIPClientNext {
     fileprivate func handle(packet: Packetable) {
         
         if packet as? CommandResponsePacket == nil || !(packet as! CommandResponsePacket).awaitingFurtherData {
-            Logger.log(message: "Received packet from device: \(packet.debugDescription)", category: "PTPIPClient", level: .debug)
-            os_log("Received packet from device: %@", log: ptpClientLog, type: .debug, "\(packet.debugDescription)")
+            let packetTransactionId = { () -> DWord? in
+                switch packet {
+                case let startData as StartDataPacket: return startData.transactionId
+                case let data as DataPacket: return data.transactionId
+                case let endData as EndDataPacket: return endData.transactionId
+                case let response as CommandResponsePacket: return response.code != .okay ? nil : response.transactionId
+                default: return nil
+                }
+            }()
+            let viewfinderTransactionId = (packetStream as? InputOutputPacketStream)?.lastViewfinderRequest
+            
+            if packetTransactionId == nil || viewfinderTransactionId == nil || packetTransactionId != viewfinderTransactionId {
+                Logger.log(message: "RECV: \(packet.debugDescription)", category: "PTPIPClient", level: .debug)
+                os_log("RECV: %@", log: ptpClientLog, type: .debug, "\(packet.debugDescription)")
+            }
         }
         
         switch packet {

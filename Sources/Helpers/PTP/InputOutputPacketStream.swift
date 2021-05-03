@@ -32,6 +32,8 @@ final class InputOutputPacketStream: NSObject, PTPPacketStream {
     internal var awaitingFurtherDataControlPacket: Packetable?
     
     private var thread: Thread?
+    
+    var lastViewfinderRequest: DWord?
 
     init?(camera: Camera, port: Int = 15740) {
         
@@ -230,8 +232,12 @@ final class InputOutputPacketStream: NSObject, PTPPacketStream {
             pendingControlPackets.append(packet)
             return
         }
-        Logger.log(message: "Sending control packet to device: \(packet.debugDescription)", category: "PTPIPClient", level: .debug)
-        os_log("Sending control packet to device: %@", log: log, type: .debug, "\(packet.debugDescription)")
+        if let cmdPacket = packet as? CommandRequestPacket, cmdPacket.commandCode == .canonGetViewFinderData {
+            lastViewfinderRequest = cmdPacket.transactionId
+        } else {
+            Logger.log(message: "SEND: \(packet.debugDescription)", category: "PTPIPClient", level: .debug)
+            os_log("SEND: %@", log: log, type: .debug, "\(packet.debugDescription)")
+        }
         controlWriteStream.write(packet)
     }
     
@@ -274,8 +280,11 @@ final class InputOutputPacketStream: NSObject, PTPPacketStream {
             guard response == packet.length else {
                 break
             }
-            Logger.log(message: "Sending control packet to device: \(packet.debugDescription)", category: "PTPIPClient", level: .debug)
-            os_log("Sending control packet to device: %@", log: log, type: .debug, "\(packet.debugDescription)")
+            if let cmdPacket = packet as? CommandRequestPacket, cmdPacket.commandCode == .canonGetViewFinderData {
+                lastViewfinderRequest = cmdPacket.transactionId
+            }
+            Logger.log(message: "SEND: \(packet.debugDescription)", category: "PTPIPClient", level: .debug)
+            os_log("SEND: %@", log: log, type: .debug, "\(packet.debugDescription)")
             pendingControlPackets.remove(at: index)
         }
     }

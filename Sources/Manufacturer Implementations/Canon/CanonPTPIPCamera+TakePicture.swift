@@ -188,7 +188,7 @@ extension CanonPTPIPDevice {
             
             guard let self = self else { return }
             
-            print("Intervalometer - focus completion \(result)")
+            Logger.log(message: "Intervalometer - focus completion \(result)", category: "PTPIPClient", level: .debug)
             
             completion()
         }
