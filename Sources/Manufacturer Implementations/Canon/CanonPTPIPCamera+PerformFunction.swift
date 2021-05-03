@@ -50,12 +50,20 @@ extension CanonPTPIPDevice {
             autoExposureMode.getSetSupported = .getSet
             autoExposureMode.length = 4
             
+            var driveMode = PTP.DeviceProperty.Enum()
+            driveMode.type = .uint32
+            driveMode.code = .stillCaptureMode
+            driveMode.getSetAvailable = .getSet
+            driveMode.getSetSupported = .getSet
+            driveMode.length = 4
+            
             allProperties = [
                 .fNumber: apertureField,
                 .shutterSpeed: shutterSpeedField,
                 .ISO: isoField,
                 .exposureBiasCompensation: exposureCompensationField,
-                .exposureProgramModeControl: autoExposureMode
+                .exposureProgramModeControl: autoExposureMode,
+                .stillCaptureMode: driveMode
             ]
         }
         
@@ -68,6 +76,8 @@ extension CanonPTPIPDevice {
         var isoField = allProperties[.ISO] as! PTP.DeviceProperty.Enum
         var exposureCompensationField = allProperties[.exposureBiasCompensation] as! PTP.DeviceProperty.Enum
         var autoExposureMode = allProperties[.exposureProgramModeControl] as! PTP.DeviceProperty.Enum
+        var driveMode = allProperties[.stillCaptureMode] as! PTP.DeviceProperty.Enum
+
 
         let dataSize = eventData.length
         var pointer: UInt = 0
@@ -117,7 +127,13 @@ extension CanonPTPIPDevice {
                     autoExposureMode.factoryValue = value!
                     
                     print("Received property \(propType) \(subType) size:\(size) \(value)")
-
+                case .PTP_DPC_CANON_EOS_DriveMode:
+                    let value = eventData[dWord: pointer + 12]
+                    
+                    driveMode.currentValue = value!
+                    driveMode.factoryValue = value!
+                    
+                    print("Received property \(propType) \(subType) size:\(size) \(value)")
                 default:
                     let bytes = eventData.sliced(Int(pointer), Int(pointer) + Int(size!))
                     print("Received property \(propType) (\(type)) \(subType) size:\(size) bytes: \(bytes.toHex)")
@@ -273,6 +289,7 @@ extension CanonPTPIPDevice {
         allProperties[.ISO] = isoField
         allProperties[.exposureBiasCompensation] = exposureCompensationField
         allProperties[.exposureProgramModeControl] = autoExposureMode
+        allProperties[.stillCaptureMode] = driveMode
         
         self.allProperties = allProperties
 
@@ -313,6 +330,7 @@ extension CanonPTPIPDevice {
                         var shutterSpeed: (current: ShutterSpeed, available: [ShutterSpeed], supported: [ShutterSpeed])?
                         var iso: (current: ISO.Value, available: [ISO.Value], supported: [ISO.Value])?
                         var exposureCompensation: (current: Exposure.Compensation.Value, available: [Exposure.Compensation.Value], supported: [Exposure.Compensation.Value])?
+                        var driveMode: (current: ShootingMode, available: [ShootingMode], supported: [ShootingMode])?
                         
                         var availableFunctions: [_CameraFunction] = []
                         var supportedFunctions: [_CameraFunction] = []
@@ -413,13 +431,27 @@ extension CanonPTPIPDevice {
                                 
                                 exposureMode = (value, [], [])
                                 break
+                                
+                            case .stillCaptureMode:
+                                guard let enumProperty = deviceProperty as? PTP.DeviceProperty.Enum else {
+                                    return
+                                }
+                                guard let value = ShootingMode(canonValue: enumProperty.currentValue) else {
+                                    return
+                                }
+                                let available = enumProperty.available.compactMap { ShootingMode(canonValue: $0) }
+                                let supported = enumProperty.available.compactMap { ShootingMode(canonValue: $0) }
+
+                                
+                                driveMode = (value, available, supported)
+                                break
 
                             default:
                                 break
                             }
                         }
                         
-                        let event = CameraEvent(status: nil, liveViewInfo: nil, liveViewQuality: nil, zoomPosition: nil, availableFunctions: availableFunctions, supportedFunctions: supportedFunctions, postViewPictureURLs: nil, storageInformation: nil, beepMode: nil, function: nil, functionResult: false, videoQuality: nil, stillSizeInfo: nil, steadyMode: nil, viewAngle: nil, exposureMode: exposureMode, exposureModeDialControl: nil, exposureSettingsLockStatus: nil, postViewImageSize: nil, selfTimer: nil, shootMode: nil, exposureCompensation: exposureCompensation, flashMode: nil, aperture: aperture, focusMode: nil, iso: iso, isProgramShifted: nil, shutterSpeed: shutterSpeed, whiteBalance: nil, touchAF: nil, focusStatus: nil, zoomSetting: nil, stillQuality: nil, stillFormat: nil, continuousShootingMode: nil, continuousShootingSpeed: nil, continuousBracketedShootingBrackets: nil, singleBracketedShootingBrackets: nil, flipSetting: nil, scene: nil, intervalTime: nil, colorSetting: nil, videoFileFormat: nil, videoRecordingTime: nil, highFrameRateCaptureStatus: nil, infraredRemoteControl: nil, tvColorSystem: nil, trackingFocusStatus: nil, trackingFocus: nil, batteryInfo: nil, numberOfShots: nil, autoPowerOff: nil, loopRecordTime: nil, audioRecording: nil, windNoiseReduction: nil, bulbShootingUrl: nil, bulbCapturingTime: nil, bulbShootingURLS: nil)
+                        let event = CameraEvent(status: nil, liveViewInfo: nil, liveViewQuality: nil, zoomPosition: nil, availableFunctions: availableFunctions, supportedFunctions: supportedFunctions, postViewPictureURLs: nil, storageInformation: nil, beepMode: nil, function: nil, functionResult: false, videoQuality: nil, stillSizeInfo: nil, steadyMode: nil, viewAngle: nil, exposureMode: exposureMode, exposureModeDialControl: nil, exposureSettingsLockStatus: nil, postViewImageSize: nil, selfTimer: nil, shootMode: driveMode, exposureCompensation: exposureCompensation, flashMode: nil, aperture: aperture, focusMode: nil, iso: iso, isProgramShifted: nil, shutterSpeed: shutterSpeed, whiteBalance: nil, touchAF: nil, focusStatus: nil, zoomSetting: nil, stillQuality: nil, stillFormat: nil, continuousShootingMode: nil, continuousShootingSpeed: nil, continuousBracketedShootingBrackets: nil, singleBracketedShootingBrackets: nil, flipSetting: nil, scene: nil, intervalTime: nil, colorSetting: nil, videoFileFormat: nil, videoRecordingTime: nil, highFrameRateCaptureStatus: nil, infraredRemoteControl: nil, tvColorSystem: nil, trackingFocusStatus: nil, trackingFocus: nil, batteryInfo: nil, numberOfShots: nil, autoPowerOff: nil, loopRecordTime: nil, audioRecording: nil, windNoiseReduction: nil, bulbShootingUrl: nil, bulbCapturingTime: nil, bulbShootingURLS: nil)
                         callback(nil, event as? T.ReturnType)
                     case .failure(let error):
                         print("received error \(error)")
@@ -476,32 +508,6 @@ extension CanonPTPIPDevice {
             imageURLs = [:]
             callback(nil, lastEvent as? T.ReturnType)
             
-        case .setShootMode:
-            guard let value = payload as? ShootingMode else {
-                callback(FunctionError.invalidPayload, nil)
-                return
-            }
-            guard let stillCapMode = bestStillCaptureMode(for: value) else {
-                guard let exposureProgrammeMode = self.bestExposureProgrammeModes(for: value, currentExposureProgrammeMode: self.lastEvent?.exposureMode?.current)?.first else {
-                    callback(FunctionError.notAvailable, nil)
-                    return
-                }
-                self.setExposureProgrammeMode(exposureProgrammeMode) { (programmeError) in
-                    // We return error here, as if callers obey the available shoot modes they shouldn't be calling this with an invalid value
-                    callback(programmeError, nil)
-                }
-                return
-            }
-            setStillCaptureMode(stillCapMode) { [weak self] (error) in
-                guard let self = self, error == nil, let exposureProgrammeMode = self.bestExposureProgrammeModes(for: value, currentExposureProgrammeMode: self.lastEvent?.exposureMode?.current)?.first else {
-                    callback(error, nil)
-                    return
-                }
-                self.setExposureProgrammeMode(exposureProgrammeMode) { (programmeError) in
-                    // We return error here, as if callers obey the available shoot modes they shouldn't be calling this with an invalid value
-                    callback(programmeError, nil)
-                }
-            }
         case .getShootMode:
             getDevicePropDescriptionsFor(propCodes: [.stillCaptureMode, .exposureProgramMode]) { (result) in
              
@@ -516,7 +522,7 @@ extension CanonPTPIPDevice {
         case .setContinuousShootingMode:
             // This isn't a thing via PTP according to Sony's app (Instead we just have multiple continuous shooting speeds) so we just don't do anything!
             callback(nil, nil)
-        case .setISO, .setShutterSpeed, .setAperture, .setExposureCompensation, .setFocusMode, .setExposureMode, .setExposureModeDialControl, .setFlashMode, .setContinuousShootingSpeed, .setStillQuality, .setStillFormat, .setVideoFileFormat, .setVideoQuality, .setContinuousBracketedShootingBracket, .setSingleBracketedShootingBracket, .setLiveViewQuality:
+        case .setISO, .setShutterSpeed, .setAperture, .setExposureCompensation, .setFocusMode, .setExposureMode, .setExposureModeDialControl, .setFlashMode, .setContinuousShootingSpeed, .setStillQuality, .setStillFormat, .setVideoFileFormat, .setVideoQuality, .setContinuousBracketedShootingBracket, .setSingleBracketedShootingBracket, .setLiveViewQuality, .setShootMode:
             
             print("CANON SET \(function.function): \(payload)")
             guard let value = payload as? CanonPTPPropValueConvertable else {
@@ -785,24 +791,32 @@ extension CanonPTPIPDevice {
                 }
             }
         case .startContinuousShooting, .startContinuousBracketShooting:
-            /*startCapturing { (error) in
-                callback(error, nil)
-            }
-            callback(nil, nil)*/
-            callback(nil, nil)
-        case .endContinuousShooting, .stopContinuousBracketShooting:
-            // Only await image if we're continuous shooting, continuous bracket behaves strangely
-            // in that the user must manually trigger the completion and so `ObjectID` event will have been received
-            // long ago!
-            /*finishCapturing(awaitObjectId: function.function == .endContinuousShooting) { (result) in
-                switch result {
-                case .failure(let error):
+            startTakingPicture { [weak self] (error) in
+                guard error == nil else {
                     callback(error, nil)
+                    return
+                }
+
+                /*
+                 self?.awaitFocusIfNeeded { () in
+                     callback(nil, nil)
+                 }
+                 */
+                callback(nil, nil)
+            }
+        case .endContinuousShooting, .stopContinuousBracketShooting:
+            stopTakingPicture { (result) in
+                Logger.log(message: "Intervalometer - Taking picture CONT RESULT \(result)", category: "SonyPTPIPCamera", level: .debug)
+                os_log("Intervalometer - Taking picture CONT RESULT", log: self.log, type: .debug)
+
+                switch result {
                 case .success(let url):
                     callback(nil, url as? T.ReturnType)
+                case .failure(let error):
+                    callback(error, nil)
                 }
-            }*/
-            callback(nil, nil)
+            }
+            
         case .startVideoRecording:
             self.ptpIPClient?.sendSetControlDeviceBValue(
                 PTP.DeviceProperty.Value(

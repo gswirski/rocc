@@ -16,5 +16,5 @@ protocol CanonPTPPropValueConvertable {
     
     var code: PTP.DeviceProperty.Code { get }
     
-    init?(sonyValue: PTPDevicePropertyDataType)
+    init?(canonValue: PTPDevicePropertyDataType)
 }

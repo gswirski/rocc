@@ -211,7 +211,7 @@ public final class LiveViewStream: NSObject {
     private var eventTimer: Timer?
     
     func canonLiveView(_ client: PTPIPClientNext) {
-        print("Canon Live View loop")
+        //print("Canon Live View loop")
         
         isAwaitingResponse = true
         
@@ -227,7 +227,7 @@ public final class LiveViewStream: NSObject {
                 if (error as? CommandResponsePacket.Code) == .nikon_notReady {
                     delay = true
                 }
-                print("Canon Live View error \(error)")
+                //print("Canon Live View error \(error)")
             }
             
             if self.isStreaming {

@@ -165,12 +165,12 @@ final class PTPIPClientNext {
     
     func processNextPendingCommandPacket() {
         ptpQueue.async {
-            print("PTPQueue - start isExecutingAlready: \(self.isExecutingCommandPacket) \(self.debugPendingCommandQueue())")
+            //print("PTPQueue - start isExecutingAlready: \(self.isExecutingCommandPacket) \(self.debugPendingCommandQueue())")
             guard !self.isExecutingCommandPacket else { return }
             guard self.hasPendingCommands() else { return }
 
             let pending = self.removeFirstPendingCommand()
-            print("PTPQueue - executing \(pending)")
+            //print("PTPQueue - executing \(pending)")
             
             self.isExecutingCommandPacket = true
             
@@ -180,7 +180,7 @@ final class PTPIPClientNext {
             let checkConditionsAndProceed = { [weak self] () in
                 guard let self = self else { return }
                 
-                print("PTPQueue - awaiting \(awaitingResponse) \(awaitingData)")
+                //print("PTPQueue - awaiting \(awaitingResponse) \(awaitingData)")
                 guard !awaitingResponse && !awaitingData else { return }
 
                 self.isExecutingCommandPacket = false
@@ -191,10 +191,10 @@ final class PTPIPClientNext {
             let phaseInfo = pending.packet.phaseInfo.map { DWord($0) } ?? 1
             let packet = Packet.commandRequestPacket(code: pending.packet.commandCode, arguments: pending.packet.arguments, transactionId: transactionId, dataPhaseInfo: phaseInfo)
             
-            print("PTPQueue - setting transaction id: \(packet.transactionId), awaiting respo \(awaitingResponse) awaitingData \(awaitingData) -> \(pending.packet.commandCode)")
+            //print("PTPQueue - setting transaction id: \(packet.transactionId), awaiting respo \(awaitingResponse) awaitingData \(awaitingData) -> \(pending.packet.commandCode)")
             
             self.sendCommandRequestPacket(packet, callback: { (response) in
-                print("PTPQueue - received response \(response)")
+                //print("PTPQueue - received response \(response)")
                 if let responseHandler = pending.responseHandler {
                     DispatchQueue.global(qos: .userInteractive).async {
                         responseHandler(response)
@@ -224,7 +224,7 @@ final class PTPIPClientNext {
                     let length = response.map { (data) in
                         return data.data.length
                     }
-                    print("PTPQueue - received data for transaction \(packet.transactionId), length: \(length)")
+                    //print("PTPQueue - received data for transaction \(packet.transactionId), length: \(length)")
                     DispatchQueue.global(qos: .userInteractive).async {
                         dataHandler(response)
                     }
@@ -244,7 +244,8 @@ final class PTPIPClientNext {
             if packet.commandCode == .canonGetViewFinderData && self.pendingCommandPackets[.low]!.contains(where: { pendingCommand in
                 return pendingCommand.packet.commandCode == .canonGetViewFinderData
             }) {
-                fatalError("requesting a frame before the previous one finished processing")
+                // TODO: not ideal, but meh...
+                //fatalError("requesting a frame before the previous one finished processing")
             }
             self.pendingCommandPackets[priority]!.append(PendingCommandRequest(packet: packet, responseHandler: responseCallback, dataHandler: dataCallback))
             self.processNextPendingCommandPacket()
@@ -277,11 +278,11 @@ final class PTPIPClientNext {
     func getViewFinderData(callback: @escaping DataResponse) {
         let opRequestPacket = CommandRequestPacketArguments(commandCode: .canonGetViewFinderData, arguments: [0x00200000, 0x00000001, 0x00000000])
         
-        print("Canon Live View sending")
+        //print("Canon Live View sending")
         
         
         sendCommandRequestPacket(opRequestPacket, priority: .low, responseCallback: { (response) in
-            print("Canon Live View response A")
+            //print("Canon Live View response A")
         }, dataCallback: callback)
     }
     
@@ -416,7 +417,7 @@ final class PTPIPClientNext {
         
     fileprivate func handleCommandResponsePacket(_ packet: CommandResponsePacket) {
         
-        print("handleCommandResponsePacket A")
+        //print("handleCommandResponsePacket A")
 
         
         // Need to catch this, as sometimes cameras send invalid command responses, but sometimes they just
@@ -425,7 +426,7 @@ final class PTPIPClientNext {
             return
         }
         
-        print("handleCommandResponsePacket B")
+        //print("handleCommandResponsePacket B")
         
         guard let transactionId = packet.transactionId else {
             commandRequestCallbacks = commandRequestCallbacks.filter { (_, value) -> Bool in
