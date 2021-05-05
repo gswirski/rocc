@@ -865,6 +865,7 @@ extension PTP {
                 rawCode = 0
                 currentValue = UInt8(0)
                 factoryValue = UInt8(0)
+                olcValue = nil
                 getSetSupported = .unknown
                 getSetAvailable = .unknown
                 unknown = 0
@@ -882,6 +883,8 @@ extension PTP {
             var currentValue: PTPDevicePropertyDataType
             
             var factoryValue: PTPDevicePropertyDataType
+            
+            var olcValue: PTPDevicePropertyDataType?
             
             // 0x00, 0x00: Hidden entirely
             // 0x00, 0x01: Entirely interactable

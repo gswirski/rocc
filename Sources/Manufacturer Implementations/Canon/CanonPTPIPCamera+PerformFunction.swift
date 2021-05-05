@@ -18,6 +18,7 @@ extension CanonPTPIPDevice {
             var apertureField = PTP.DeviceProperty.Enum()
             apertureField.type = .uint32
             apertureField.code = .fNumber
+            apertureField.olcValue = nil
             apertureField.getSetAvailable = .getSet
             apertureField.getSetSupported = .getSet
             apertureField.length = 4
@@ -25,6 +26,7 @@ extension CanonPTPIPDevice {
             var shutterSpeedField = PTP.DeviceProperty.Enum()
             shutterSpeedField.type = .uint32
             shutterSpeedField.code = .shutterSpeed
+            shutterSpeedField.olcValue = nil
             shutterSpeedField.getSetAvailable = .getSet
             shutterSpeedField.getSetSupported = .getSet
             shutterSpeedField.length = 4
@@ -187,6 +189,7 @@ extension CanonPTPIPDevice {
                 
                     Logger.log(message: "Intervalometer - OLC(0x0002 shutter) - \(data.toHex)", category: "PTPIPClient", level: .debug)
                     let value = eventData[word: pointer + 16 + olcOffset + 5]!
+                    shutterSpeedField.olcValue = value
                     olcOffset += 7
                 }
                 if (mask & 0x0004) != 0 { // APERTURE
@@ -194,6 +197,8 @@ extension CanonPTPIPDevice {
                     lastOLCInfoChanged.aperture = ByteBuffer(bytes: data.bytes)
 
                     Logger.log(message: "Intervalometer - OLC(0x0004 aperture) - \(data.toHex)", category: "PTPIPClient", level: .debug)
+                    let value = eventData[word: pointer + 16 + olcOffset + 7]!
+                    apertureField.olcValue = value
                     olcOffset += 9
                 }
                 if (mask & 0x0008) != 0 { // ISO
@@ -373,7 +378,7 @@ extension CanonPTPIPDevice {
                                 guard let enumProperty = deviceProperty as? PTP.DeviceProperty.Enum else {
                                     return
                                 }
-                                guard let value = Aperture.Value(canonValue: enumProperty.currentValue) else {
+                                guard let value = Aperture.Value(canonValue: enumProperty.currentValue, olcValue: enumProperty.olcValue) else {
                                     return
                                 }
                                 
@@ -386,7 +391,7 @@ extension CanonPTPIPDevice {
                                 guard let enumProperty = deviceProperty as? PTP.DeviceProperty.Enum else {
                                     return
                                 }
-                                guard let value = ShutterSpeed(canonValue: enumProperty.currentValue) else {
+                                guard let value = ShutterSpeed(canonValue: enumProperty.currentValue, olcValue: enumProperty.olcValue) else {
                                     return
                                 }
                                 

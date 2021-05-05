@@ -52,14 +52,23 @@ let canonApertureMapping: [Double: DWord] = [
 
 extension Aperture.Value: CanonPTPPropValueConvertable {
     init?(canonValue: PTPDevicePropertyDataType) {
+        self.init(canonValue: canonValue, olcValue: nil)
+    }
+
+    init?(canonValue: PTPDevicePropertyDataType, olcValue: PTPDevicePropertyDataType? = nil) {
         
         guard let binaryInt = canonValue.toInt else {
             return nil
         }
         
         guard binaryInt != AUTO_VALUE else {
-            self = .auto(value: nil)
-            return
+            if let olc = olcValue, let binaryOlc = olc.toInt, let item = canonApertureMapping.first(where: { (key, val) -> Bool in val == binaryOlc}) {
+                self = .auto(value: item.key)
+                return
+            } else {
+                self = .auto(value: nil)
+                return
+            }
         }
 
         guard let item = canonApertureMapping.first(where: { (key, val) -> Bool in

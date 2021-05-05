@@ -398,11 +398,11 @@ extension CameraEvent {
                 let supported = enumProperty.supported.compactMap({ ShutterSpeed(sonyValue: $0) })
                 shutterSpeed = (value, available, supported)
                 
-                if supported.contains(where: { $0.isBulb }), !supportedFunctions.contains(.startBulbCapture) {
+                if supported.contains(where: { $0 == .bulb }), !supportedFunctions.contains(.startBulbCapture) {
                     supportedFunctions.append(contentsOf: [.startBulbCapture, .endBulbCapture])
                 }
                 // Only list startBulbCapture as available if current shutter speed is BULB
-                if available.contains(where: { $0.isBulb }), value.isBulb, !availableFunctions.contains(.startBulbCapture) {
+                if available.contains(where: { $0 == .bulb }), value == .bulb, !availableFunctions.contains(.startBulbCapture) {
                     availableFunctions.append(contentsOf: [.startBulbCapture, .endBulbCapture])
                 }
                 
@@ -760,7 +760,7 @@ extension CameraEvent {
         }
         
         // Correct shooting mode for BULB!
-        if let currentShutterSpeed = shutterSpeed?.current, currentShutterSpeed.isBulb, shootMode.current != .bulb {
+        if let currentShutterSpeed = shutterSpeed?.current, currentShutterSpeed == .bulb, shootMode.current != .bulb {
             shootMode.current = .bulb
         }
         

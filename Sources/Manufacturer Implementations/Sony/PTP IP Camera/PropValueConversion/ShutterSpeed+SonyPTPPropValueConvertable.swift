@@ -33,20 +33,22 @@ extension ShutterSpeed: SonyPTPPropValueConvertable {
             return nil
         }
         
-        self.denominator = Double(denominator)
-        self.numerator = Double(numerator)
+        let value = ShutterSpeed.Value(numerator: Double(numerator), denominator: Double(denominator))
+        self = .userDefined(value: value)
     }
     
     var sonyPTPValue: PTPDevicePropertyDataType {
         var data = ByteBuffer()
         // isBulb can be 0/0 or -1/-1 but PTP IP uses 0/0
-        if isBulb {
+        if case .bulb = self {
             data.append(Word(0))
             data.append(Word(0))
+        } else if case .userDefined(let value) = self  {
+            data.append(Word(value.denominator))
+            data.append(Word(value.numerator))
         } else {
-            data.append(Word(denominator))
-            data.append(Word(numerator))
+            fatalError("Sony only supports user defined values")
         }
-        return data[dWord: 0] ?? DWord(value)
+        return data[dWord: 0]!
     }
 }

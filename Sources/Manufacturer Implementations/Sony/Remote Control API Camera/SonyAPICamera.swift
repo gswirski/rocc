@@ -491,7 +491,7 @@ extension SonyAPICameraDevice: Camera {
         
         // We need to do this otherwise the camera can get stuck in continuous shooting mode!
         // If the shutter speed is BULB then we need to set it to something else!
-        guard self.lastShutterSpeed?.isBulb == true else {
+        guard self.lastShutterSpeed == .bulb else {
             callback(nil)
             return
         }
@@ -503,7 +503,7 @@ extension SonyAPICameraDevice: Camera {
                 callback(error)
             case .success(let availableShutterSpeeds):
                 // Find a shutter speed that isn't bulb
-                guard let firstNonBulbShutterSpeed = availableShutterSpeeds.first(where: { !$0.isBulb }) else {
+                guard let firstNonBulbShutterSpeed = availableShutterSpeeds.first(where: { $0 != .bulb }) else {
                     callback(nil)
                     return
                 }
@@ -2921,7 +2921,7 @@ extension SonyAPICameraDevice: Camera {
                         
                         // Check if shutterSpeed has changed away from Bulb! Sony doesn't have a "Bulb" shooting mode, so
                         // we need to do this automatically!
-                        if let shutterSpeed = informations.shutterSpeed, let lastShootMode = self.lastShootMode, !shutterSpeed.current.isBulb && self.lastShutterSpeed?.isBulb == true {
+                        if let shutterSpeed = informations.shutterSpeed, let lastShootMode = self.lastShootMode, shutterSpeed.current != .bulb && self.lastShutterSpeed == .bulb {
                             // This may look strange but we need to null-coalesce twice because `firstNotNilOrEmpty` is `Element??`
                             let available = [informations.shootMode?.available, lastShootMode.available].firstNotNilOrEmpty ?? []
                             let supported = [informations.shootMode?.supported, lastShootMode.supported].firstNotNilOrEmpty ?? []

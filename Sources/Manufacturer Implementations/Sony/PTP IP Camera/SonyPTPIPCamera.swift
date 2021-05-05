@@ -802,7 +802,7 @@ extension SonyPTPIPDevice: Camera {
         
         // We need to do this otherwise the camera can get stuck in continuous shooting mode!
         // If the shutter speed is BULB then we need to set it to something else!
-        guard self.lastEvent?.shutterSpeed?.current.isBulb == true else {
+        guard self.lastEvent?.shutterSpeed?.current == .bulb else {
             callback(nil)
             return
         }
@@ -815,7 +815,7 @@ extension SonyPTPIPDevice: Camera {
             switch result {
             case .success(let property):
                 let event = CameraEvent.fromSonyDeviceProperties([property]).event
-                guard let firstNonBulbShutterSpeed = event.shutterSpeed?.available.first(where: { !$0.isBulb }) else {
+                guard let firstNonBulbShutterSpeed = event.shutterSpeed?.available.first(where: { $0 != .bulb }) else {
                     callback(nil)
                     return
                 }

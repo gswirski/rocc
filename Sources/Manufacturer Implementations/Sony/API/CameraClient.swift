@@ -1096,7 +1096,7 @@ fileprivate extension CameraEvent {
             liveViewInfo = nil
         }
         
-        if _shutterSpeed?.current.isBulb == true {
+        if _shutterSpeed?.current == .bulb {
             // If the shutter speed is bulb, then we're in BULB shoot mode.
             // we need to manually report this because Sony don't do it for us!
             _shootMode = (.bulb, _shootMode?.available ?? [], _shootMode?.supported ?? [])
