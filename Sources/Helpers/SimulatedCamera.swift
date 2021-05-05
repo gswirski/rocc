@@ -162,7 +162,7 @@ public final class DummyCamera: Camera {
     
     private var currentShutterSpeed: ShutterSpeed = ShutterSpeed(numerator: 1.0, denominator: 1250)
     
-    private var currentAperture: Aperture.Value = Aperture.Value(value: 1.8, decimalSeperator: nil)
+    private var currentAperture: Aperture.Value = .userDefined(value: 1.8)
     
     private var currentProgrammeMode: Exposure.Mode.Value = .aperturePriority
     
@@ -345,32 +345,32 @@ public final class DummyCamera: Camera {
             aperture: (
                 current: currentAperture,
                 available: [
-                        Aperture.Value(value: 1.8, decimalSeperator: "."),
-                        Aperture.Value(value: 2.0, decimalSeperator: "."),
-                        Aperture.Value(value: 2.2, decimalSeperator: "."),
-                        Aperture.Value(value: 2.8, decimalSeperator: "."),
-                        Aperture.Value(value: 3.2, decimalSeperator: "."),
-                        Aperture.Value(value: 4.0, decimalSeperator: "."),
-                        Aperture.Value(value: 4.8, decimalSeperator: "."),
-                        Aperture.Value(value: 5.6, decimalSeperator: "."),
-                        Aperture.Value(value: 8.0, decimalSeperator: "."),
-                        Aperture.Value(value: 11.0, decimalSeperator: "."),
-                        Aperture.Value(value: 18.0, decimalSeperator: "."),
-                        Aperture.Value(value: 22.0, decimalSeperator: ".")
+                    .userDefined(value: 1.8),
+                    .userDefined(value: 2.0),
+                    .userDefined(value: 2.2),
+                    .userDefined(value: 2.8),
+                    .userDefined(value: 3.2),
+                    .userDefined(value: 4.0),
+                    .userDefined(value: 4.8),
+                    .userDefined(value: 5.6),
+                    .userDefined(value: 8.0),
+                    .userDefined(value: 11.0),
+                    .userDefined(value: 18.0),
+                    .userDefined(value: 22.0)
                 ],
                 supported: [
-                    Aperture.Value(value: 1.8, decimalSeperator: "."),
-                    Aperture.Value(value: 2.0, decimalSeperator: "."),
-                    Aperture.Value(value: 2.2, decimalSeperator: "."),
-                    Aperture.Value(value: 2.8, decimalSeperator: "."),
-                    Aperture.Value(value: 3.2, decimalSeperator: "."),
-                    Aperture.Value(value: 4.0, decimalSeperator: "."),
-                    Aperture.Value(value: 4.8, decimalSeperator: "."),
-                    Aperture.Value(value: 5.6, decimalSeperator: "."),
-                    Aperture.Value(value: 8.0, decimalSeperator: "."),
-                    Aperture.Value(value: 11.0, decimalSeperator: "."),
-                    Aperture.Value(value: 18.0, decimalSeperator: "."),
-                    Aperture.Value(value: 22.0, decimalSeperator: ".")
+                    .userDefined(value: 1.8),
+                    .userDefined(value: 2.0),
+                    .userDefined(value: 2.2),
+                    .userDefined(value: 2.8),
+                    .userDefined(value: 3.2),
+                    .userDefined(value: 4.0),
+                    .userDefined(value: 4.8),
+                    .userDefined(value: 5.6),
+                    .userDefined(value: 8.0),
+                    .userDefined(value: 11.0),
+                    .userDefined(value: 18.0),
+                    .userDefined(value: 22.0)
                 ]
             ),
             focusMode: (current: currentFocusMode, available: [.auto, .manual], supported: [.auto, .manual]),

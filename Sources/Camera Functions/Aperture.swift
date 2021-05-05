@@ -11,15 +11,9 @@ import Foundation
 /// Functions for controlling the Aperture (F Stop) of the camera
 public struct Aperture: CameraFunction {
     
-    public struct Value {
-                        
-        public let value: Double
-        internal let decimalSeperator: String?
-
-        public init(value: Double, decimalSeperator: String? = nil) {
-            self.value = value
-            self.decimalSeperator = decimalSeperator
-        }
+    public enum Value: Equatable {
+        case userDefined(value: Double)
+        case auto(value: Double?)
     }
     
     public var function: _CameraFunction
@@ -33,10 +27,4 @@ public struct Aperture: CameraFunction {
     
     /// Returns the current aperture of the camera
     public static let get = Aperture(function: .getAperture)
-}
-
-extension Aperture.Value: Equatable {
-    public static func ==(lhs: Aperture.Value, rhs: Aperture.Value) -> Bool {
-        return lhs.value == rhs.value
-    }
 }

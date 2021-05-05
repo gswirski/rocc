@@ -17,6 +17,7 @@ import Foundation
  * for x = 0x18 = 24   -> 2^3 = 8
 */
 
+let AUTO_VALUE: DWord = 0xff
 let canonApertureMapping: [Double: DWord] = [
     1.2: 0x0d,
     1.4: 0x10,
@@ -55,18 +56,29 @@ extension Aperture.Value: CanonPTPPropValueConvertable {
         guard let binaryInt = canonValue.toInt else {
             return nil
         }
+        
+        guard binaryInt != AUTO_VALUE else {
+            self = .auto(value: nil)
+            return
+        }
+
         guard let item = canonApertureMapping.first(where: { (key, val) -> Bool in
             val == binaryInt
         }) else {
             return nil
         }
         
-        value = item.key
-        decimalSeperator = nil
+        self = .userDefined(value: item.key)
     }
     
     var canonPTPValue: PTPDevicePropertyDataType {
-        return canonApertureMapping[value]!
+        switch self {
+        case .userDefined(let value):
+            return canonApertureMapping[value]!
+        case .auto(value: _):
+            return AUTO_VALUE
+        }
+        
     }
     
     var canonPTPCode: PTPDevicePropertyDataType {

@@ -18,6 +18,7 @@ import Foundation
 */
 
 let canonShutterSpeedMapping: [DWord: ShutterSpeed] = [
+    0xff: ShutterSpeed(numerator: 13, denominator: 15), // AUTO
     0x04: ShutterSpeed(numerator: -1, denominator: -1), // BULB
     0x10: ShutterSpeed(numerator: 300, denominator: 10),
     0x13: ShutterSpeed(numerator: 250, denominator: 10),

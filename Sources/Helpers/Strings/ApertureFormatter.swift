@@ -18,27 +18,27 @@ public class ApertureFormatter {
             return nil
         }
         let numberFormatter = NumberFormatter()
-        
-        // Some apertures are represented as a decimal even when they're a whole number:
-        // "9.0" vs "11". We'll use the nullability of `decimalSeperator` to unwind
-        // this behaviour!
-        if let decimalSeperator = aperture.decimalSeperator {
-            numberFormatter.decimalSeparator = decimalSeperator
-            // For the moment, we'll assume no apertures have more than one fraction digit, this seems to be the case
-            // on Sony's cameras
-            numberFormatter.minimumFractionDigits = 1
-        } else {
-            numberFormatter.minimumFractionDigits = 0
-        }
-
+        numberFormatter.minimumFractionDigits = 1
         numberFormatter.maximumFractionDigits = 1
-        return numberFormatter.string(from: NSNumber(value: aperture.value))
+        numberFormatter.decimalSeparator = "."
+        
+        switch aperture {
+        case .userDefined(let value):
+            return numberFormatter.string(from: NSNumber(value: value))
+        case .auto(let value):
+            if let actualValue = value {
+                return numberFormatter.string(from: NSNumber(value: actualValue))
+            } else {
+                return "AUTO"
+            }
+        }
     }
     
     public func aperture(from string: String) -> Aperture.Value? {
-        
+        if string.lowercased() == "auto" {
+            return .auto(value: nil)
+        }
         let numberFormatter = NumberFormatter()
-        var decimalSeparator: String?
         
         // Parse the decimal seperator, this will always be the last non-number character in the
         // aperture
@@ -46,11 +46,10 @@ public class ApertureFormatter {
             return !character.isNumber
         }) {
             numberFormatter.decimalSeparator = String(decimalSeperatorCharacter)
-            decimalSeparator = String(decimalSeperatorCharacter)
         }
         
         guard let number = numberFormatter.number(from: string) else { return nil }
         
-        return Aperture.Value(value: number.doubleValue, decimalSeperator: decimalSeparator)
+        return .userDefined(value: number.doubleValue)
     }
 }

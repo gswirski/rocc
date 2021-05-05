@@ -548,6 +548,9 @@ fileprivate extension Aperture.Value {
     
     var sonyString: String {
         let formatter = ApertureFormatter()
+        guard case let .userDefined(value) = self else {
+            fatalError("Sony only supports user defined values")
+        }
         return formatter.string(for: self) ?? "\(value)"
     }
 }
