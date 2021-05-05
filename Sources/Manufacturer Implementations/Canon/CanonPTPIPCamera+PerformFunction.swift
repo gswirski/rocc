@@ -206,8 +206,8 @@ extension CanonPTPIPDevice {
                     lastOLCInfoChanged.iso = ByteBuffer(bytes: data.bytes)
 
                     Logger.log(message: "Intervalometer - OLC(0x0008 iso) - \(data.toHex)", category: "PTPIPClient", level: .debug)
-                    let value = eventData[int8: pointer + 16 + olcOffset + 3]!
-                    isoField.olcValue = value
+                    let value = eventData[pointer + 16 + olcOffset + 3]!
+                    isoField.olcValue = Word(value)
                     olcOffset += 6
                 }
                 if (mask & 0x0010) != 0 { // UNKNOWN

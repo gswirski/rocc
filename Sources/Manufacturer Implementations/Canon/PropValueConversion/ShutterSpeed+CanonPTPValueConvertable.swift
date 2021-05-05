@@ -96,6 +96,11 @@ extension ShutterSpeed: CanonPTPPropValueConvertable {
                 return
             }
         }
+        
+        guard binaryInt != 0x0c else {
+            self = .bulb
+            return
+        }
             
         let item = canonShutterSpeedMapping[UInt32(binaryInt)]!
         
