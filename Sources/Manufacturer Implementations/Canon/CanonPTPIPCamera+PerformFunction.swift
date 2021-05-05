@@ -206,6 +206,8 @@ extension CanonPTPIPDevice {
                     lastOLCInfoChanged.iso = ByteBuffer(bytes: data.bytes)
 
                     Logger.log(message: "Intervalometer - OLC(0x0008 iso) - \(data.toHex)", category: "PTPIPClient", level: .debug)
+                    let value = eventData[int8: pointer + 16 + olcOffset + 3]!
+                    isoField.olcValue = value
                     olcOffset += 6
                 }
                 if (mask & 0x0010) != 0 { // UNKNOWN
@@ -404,7 +406,7 @@ extension CanonPTPIPDevice {
                                 guard let enumProperty = deviceProperty as? PTP.DeviceProperty.Enum else {
                                     return
                                 }
-                                guard let value = ISO.Value(canonValue: enumProperty.currentValue) else {
+                                guard let value = ISO.Value(canonValue: enumProperty.currentValue, olcValue: enumProperty.olcValue) else {
                                     return
                                 }
                                 

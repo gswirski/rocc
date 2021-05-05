@@ -17,8 +17,8 @@ import Foundation
  * for x = 0x18 = 24   -> 2^3 = 8
 */
 
+let ISO_AUTO_VALUE: DWord = 0x00
 let canonIsoMapping: [DWord: Int] = [
-    0x00: 0,
     0x40: 50,
     0x48: 100,
     0x4b: 125,
@@ -55,34 +55,39 @@ let canonIsoMapping: [DWord: Int] = [
 
 extension ISO.Value: CanonPTPPropValueConvertable {
     init?(canonValue: PTPDevicePropertyDataType) {
+        self.init(canonValue: canonValue, olcValue: nil)
+    }
+
+    init?(canonValue: PTPDevicePropertyDataType, olcValue: PTPDevicePropertyDataType? = nil) {
         
         guard let binaryInt = canonValue.toInt else {
             return nil
         }
-        guard let item = canonIsoMapping[UInt32(binaryInt)] else {
-            print("Canon Invalid Value ISO \(binaryInt)")
-            return nil
-        }
-        
-        if item == 0 {
-            self = .auto
+
+        if binaryInt == ISO_AUTO_VALUE {
+            if let olc = olcValue, let binaryOlc = olc.toInt, let value = canonIsoMapping[UInt32(binaryOlc)] {
+                self = .auto(value)
+            } else {
+                self = .auto(nil)
+            }
         } else {
+            guard let item = canonIsoMapping[UInt32(binaryInt)] else {
+                print("Canon Invalid Value ISO \(binaryInt)")
+                return nil
+            }
             self = .native(item)
         }
     }
     
     var canonPTPValue: PTPDevicePropertyDataType {
-        return canonIsoMapping.first { (item) -> Bool in
-            let value = item.1
-            switch self {
-            case .auto:
-                return value == 0
-            case .native(let x):
-                return value == x
-            default:
-                return false
-            }
-        }!.key
+        switch self {
+        case .auto(_):
+            return ISO_AUTO_VALUE
+        case .native(let x):
+            return canonIsoMapping.first { (item) -> Bool in return item.1 == x }!.key
+        default:
+            return ISO_AUTO_VALUE
+        }
     }
     
     var canonPTPCode: PTPDevicePropertyDataType {

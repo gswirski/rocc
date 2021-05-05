@@ -210,7 +210,7 @@ fileprivate extension ISO.Value {
     init?(sonyString: String) {
         switch sonyString.lowercased() {
         case "auto":
-            self = .auto
+            self = .auto(nil)
         default:
             guard let number = Int(sonyString) else { return nil }
             self = number < 100 ? .extended(number) : .native(number)

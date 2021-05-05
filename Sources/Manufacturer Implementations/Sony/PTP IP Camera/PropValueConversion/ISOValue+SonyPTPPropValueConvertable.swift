@@ -26,7 +26,7 @@ extension ISO.Value: SonyPTPPropValueConvertable {
         
         switch binaryInt {
         case 0x00ffffff:
-            self = .auto
+            self = .auto(nil)
         case 0x01ffffff:
             self = .multiFrameNRAuto
         case 0x02ffffff:

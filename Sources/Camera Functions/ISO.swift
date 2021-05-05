@@ -13,7 +13,7 @@ public struct ISO: CameraFunction {
     
     public enum Value: Equatable {
         
-        case auto
+        case auto(Int?)
         case extended(Int)
         case native(Int)
         case multiFrameNRAuto

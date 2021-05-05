@@ -158,7 +158,7 @@ public final class DummyCamera: Camera {
     
     public var hasFetchedEvent: Bool = false
     
-    private var currentISO: ISO.Value = .auto
+    private var currentISO: ISO.Value = .auto(nil)
     
     private var currentShutterSpeed: ShutterSpeed = .userDefined(value: ShutterSpeed.Value(numerator: 1.0, denominator: 1250))
     
@@ -374,7 +374,7 @@ public final class DummyCamera: Camera {
                 ]
             ),
             focusMode: (current: currentFocusMode, available: [.auto, .manual], supported: [.auto, .manual]),
-            iso: (current: currentISO, available: [.auto, .native(100), .native(200), .native(400), .native(1600), .native(3200), .native(6400)], supported: [.auto, .native(100), .native(200), .native(400), .native(1600), .native(3200), .native(6400)]),
+            iso: (current: currentISO, available: [.auto(nil), .native(100), .native(200), .native(400), .native(1600), .native(3200), .native(6400)], supported: [.auto(nil), .native(100), .native(200), .native(400), .native(1600), .native(3200), .native(6400)]),
             isProgramShifted: false,
             shutterSpeed: (current: currentShutterSpeed, available: [
                 .userDefined(value: ShutterSpeed.Value(numerator: 1, denominator: 8000)),
