@@ -17,7 +17,7 @@ import Foundation
  * for x = 0x18 = 24   -> 2^3 = 8
 */
 
-let AUTO_VALUE: DWord = 0xff
+let APERTURE_AUTO_VALUE: DWord = 0xff
 let canonApertureMapping: [Double: DWord] = [
     1.2: 0x0d,
     1.4: 0x10,
@@ -61,7 +61,7 @@ extension Aperture.Value: CanonPTPPropValueConvertable {
             return nil
         }
         
-        guard binaryInt != AUTO_VALUE else {
+        guard binaryInt != APERTURE_AUTO_VALUE else {
             if let olc = olcValue, let binaryOlc = olc.toInt, let item = canonApertureMapping.first(where: { (key, val) -> Bool in val == binaryOlc}) {
                 self = .auto(value: item.key)
                 return
@@ -85,7 +85,7 @@ extension Aperture.Value: CanonPTPPropValueConvertable {
         case .userDefined(let value):
             return canonApertureMapping[value]!
         case .auto(value: _):
-            return AUTO_VALUE
+            return APERTURE_AUTO_VALUE
         }
         
     }

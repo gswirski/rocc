@@ -151,10 +151,22 @@ extension CanonPTPIPDevice {
                 
                 switch subType {
                 case .PTP_DPC_CANON_EOS_Aperture:
+                    if values.count == 0 {
+                        print("Received property values: \(propType) \(subType) SETTING AUTO")
+
+                        apertureField.currentValue = APERTURE_AUTO_VALUE
+                        apertureField.factoryValue = APERTURE_AUTO_VALUE
+                    }
                     apertureField.available = values
                     apertureField.supported = values
                     print("Received property values: \(propType) \(subType) \(values)")
                 case .PTP_DPC_CANON_EOS_ShutterSpeed:
+                    if values.count == 0 {
+                        print("Received property values: \(propType) \(subType) SETTING AUTO")
+
+                        shutterSpeedField.currentValue = SHUTTER_SPEED_AUTO_VALUE
+                        shutterSpeedField.factoryValue = SHUTTER_SPEED_AUTO_VALUE
+                    }
                     shutterSpeedField.available = values
                     shutterSpeedField.supported = values
                     print("Received property values: \(propType) \(subType) \(values)")
@@ -188,8 +200,9 @@ extension CanonPTPIPDevice {
                     lastOLCInfoChanged.shutterSpeed = ByteBuffer(bytes: data.bytes)
                 
                     Logger.log(message: "Intervalometer - OLC(0x0002 shutter) - \(data.toHex)", category: "PTPIPClient", level: .debug)
+                    let active = eventData[word: pointer + 16 + olcOffset]!
                     let value = eventData[word: pointer + 16 + olcOffset + 5]!
-                    shutterSpeedField.olcValue = value
+                    shutterSpeedField.olcValue = (active > 0) ? value : SHUTTER_SPEED_AUTO_VALUE
                     olcOffset += 7
                 }
                 if (mask & 0x0004) != 0 { // APERTURE
@@ -197,8 +210,9 @@ extension CanonPTPIPDevice {
                     lastOLCInfoChanged.aperture = ByteBuffer(bytes: data.bytes)
 
                     Logger.log(message: "Intervalometer - OLC(0x0004 aperture) - \(data.toHex)", category: "PTPIPClient", level: .debug)
+                    let active = eventData[word: pointer + 16 + olcOffset]!
                     let value = eventData[word: pointer + 16 + olcOffset + 7]!
-                    apertureField.olcValue = value
+                    apertureField.olcValue = (active > 0) ? value : APERTURE_AUTO_VALUE
                     olcOffset += 9
                 }
                 if (mask & 0x0008) != 0 { // ISO
