@@ -54,6 +54,8 @@ extension CanonPTPIPDevice {
                     case .success(let container):
                         let data = Data(container.data)
                         guard let image = UIImage(data: data) else {
+                            Logger.log(message: "Could not decode image \(container.data.toHex)", category: "CanonPTPIPCamera")
+                            os_log("Could not decode image", log: self.log, type: .error)
                             completion(.success(nil))
                             return
                         }
@@ -72,7 +74,7 @@ extension CanonPTPIPDevice {
                         }
                          //" \(container.data.toHex)")
                     case .failure(let error):
-                        print("Received Thumbnail error \(error)")
+                        Logger.log(message: "Received thumbnail error \(error)", category: "CanonPTPIPCamera")
                         completion(.failure(error))
                     }
                 }
