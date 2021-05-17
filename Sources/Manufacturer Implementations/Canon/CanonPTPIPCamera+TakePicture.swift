@@ -176,7 +176,7 @@ extension CanonPTPIPDevice {
             let lastOLCChange = self.lastOLCInfoChanged
 
             if lastOLCChange.button == 3 || lastOLCChange.button == 4 {
-                result = lastOLCChange.button
+                result = lastOLCChange.button.map { UInt16($0) }
                 return continueClosure(true)
             } else if let focusInfo = lastOLCChange.focusInfo, (focusInfo[word: 5] ?? 0) > 0 {
                 result = (focusInfo[word: 5] ?? 0)

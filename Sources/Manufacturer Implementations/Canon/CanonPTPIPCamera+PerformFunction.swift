@@ -189,7 +189,7 @@ extension CanonPTPIPDevice {
 
                 var olcOffset: UInt = 0
                 if (mask & 0x0001) != 0 {  // BUTTON
-                    lastOLCInfoChanged.button = eventData[word: UInt(pointer) + 16 + UInt(olcOffset)]
+                    lastOLCInfoChanged.button = eventData[UInt(pointer) + 16 + UInt(olcOffset)]
                     
                     let hex = eventData.sliced(Int(pointer) + 16 + Int(olcOffset), Int(pointer) + 16 + Int(olcOffset) + 2).toHex
                     Logger.log(message: "Intervalometer - OLC(0x0001 button) - \(hex)", category: "PTPIPClient", level: .debug)

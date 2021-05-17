@@ -43,7 +43,11 @@ public protocol LiveViewStreamDelegate {
     /// - Parameters:
     ///   - stream: The stream which received frame information
     ///   - frames: The frames which were received
-    func liveViewStream(_ stream: LiveViewStream, didReceive frames: [FrameInfo])
+    func liveViewStream(_ stream: LiveViewStream, didReceive frames: [FrameInfo], inViewfinder viewfinder:ViewfinderInfo)
+}
+
+public struct ViewfinderInfo {
+    public let size: CGPoint
 }
 
 /// A structural represention an area on screen and information about it, be it an in-focus area or a detected face
@@ -520,7 +524,7 @@ public final class LiveViewStream: NSObject {
                     
                     return frame
                 }
-                delegate?.liveViewStream(self, didReceive: frames)
+                delegate?.liveViewStream(self, didReceive: frames, inViewfinder: ViewfinderInfo(size: CGPoint(x: viewfinderWidth, y: viewfinderHeight)))
             default:
                 //print("Viewfinder frame - \(type) - \(size)")
                 break
@@ -579,7 +583,7 @@ public final class LiveViewStream: NSObject {
         }
 
         if let frames = lastFrames {
-            delegate?.liveViewStream(self, didReceive: frames)
+            delegate?.liveViewStream(self, didReceive: frames, inViewfinder: ViewfinderInfo(size: CGPoint.zero))
         }
         
         return payloads

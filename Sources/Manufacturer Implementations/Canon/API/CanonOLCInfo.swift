@@ -9,7 +9,7 @@
 import Foundation
 
 struct CanonOLCInfo {
-    var button: UInt16?
+    var button: UInt8?
     var shutterSpeed: ByteBuffer?
     var aperture: ByteBuffer?
     var iso: ByteBuffer?
