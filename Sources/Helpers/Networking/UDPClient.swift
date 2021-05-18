@@ -44,9 +44,7 @@ class UDPClient {
         let ddURL: URL
     }
     
-    private var sendSocket: CFSocket?
-    
-    private var listenSocket: CFSocket?
+    private var socket: CFSocket?
     
     private var timer: Timer?
     
@@ -99,7 +97,7 @@ class UDPClient {
     var finishCallbacks: [() -> Void] = []
     
     var isRunning: Bool {
-        return sendSocket != nil && listenSocket != nil
+        return socket != nil
     }
     
     func finishSearching(with callback: @escaping () -> Void) {
@@ -141,15 +139,11 @@ class UDPClient {
     private func releaseSocket() {
 //        @synchronized(self)
 //        {
-        if let sendSocket = sendSocket, CFSocketIsValid(sendSocket) {
-            CFSocketInvalidate(sendSocket)
-        }
-        if let listenSocket = listenSocket, CFSocketIsValid(listenSocket) {
-            CFSocketInvalidate(listenSocket)
+        if let socket = socket, CFSocketIsValid(socket) {
+            CFSocketInvalidate(socket)
         }
         
-        self.sendSocket = nil
-        self.listenSocket = nil
+        self.socket = nil
 
 //        }
     }
@@ -163,12 +157,33 @@ class UDPClient {
             
             guard let self = self else { return }
             
-            if self.sendSocket == nil {
-                self.sendSocket = self.newSocket()
+            if self.socket == nil {
+                self.socket = self.newSocket()
             }
             
-            guard let sendSocket = self.sendSocket else {
-                self.callCompletionHandlers(with: nil, error: UDPClientError.failedToCreateSendSocket)
+            guard let socket = self.socket else {
+                self.callCompletionHandlers(with: nil, error: UDPClientError.failedToCreateSocket)
+                return
+            }
+            
+            var address: sockaddr_in = sockaddr_in(
+                sin_len: __uint8_t(MemoryLayout<sockaddr_in>.size),
+                sin_family: sa_family_t(AF_INET),
+                sin_port: htons(CUnsignedShort(0)),
+                sin_addr: in_addr(s_addr: INADDR_ANY),
+                sin_zero: ( 0, 0, 0, 0, 0, 0, 0, 0 )
+            )
+            
+            let addressData = Data(bytes: &address, count: MemoryLayout.size(ofValue: address))
+            
+            Logger.log(message: "Initialising socket for listening", category: "UDPClient", level: .debug)
+            os_log("Initialising socket for listening", log: self.log, type: .debug)
+            
+            let setAddressResponse = CFSocketSetAddress(socket, addressData as CFData)
+            guard setAddressResponse == CFSocketError.success else {
+                self.callCompletionHandlers(with: nil, error: UDPClientError.failedToSetListenAddress)
+                Logger.log(message: "listenSocket CFSocketSetAddress() failed. [errno \(errno)]", category: "UDPClient", level: .error)
+                os_log("listenSocket CFSocketSetAddress() failed. [errno %d]", log: self.log, type: .error, errno)
                 return
             }
             
@@ -179,36 +194,25 @@ class UDPClient {
                 return (message: message, data: Data(Array(message.utf8)) as CFData)
             })
             
-            var address: sockaddr_in = sockaddr_in(
+            var multicastAddress: sockaddr_in = sockaddr_in(
                 sin_len: __uint8_t(MemoryLayout<sockaddr_in>.size),
                 sin_family: sa_family_t(AF_INET),
-                sin_port: htons(CUnsignedShort(self.port)),
-                sin_addr: in_addr(self.address)!,
+                sin_port: htons(CUnsignedShort(SonyConstants.SSDP.port)),
+                sin_addr: in_addr(SonyConstants.SSDP.address)!,
                 sin_zero: ( 0, 0, 0, 0, 0, 0, 0, 0 )
             )
             
-            let addressData = Data(bytes: &address, count: MemoryLayout.size(ofValue: address))
+            let multicastAddressData = Data(bytes: &multicastAddress, count: MemoryLayout.size(ofValue: address))
+
             
-            Logger.log(message: "Initialising socket for listening", category: "UDPClient", level: .debug)
-            os_log("Initialising socket for listening", log: self.log, type: .debug)
-            
-            if self.listenSocket == nil {
-                self.listenSocket = self.newSocket()
-            }
-            
-            guard let _listenSocket = self.listenSocket else {
-                self.callCompletionHandlers(with: nil, error: UDPClientError.failedToCreateListenSocket)
-                return
-            }
-            
-            guard self.setReusePortOption(for: _listenSocket) else {
+            /*guard self.setReusePortOption(for: _listenSocket) else {
                 self.callCompletionHandlers(with: nil, error: UDPClientError.failedToSetReuseOptions)
                 return
-            }
+            }*/
             
             // Send data to socket
             messageDatas.forEach({ (messageData) in
-                let sendResponse = CFSocketSendData(sendSocket, addressData as CFData, messageData.data, 0.0)
+                let sendResponse = CFSocketSendData(socket, multicastAddressData as CFData, messageData.data, 0.0)
                 if sendResponse == CFSocketError.success {
                     Logger.log(message: "Sending data to socket:\n\n\(messageData.message)", category: "UDPClient", level: .debug)
                     os_log("sendSocket Sending data:\n\n%@", log: self.log, type: .debug, messageData.message)
@@ -217,21 +221,12 @@ class UDPClient {
                     os_log("Failed to send data to socket:\n\n%@", log: self.log, type: .error, messageData.message)
                 }
             })
-            
-            // Set the listen socket's address
-            let setAddressResponse = CFSocketSetAddress(_listenSocket, addressData as CFData)
-            guard setAddressResponse == CFSocketError.success else {
-                self.callCompletionHandlers(with: nil, error: UDPClientError.failedToSetListenAddress)
-                Logger.log(message: "listenSocket CFSocketSetAddress() failed. [errno \(errno)]", category: "UDPClient", level: .error)
-                os_log("listenSocket CFSocketSetAddress() failed. [errno %d]", log: self.log, type: .error, errno)
-                return
-            }
+
             
             // Listen from the socket
-            let _sendSource = CFSocketCreateRunLoopSource(kCFAllocatorDefault, sendSocket, 0)
-            let _listenSource = CFSocketCreateRunLoopSource(kCFAllocatorDefault, _listenSocket, 0)
+            let _sendSource = CFSocketCreateRunLoopSource(kCFAllocatorDefault, socket, 0)
             
-            if _sendSource == nil && _listenSource == nil {
+            if _sendSource == nil {
                 self.callCompletionHandlers(with: nil, error: UDPClientError.failedToCreateRunLoopSources)
                 Logger.log(message: "CFRunLoopSourceRef's couldn't be allocated", category: "UDPClient", level: .error)
                 os_log("CFRunLoopSourceRef's couldn't be allocated", log: self.log, type: .error)
@@ -240,15 +235,9 @@ class UDPClient {
             
             if let sendSource = _sendSource {
                 CFRunLoopAddSource(CFRunLoopGetCurrent(), sendSource, .defaultMode)
-                Logger.log(message: "sendSource added", category: "UDPClient", level: .debug)
-                os_log("sendSource added", log: self.log, type: .debug)
+                Logger.log(message: "UDP socket added", category: "UDPClient", level: .debug)
+                os_log("UDP socket added", log: self.log, type: .debug)
             }
-            if let listenSource = _listenSource {
-                CFRunLoopAddSource(CFRunLoopGetCurrent(), listenSource, .defaultMode)
-                Logger.log(message: "listenSocket listening", category: "UDPClient", level: .debug)
-                os_log("listenSocket listening", log: self.log, type: .debug)
-            }
-                        
             CFRunLoopRun()
         }
     }
@@ -300,7 +289,7 @@ class UDPClient {
         
         CFSocketSetSocketFlags(_socket, kCFSocketCloseOnInvalidate)
         
-        let mutliaddr = in_addr(SonyConstants.SSDP.address)!
+        /*let mutliaddr = in_addr(SonyConstants.SSDP.address)!
         let interface = in_addr(ipAddress)!
         var mreq: ip_mreq = ip_mreq(imr_multiaddr: mutliaddr, imr_interface: interface)
         
@@ -313,7 +302,7 @@ class UDPClient {
         }
         
         Logger.log(message: "setsockopt IP_ADD_MEMBERSHIP succeeded.", category: "UDPClient", level: .debug)
-        os_log("setsockopt IP_ADD_MEMBERSHIP succeeded", log: log)
+        os_log("setsockopt IP_ADD_MEMBERSHIP succeeded", log: log)*/
         
         return socket;
     }
@@ -413,8 +402,7 @@ class UDPClient {
     }
     
     enum UDPClientError: Error {
-        case failedToCreateSendSocket
-        case failedToCreateListenSocket
+        case failedToCreateSocket
         case failedToSetReuseOptions
         case failedToSetListenAddress
         case failedToCreateRunLoopSources
