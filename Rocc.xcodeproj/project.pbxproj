@@ -194,6 +194,9 @@
 		B1FF7A382371EC180010D5F0 /* SDIOExtDeviceInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1FF7A372371EC180010D5F0 /* SDIOExtDeviceInfo.swift */; };
 		B1FF7A422371F4AB0010D5F0 /* DeviceProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1FF7A412371F4AB0010D5F0 /* DeviceProperty.swift */; };
 		EF140C5A24902FC7001BAD7F /* Retries.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF140C5924902FC7001BAD7F /* Retries.swift */; };
+		EF481EE5266D1B1000894E07 /* libptp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EF481EE4266D1AB600894E07 /* libptp.a */; };
+		EF481EE8266D22FF00894E07 /* DeviceDiscoveryHandle.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF481EE7266D22FF00894E07 /* DeviceDiscoveryHandle.swift */; };
+		EF481EE9266D236D00894E07 /* libptp.h in Headers */ = {isa = PBXBuildFile; fileRef = EF481EE2266D1AB600894E07 /* libptp.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		EF584A3E25B83CC00063F8CC /* CanonPTPEventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF584A3A25B83C910063F8CC /* CanonPTPEventTests.swift */; };
 		EF584A4E25BA25580063F8CC /* CanonDeviceProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF584A4D25BA25580063F8CC /* CanonDeviceProperty.swift */; };
 		EF584A5225BA29EA0063F8CC /* CanonPTPPropValueConvertable.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF584A5125BA29EA0063F8CC /* CanonPTPPropValueConvertable.swift */; };
@@ -431,6 +434,9 @@
 		B1FF7A372371EC180010D5F0 /* SDIOExtDeviceInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDIOExtDeviceInfo.swift; sourceTree = "<group>"; };
 		B1FF7A412371F4AB0010D5F0 /* DeviceProperty.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceProperty.swift; sourceTree = "<group>"; };
 		EF140C5924902FC7001BAD7F /* Retries.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Retries.swift; sourceTree = "<group>"; };
+		EF481EE2266D1AB600894E07 /* libptp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libptp.h; sourceTree = "<group>"; };
+		EF481EE4266D1AB600894E07 /* libptp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libptp.a; sourceTree = "<group>"; };
+		EF481EE7266D22FF00894E07 /* DeviceDiscoveryHandle.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeviceDiscoveryHandle.swift; sourceTree = "<group>"; };
 		EF584A3A25B83C910063F8CC /* CanonPTPEventTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanonPTPEventTests.swift; sourceTree = "<group>"; };
 		EF584A4D25BA25580063F8CC /* CanonDeviceProperty.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanonDeviceProperty.swift; sourceTree = "<group>"; };
 		EF584A5125BA29EA0063F8CC /* CanonPTPPropValueConvertable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanonPTPPropValueConvertable.swift; sourceTree = "<group>"; };
@@ -460,6 +466,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EF481EE5266D1B1000894E07 /* libptp.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -476,6 +483,8 @@
 		B1316A432089C08E006BD136 = {
 			isa = PBXGroup;
 			children = (
+				EF481EE1266D1AB600894E07 /* include */,
+				EF481EE3266D1AB600894E07 /* libs */,
 				B1F180A02545790200453668 /* ThunderRequest */,
 				B1316A4F2089C08F006BD136 /* Rocc */,
 				B1316A5A2089C08F006BD136 /* RoccTests */,
@@ -488,6 +497,7 @@
 		B1316A4F2089C08F006BD136 /* Rocc */ = {
 			isa = PBXGroup;
 			children = (
+				EF481EE6266D22E500894E07 /* Rust */,
 				B1FB48712092742400C33C86 /* Camera Functions */,
 				B1FB486B2092579E00C33C86 /* Camera.swift */,
 				B163AEBE20A8D6050061D1C4 /* CameraEventNotifier.swift */,
@@ -904,6 +914,30 @@
 			path = "Camera Functions";
 			sourceTree = "<group>";
 		};
+		EF481EE1266D1AB600894E07 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				EF481EE2266D1AB600894E07 /* libptp.h */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		EF481EE3266D1AB600894E07 /* libs */ = {
+			isa = PBXGroup;
+			children = (
+				EF481EE4266D1AB600894E07 /* libptp.a */,
+			);
+			path = libs;
+			sourceTree = "<group>";
+		};
+		EF481EE6266D22E500894E07 /* Rust */ = {
+			isa = PBXGroup;
+			children = (
+				EF481EE7266D22FF00894E07 /* DeviceDiscoveryHandle.swift */,
+			);
+			path = Rust;
+			sourceTree = "<group>";
+		};
 		EF584A3925B83C810063F8CC /* Canon */ = {
 			isa = PBXGroup;
 			children = (
@@ -957,6 +991,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B1316A5E2089C08F006BD136 /* Rocc.h in Headers */,
+				EF481EE9266D236D00894E07 /* libptp.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1119,6 +1154,7 @@
 				EF8C238625B5CC1400E90BC7 /* CanonPTPIPCamera.swift in Sources */,
 				B1B4342A20939EF500A81B9D /* FileSystem.swift in Sources */,
 				B1CDCB8322234CAA00DD0F0E /* UPnPService.swift in Sources */,
+				EF481EE8266D22FF00894E07 /* DeviceDiscoveryHandle.swift in Sources */,
 				B1FB47FF209089CA00C33C86 /* CameraClient.swift in Sources */,
 				B182B9242383520B0054539E /* DispatchQueue+AsyncWhile.swift in Sources */,
 				B1A1AA1A20A4E01D00FD0A4A /* Event.swift in Sources */,
@@ -1443,6 +1479,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Carthage/Build/iOS",
 				);
+				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/include";
 				INFOPLIST_FILE = Sources/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
@@ -1450,6 +1487,10 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/libs",
 				);
 				MARKETING_VERSION = 2.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.yellowbrickbear.rocc;
@@ -1476,6 +1517,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Carthage/Build/iOS",
 				);
+				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/include";
 				INFOPLIST_FILE = Sources/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
@@ -1483,6 +1525,10 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/libs",
 				);
 				MARKETING_VERSION = 2.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.yellowbrickbear.rocc;

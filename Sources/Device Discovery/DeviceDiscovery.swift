@@ -86,6 +86,8 @@ public protocol CameraDiscovererDelegate {
 /// A class which enables the discovery of cameras
 public final class CameraDiscoverer {
     
+    private var discoverer: DeviceDiscoveryHandle
+
     /// A delegate which will have methods called on it when cameras are discovered or an error occurs.
     public var delegate: CameraDiscovererDelegate?
     
@@ -94,43 +96,33 @@ public final class CameraDiscoverer {
     /// A map of cameras by the SSID the local device was connected to when they were discovered
     public var camerasBySSID: [String?: [(camera: Camera, isCached: Bool)]] = [:]
     
-    var discoverers: [DeviceDiscoverer] = []
-    
+    var queue = DispatchQueue(label: "CameraDiscoverer")
+
     /// Creates a new discoverer
     public init() {
-        
-        discoverers = [
-            SonyCameraDiscoverer(delegate: self)
-        ]
+        discoverer = DeviceDiscoveryHandle()
+        discoverer.observer = self
     }
     
     /// Starts the camera discoverer listening for cameras
     public func start() {
-        discoveredCameras = []
-        camerasBySSID = [:]
-        discoverers.forEach({ $0.start() })
+        discoverer.start()
     }
     
     /// Stops the camera discoverer from listening for cameras
     ///
     /// - Parameter callback: A closure called when all discovery has been stopped
     public func stop(with callback: @escaping () -> Void) {
-        
-        let searchingDiscoverers = discoverers.filter({ $0.isSearching })
-        guard !searchingDiscoverers.isEmpty else {
-            callback()
-            return
-        }
-        
-        searchingDiscoverers.forEach { (discoverer) in
-            
-            discoverer.stop { [weak self] in
-                guard let strongSelf = self else { return }
-                guard strongSelf.discoverers.filter({ $0.isSearching }).isEmpty else {
-                    return
-                }
-                callback()
-            }
+        discoverer.stop()
+    }
+}
+
+extension CameraDiscoverer: DeviceDiscovererObserver {
+    func deviceDiscoverer(discoveredDevice: ShutterDeviceHandle) {
+        if let url = URL(string: "http://\(discoveredDevice.host)"), let camera = CanonPTPIPDevice(dictionary: ["manufacturer": "Canon", "friendlyName": discoveredDevice.name]) {
+            camera.baseURL = url
+            print("PTP/IP Connection URL \(url) \(url.host)")
+            delegate?.cameraDiscoverer(self, discovered: camera, isCached: false)
         }
     }
 }

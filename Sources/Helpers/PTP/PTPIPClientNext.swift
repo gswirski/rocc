@@ -86,6 +86,7 @@ final class PTPIPClientNext {
     var connectCallback: ((_ error: Error?) -> Void)?
     
     func connect(callback: @escaping (_ error: Error?) -> Void) {
+        print("PTP/IP Connection connect in PTP client next")
         connectCallback = callback
         packetStream.connect(callback: callback)
     }

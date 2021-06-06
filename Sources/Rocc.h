@@ -15,6 +15,7 @@
 #import <sys/socket.h>
 #import <arpa/inet.h>
 #include <netdb.h>
+#include "libptp.h"
 
 //! Project version number for Rocc.
 FOUNDATION_EXPORT double RoccVersionNumber;

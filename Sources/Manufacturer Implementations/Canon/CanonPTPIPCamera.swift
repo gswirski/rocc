@@ -432,7 +432,10 @@ extension CanonPTPIPDevice: Camera {
                     completion(error, transferMode)
                 }
             }
+            
+            print("PTP/IP Connection client \(self.ptpIPClient)")
             self.ptpIPClient?.connect(callback: { [weak self] (error) in
+                print("PTP/IP Connection error: \(error)")
                 self?.sendStartSessionPacket(completion: retriableCompletion)
             })
         }, attempts: 3)

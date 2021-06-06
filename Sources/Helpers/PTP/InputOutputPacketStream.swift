@@ -48,11 +48,12 @@ final class InputOutputPacketStream: NSObject, PTPPacketStream {
     var connectCallback: ((_ error: Error?) -> Void)?
     
     func connect(callback: @escaping (Error?) -> Void) {
-        
+        print("PTP/IP Connection InputOutputPacketStream")
+
         // First clear out any old streams, otherwise we get crashes if we connect twice and then
         // server closes one of the previous sockets!
         
-        disconnect()
+        //disconnect()
         
         awaitingFurtherDataControlPacket = nil
         
