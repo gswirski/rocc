@@ -98,7 +98,7 @@ final class PTPIPClientNext {
     
     private func sendInitCommandRequest() {
         let guidBytes = ByteBuffer(hexString: "41 86 d4 f7 1f 9b 42 86  88 4d fb c1 1e e8 8b d9").bytes.compactMap { $0 }
-        let connectPacket = Packet.initCommandPacket(guid: guidBytes, name: deviceName)
+        let connectPacket = Packet.initCommandPacket(guid: guidBytes, name: "Shutter")
         sendControlPacket(connectPacket)
         
         Logger.log(message: "Sending InitCommandPacket to PTP IP Device", category: "PTPIPClient", level: .debug)
