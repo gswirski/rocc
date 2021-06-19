@@ -86,7 +86,10 @@ public protocol CameraDiscovererDelegate {
 /// A class which enables the discovery of cameras
 public final class CameraDiscoverer {
     
-    private var discoverer: DeviceDiscoveryHandle
+    private let discoverer: DeviceDiscoveryHandle
+    
+    private let reachability: Reachability?
+
 
     /// A delegate which will have methods called on it when cameras are discovered or an error occurs.
     public var delegate: CameraDiscovererDelegate?
@@ -100,6 +103,8 @@ public final class CameraDiscoverer {
 
     /// Creates a new discoverer
     public init() {
+        reachability = Reachability(hostName: "www.google.co.uk")
+
         discoverer = DeviceDiscoveryHandle()
         discoverer.observer = self
     }
@@ -107,12 +112,16 @@ public final class CameraDiscoverer {
     /// Starts the camera discoverer listening for cameras
     public func start() {
         discoverer.start()
+        reachability?.start(callback: { [weak self] (flags) in
+            self?.discoverer.poke()
+        })
     }
     
     /// Stops the camera discoverer from listening for cameras
     ///
     /// - Parameter callback: A closure called when all discovery has been stopped
     public func stop(with callback: @escaping () -> Void) {
+        reachability?.stop()
         discoverer.stop()
     }
 }
@@ -124,39 +133,5 @@ extension CameraDiscoverer: DeviceDiscovererObserver {
             print("PTP/IP Connection URL \(url) \(url.host)")
             delegate?.cameraDiscoverer(self, discovered: camera, isCached: false)
         }
-    }
-}
-
-extension CameraDiscoverer: DeviceDiscovererDelegate {
-    
-    func deviceDiscoverer<T>(_ discoverer: T, discovered device: Camera, isCached: Bool) where T : DeviceDiscoverer {
-        
-        if let previouslyDiscoveredCamera = discoveredCameras.enumerated().first(where: {
-            $0.element.camera.identifier == device.identifier
-        }) {
-            // If we went from non-cached, to cached, let the delegate know!
-            if previouslyDiscoveredCamera.element.isCached && !isCached {
-                discoveredCameras[previouslyDiscoveredCamera.offset] = (device, isCached)
-                if var camerasForSSID = camerasBySSID[Reachability.currentWiFiSSID], let indexInCamerasForSSID = camerasForSSID.firstIndex(where: { $0.camera.identifier == device.identifier }) {
-                    camerasForSSID[indexInCamerasForSSID] = (device, isCached)
-                    camerasBySSID[Reachability.currentWiFiSSID] = camerasForSSID
-                }
-                delegate?.cameraDiscoverer(self, discovered: device, isCached: false)
-            }
-            return
-        }
-        
-        camerasBySSID[Reachability.currentWiFiSSID, default: []].append((device, isCached))
-        discoveredCameras.append((device, isCached))
-        delegate?.cameraDiscoverer(self, discovered: device, isCached: isCached)
-    }
-    
-    
-    func deviceDiscoverer<T>(_ discoverer: T, didError error: Error) where T : DeviceDiscoverer {
-        delegate?.cameraDiscoverer(self, didError: error)
-    }
-
-    func deviceDiscoverer<T>(_ discoverer: T, didDetectNetworkChange ssid: String?) where T : DeviceDiscoverer {
-        delegate?.cameraDiscoverer(self, didDetectNetworkChange: ssid)
     }
 }

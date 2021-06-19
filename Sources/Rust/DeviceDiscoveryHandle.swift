@@ -66,6 +66,10 @@ final class DeviceDiscoveryHandle {
         shutter_discovery_start(raw, observer)
     }
 
+    func poke() {
+        shutter_discovery_poke(raw)
+    }
+
     func stop() {
         shutter_discovery_stop(raw)
     }

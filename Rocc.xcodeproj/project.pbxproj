@@ -716,7 +716,6 @@
 		B1D6065221812231001719EC /* Device Discovery */ = {
 			isa = PBXGroup;
 			children = (
-				B1316A712089C0F6006BD136 /* DeviceDiscovery.swift */,
 				B1D606532181225E001719EC /* UDPDeviceDiscoverer.swift */,
 				B115EFB621ECF88100667FB7 /* UPnPParsers.swift */,
 				B1CDCB8222234CAA00DD0F0E /* UPnPService.swift */,
@@ -933,6 +932,7 @@
 		EF481EE6266D22E500894E07 /* Rust */ = {
 			isa = PBXGroup;
 			children = (
+				B1316A712089C0F6006BD136 /* DeviceDiscovery.swift */,
 				EF481EE7266D22FF00894E07 /* DeviceDiscoveryHandle.swift */,
 			);
 			path = Rust;
