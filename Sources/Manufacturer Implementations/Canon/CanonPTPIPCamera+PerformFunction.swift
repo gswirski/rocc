@@ -84,6 +84,28 @@ extension CanonPTPIPDevice {
         let dataSize = eventData.length
         var pointer: UInt = 0
         
+        while (pointer + 8 <= dataSize) {
+            var size: DWord? = eventData[dWord: pointer]
+            var type: DWord? = eventData[dWord: pointer + 4]
+            
+            var propType = CanonPropType(rawValue: type!)
+            
+            switch  propType {
+            case .PTP_EC_CANON_EOS_PropValueChanged:
+                let subType = CanonSubPropType(rawValue: eventData[dWord: pointer + 8]!)
+                switch subType {
+                case .PTP_DPC_CANON_EOS_OLCInfoVersion:
+                    olcVersion = eventData[dWord: pointer + 12]
+                    Logger.log(message: "Intervalometer - OLC SET to \(olcVersion)", category: "PTPIPClient", level: .debug)
+                default: ()
+                }
+            default: ()
+            }
+            
+            pointer += UInt(size!)
+        }
+        
+        pointer = 0
         
         while (pointer + 8 <= dataSize) {
             var size: DWord? = eventData[dWord: pointer]
@@ -185,7 +207,7 @@ extension CanonPTPIPDevice {
             case .PTP_EC_CANON_EOS_OLCInfoChanged:
                 let len = eventData[dWord: pointer + 8]!
                 let mask = eventData[dWord: pointer + 12]!
-                Logger.log(message: "Intervalometer - OLC", category: "PTPIPClient", level: .debug)
+                Logger.log(message: "Intervalometer - OLC VERSION \(olcVersion)", category: "PTPIPClient", level: .debug)
 
                 var olcOffset: UInt = 0
                 if (mask & 0x0001) != 0 {  // BUTTON
@@ -211,9 +233,28 @@ extension CanonPTPIPDevice {
 
                     Logger.log(message: "Intervalometer - OLC(0x0004 aperture) - \(data.toHex)", category: "PTPIPClient", level: .debug)
                     let active = eventData[word: pointer + 16 + olcOffset]!
-                    let value = eventData[word: pointer + 16 + olcOffset + 7]!
+                    
+                    let olcVersion = olcVersion ?? 0x13  // default to R6 version as this is what we've launched with
+                    
+                    let value: Word
+                    
+                    if (olcVersion >= 0x13) {
+                        value = eventData[word: pointer + 16 + olcOffset + 7]!
+                    } else if olcVersion >= 0x12 {
+                        value = eventData[word: pointer + 16 + olcOffset + 5]!
+                    } else {
+                        value = eventData[word: pointer + 16 + olcOffset + 4]!
+                    }
+                    
                     apertureField.olcValue = (active > 0) ? value : APERTURE_AUTO_VALUE
-                    olcOffset += 9
+                    
+                    if (olcVersion >= 0x12) {
+                        olcOffset += 9;    /* m6 mark 2, r5 */
+                    } else if (olcVersion >= 0xf) {
+                        olcOffset += 6;    /* f, 11 */
+                    } else {
+                        olcOffset += 5;    /* 7, 8, b */
+                    }
                 }
                 if (mask & 0x0008) != 0 { // ISO
                     let data = eventData.sliced(Int(pointer) + 16 + Int(olcOffset), Int(pointer) + 16 + Int(olcOffset) + 6)

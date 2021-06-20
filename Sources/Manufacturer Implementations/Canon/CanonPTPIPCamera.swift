@@ -60,6 +60,8 @@ internal final class CanonPTPIPDevice: SonyCamera {
     
     var connectionMode: ConnectionMode = .remoteControl
     
+    var olcVersion: DWord?
+    
     private var cachedPTPIPClient: PTPIPClientNext?
     
     var ptpIPClient: PTPIPClientNext? {
