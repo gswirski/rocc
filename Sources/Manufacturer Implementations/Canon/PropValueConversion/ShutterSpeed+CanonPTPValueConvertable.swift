@@ -119,12 +119,19 @@ extension ShutterSpeed: CanonPTPPropValueConvertable {
     
     init?(canonValue: PTPDevicePropertyDataType, olcValue: PTPDevicePropertyDataType? = nil) {
         
-        guard let binaryInt = canonValue.toInt else {
+        guard var binaryInt = canonValue.toInt else {
             return nil
         }
         
+        if binaryInt > 256 {
+            binaryInt = binaryInt / 256
+        }
+        
         guard binaryInt != SHUTTER_SPEED_AUTO_VALUE else {
-            if let olc = olcValue, let binaryOlc = olc.toInt {
+            if let olc = olcValue, var binaryOlc = olc.toInt {
+                if binaryOlc > 256 {
+                    binaryOlc = binaryOlc / 256
+                }
                 if let item = canonShutterSpeedMapping[UInt32(binaryOlc)] {
                    self = .auto(value: item)
                    return

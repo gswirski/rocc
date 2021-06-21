@@ -225,6 +225,7 @@ extension CanonPTPIPDevice {
                     let active = eventData[word: pointer + 16 + olcOffset]!
                     let value = eventData[word: pointer + 16 + olcOffset + 5]!
                     shutterSpeedField.olcValue = (active > 0) ? value : SHUTTER_SPEED_AUTO_VALUE
+
                     olcOffset += 7
                 }
                 if (mask & 0x0004) != 0 { // APERTURE
