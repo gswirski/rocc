@@ -29,18 +29,21 @@ public enum ShutterSpeed: Equatable {
         /// The denominator of the shutter speed
         public let denominator: Double
         
+        public let id: UInt32
+        
         /// Creates a new shutter speed with numerator and denominator
         ///
         /// - Parameters:
         ///   - numerator: The numerator for the shutter speed
         ///   - denominator: The denominator for the shutter speed
-        public init(numerator: Double, denominator: Double) {
+        public init(numerator: Double, denominator: Double, id: UInt32) {
             self.numerator = numerator
             self.denominator = denominator
+            self.id = id
         }
         
         /// A statically available constant for BULB shutter speed
-        public static let bulb: Value = Value(numerator: -1.0, denominator: -1.0)
+        public static let bulb: Value = Value(numerator: -1.0, denominator: -1.0, id: 0x04)
         
         /// Returns whether the given shutter speed is a BULB shutter speed
         public var isBulb: Bool {
@@ -115,7 +118,11 @@ public class ShutterSpeedFormatter {
         // For some reason some cameras returns shutter speeds as 300/10 = 30 seconds.
         if fixedValue >= 1/3 {
             while fixedShutterSpeed.denominator >= 10, fixedShutterSpeed.denominator.remainder(dividingBy: 10) == 0 {
-                fixedShutterSpeed = ShutterSpeed.Value(numerator: fixedShutterSpeed.numerator/10, denominator: fixedShutterSpeed.denominator/10)
+                fixedShutterSpeed = ShutterSpeed.Value(
+                    numerator: fixedShutterSpeed.numerator/10,
+                    denominator: fixedShutterSpeed.denominator/10,
+                    id: fixedShutterSpeed.id
+                )
             }
         }
         
@@ -156,7 +163,7 @@ public class ShutterSpeedFormatter {
         let trimmedString = string.trimmingCharacters(in: CharacterSet.decimalDigits.inverted)
         
         if let timeInterval = TimeInterval(trimmedString) {
-            return .userDefined(value: ShutterSpeed.Value(numerator: timeInterval, denominator: 1))
+            return .userDefined(value: ShutterSpeed.Value(numerator: timeInterval, denominator: 1, id: 0))
         }
         
         if let value = ShutterSpeed.Value(fractionString: trimmedString) {
@@ -189,6 +196,6 @@ fileprivate extension ShutterSpeed.Value {
         guard let numerator = Double(numeratorString) else { return nil }
         guard let denominator = Double(denominatorString) else { return nil }
         
-        self.init(numerator: numerator, denominator: denominator)
+        self.init(numerator: numerator, denominator: denominator, id: 0)
     }
 }

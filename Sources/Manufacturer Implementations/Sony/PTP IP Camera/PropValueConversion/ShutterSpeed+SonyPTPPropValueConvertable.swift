@@ -33,7 +33,7 @@ extension ShutterSpeed: SonyPTPPropValueConvertable {
             return nil
         }
         
-        let value = ShutterSpeed.Value(numerator: Double(numerator), denominator: Double(denominator))
+        let value = ShutterSpeed.Value(numerator: Double(numerator), denominator: Double(denominator), id: 0)
         self = .userDefined(value: value)
     }
     

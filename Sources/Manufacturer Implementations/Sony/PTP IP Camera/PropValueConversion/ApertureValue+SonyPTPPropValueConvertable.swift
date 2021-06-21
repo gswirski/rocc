@@ -24,11 +24,11 @@ extension Aperture.Value: SonyPTPPropValueConvertable {
             return nil
         }
         
-        self = .userDefined(value: Double(binaryInt)/100.0)
+        self = .userDefined(value: Double(binaryInt)/100.0, id: 0)
     }
     
     var sonyPTPValue: PTPDevicePropertyDataType {
-        guard case let .userDefined(value) = self else {
+        guard case let .userDefined(value, id) = self else {
             fatalError("Sony only supports user defined values")
         }
         return Word(value * 100)

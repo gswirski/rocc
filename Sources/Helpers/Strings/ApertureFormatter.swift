@@ -23,9 +23,9 @@ public class ApertureFormatter {
         numberFormatter.decimalSeparator = "."
         
         switch aperture {
-        case .userDefined(let value):
+        case .userDefined(let value, let id):
             return numberFormatter.string(from: NSNumber(value: value))
-        case .auto(let value):
+        case .auto(let value, let id):
             if let actualValue = value {
                 return numberFormatter.string(from: NSNumber(value: actualValue))
             } else {
@@ -36,7 +36,7 @@ public class ApertureFormatter {
     
     public func aperture(from string: String) -> Aperture.Value? {
         if string.lowercased() == "auto" {
-            return .auto(value: nil)
+            return .auto(value: nil, id: nil)
         }
         let numberFormatter = NumberFormatter()
         
@@ -50,6 +50,6 @@ public class ApertureFormatter {
         
         guard let number = numberFormatter.number(from: string) else { return nil }
         
-        return .userDefined(value: number.doubleValue)
+        return .userDefined(value: number.doubleValue, id: 0)
     }
 }

@@ -12,8 +12,8 @@ import Foundation
 public struct Aperture: CameraFunction {
     
     public enum Value: Equatable {
-        case userDefined(value: Double)
-        case auto(value: Double?)
+        case userDefined(value: Double, id: UInt32)
+        case auto(value: Double?, id: UInt32?)
     }
     
     public var function: _CameraFunction
