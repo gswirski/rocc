@@ -43,6 +43,6 @@ struct DataPacket: Packetable {
     }
     
     var description: String {
-        return "\(length) | n:\(name) | t:\(transactionId) | \(data.toHex.trunc(length: 50))"
+        return "\(length) | n:\(name) | t:\(transactionId) | \(data.toHex)"
     }
 }

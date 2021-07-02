@@ -19,7 +19,12 @@ extension PTPIPClientNext {
     }
 
     func handleStartDataPacket(_ packet: StartDataPacket) {
-        dataContainers[packet.transactionId] = PTPIPClient.DataContainer(startPacket: packet)
+        if var containerForData = dataContainers[packet.transactionId] {
+            containerForData.appendData(from: packet)
+            dataContainers[packet.transactionId] = containerForData
+        } else {
+            dataContainers[packet.transactionId] = PTPIPClient.DataContainer(startPacket: packet)
+        }
     }
 
     func handleDataPacket(_ packet: DataPacket) {
