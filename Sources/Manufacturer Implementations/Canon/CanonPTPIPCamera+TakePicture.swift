@@ -43,43 +43,75 @@ extension CanonPTPIPDevice {
             self.awaitObject { [weak self] (_ objectId: DWord?) in
                 guard let self = self else { return }
                 
-                print("BULB capture objectId \(objectId)")
                 guard let objectId = objectId else {
                     completion(.failure(CaptureError.noObjectId))
                     return
                 }
                 
-                self.ptpIPClient?.getReducedObject(objectId: objectId) { (data) in
-                    switch data {
-                    case .success(let container):
-                        let data = Data(container.data)
-                        guard let image = UIImage(data: data) else {
-                            Logger.log(message: "Could not decode image \(container.data.toHex)", category: "CanonPTPIPCamera")
-                            os_log("Could not decode image", log: self.log, type: .error)
-                            completion(.success(nil))
-                            return
+                if self.deviceInfo == nil || self.deviceInfo!.supportedOperations.contains(.canonGetReducedObject) {
+                    self.ptpIPClient?.getReducedObject(objectId: objectId, callback: { (data) in
+                        self.processImageData(data: data, completion: completion)
+                    })
+                } else {
+                    print("Canon getThumbEx objectId \(objectId)")
+                    self.awaitCameraStatusNotBusy() {
+                        self.awaitInnerDevelop(objectId) { (_ objectId: DWord?) in
+                            
+                            print("Canon getThumbEx capture objectId \(objectId)")
+
+                            guard let objectId = objectId else {
+                                completion(.failure(CaptureError.noObjectId))
+                                return
+                            }
+                                                
+                            self.ptpIPClient?.getPartialObject(objectId: objectId, offset: 0, maxbyte: 5*1024*1024) { (data) in
+                                print("Canon getThumbEx response C")
+
+                                self.ptpIPClient?.transferComplete(objectId: objectId) { (response) in
+                                    
+                                    print("Canon getThumbEx transfer complete \(response)")
+                                    self.ptpIPClient?.requestInnerDevelopEnd() { (response) in
+                                        print("Canon getThumbEx inner develop end \(response)")
+                                    }
+                                }
+                                
+                                self.processImageData(data: data, completion: completion)
+                            }
                         }
-                        print("Received Thumbnail data \(image)")
-                        
-                        let temporaryDirectoryURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
-                        let fileName = "\(ProcessInfo().globallyUniqueString).jpg"
-                        let imageURL = temporaryDirectoryURL.appendingPathComponent(fileName)
-                        do {
-                            try data.write(to: imageURL)
-                            completion(.success(imageURL))
-                        } catch let error {
-                            Logger.log(message: "Failed to save image to disk: \(error.localizedDescription)", category: "SonyPTPIPCamera", level: .error)
-                            os_log("Failed to save image to disk", log: self.log, type: .error)
-                            completion(.success(nil))
-                        }
-                         //" \(container.data.toHex)")
-                    case .failure(let error):
-                        Logger.log(message: "Received thumbnail error \(error)", category: "CanonPTPIPCamera")
-                        completion(.failure(error))
                     }
                 }
             }
         })
+    }
+    
+    func processImageData(data: Result<PTPIPClient.DataContainer, Error>, completion: @escaping CaptureCompletion) {
+        switch data {
+        case .success(let container):
+            let data = Data(container.data)
+            guard let image = UIImage(data: data) else {
+                Logger.log(message: "Canon getThumbEx Could not decode image \(container.data.toHex)", category: "CanonPTPIPCamera")
+                os_log("Canon getThumbEx Could not decode image", log: self.log, type: .error)
+                completion(.success(nil))
+                return
+            }
+            print("Canon getThumbEx Received Thumbnail data \(image)")
+            
+            let temporaryDirectoryURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+            let fileName = "\(ProcessInfo().globallyUniqueString).jpg"
+            let imageURL = temporaryDirectoryURL.appendingPathComponent(fileName)
+            do {
+                try data.write(to: imageURL)
+                completion(.success(imageURL))
+            } catch let error {
+                Logger.log(message: "Canon getThumbEx Failed to save image to disk: \(error.localizedDescription)", category: "SonyPTPIPCamera", level: .error)
+                os_log("Canon getThumbEx Failed to save image to disk", log: self.log, type: .error)
+                completion(.success(nil))
+            }
+             //" \(container.data.toHex)")
+        case .failure(let error):
+            Logger.log(message: "Canon getThumbEx Received thumbnail error \(error)", category: "CanonPTPIPCamera")
+            completion(.failure(error))
+        }
     }
     
     func takePicture(completion: @escaping CaptureCompletion) {
@@ -91,47 +123,32 @@ extension CanonPTPIPDevice {
             guard let self = self else { return }
             
             self.awaitFocus { [weak self] () in
-                self?.ptpIPClient?.sendRemoteReleaseOff(callback: { (_) in
-                    guard let self = self else { return }
-
-                    self.awaitObject { [weak self] (_ objectId: DWord?) in
-                        guard let self = self else { return }
-                        
-                        guard let objectId = objectId else {
-                            completion(.failure(CaptureError.noObjectId))
-                            return
-                        }
-                        
-                        self.ptpIPClient?.getReducedObject(objectId: objectId) { (data) in
-                            switch data {
-                            case .success(let container):
-                                let data = Data(container.data)
-                                guard let image = UIImage(data: data) else {
-                                    completion(.success(nil))
-                                    return
-                                }
-                                
-                                let temporaryDirectoryURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
-                                let fileName = "\(ProcessInfo().globallyUniqueString).jpg"
-                                let imageURL = temporaryDirectoryURL.appendingPathComponent(fileName)
-                                do {
-                                    try data.write(to: imageURL)
-                                    completion(.success(imageURL))
-                                } catch let error {
-                                    Logger.log(message: "Failed to save image to disk: \(error.localizedDescription)", category: "SonyPTPIPCamera", level: .error)
-                                    os_log("Failed to save image to disk", log: self.log, type: .error)
-                                    completion(.success(nil))
-                                }
-                                print("Received Thumbnail data \(image)") //" \(container.data.toHex)")
-                            case .failure(let error):
-                                print("Received Thumbnail error \(error)")
-                                completion(.failure(error))
-                            }
-                        }
-                    }
-                })
+                self?.stopTakingPicture(completion: completion)
             }
         })
+    }
+    
+    func awaitCameraStatusNotBusy(completion: @escaping () -> Void) {
+        var previousVal: Byte?
+
+        DispatchQueue.global().asyncWhile({ [weak self] (continueClosure) in
+            
+            guard let self = self else { return }
+            
+            if let status = self.lastOLCInfoChanged.maybeMemoryStatus, let val = status[1] {
+                if val != previousVal {
+                    print("Canon getThumbEx val \(val)")
+                }
+                previousVal = val
+                self.lastOLCInfoChanged.maybeMemoryStatus = nil
+                continueClosure(val != 2)
+                return
+            }
+            
+            continueClosure(false)
+        }, timeout: 3) {
+            completion()
+        }
     }
     
     func awaitObject(completion: @escaping (_ objectID: DWord?) -> Void) {
@@ -158,6 +175,34 @@ extension CanonPTPIPDevice {
             continueClosure(false)
         }, timeout: 3) {
             completion(objectID)
+        }
+    }
+    
+    func awaitInnerDevelop(_ objectId: DWord, completion: @escaping (_ objectID: DWord?) -> Void) {
+        ptpIPClient?.requestInnerDevelopStart(objectId: objectId) { response in
+            print("Canon getThumbEx awaitInnerDevelop started \(response)")
+        
+            var objectID: DWord? = nil
+            DispatchQueue.global().asyncWhile({ [weak self] (continueClosure) in
+                
+                guard let self = self else { return }
+                
+                if let lastObjectAdded = self.lastDevelopObjectAdded, let id = lastObjectAdded[dWord: 8] {
+                    objectID = id
+                    /*let storageID = lastObjectAdded[dWord: 12]!
+                    let OFC = lastObjectAdded[dWord: 16]!
+                    let size = lastObjectAdded[dWord: 28]!
+                    let parent = lastObjectAdded[dWord: 36]!*/
+
+                    self.lastDevelopObjectAdded = nil
+                    continueClosure(true)
+                    return
+                }
+                
+                continueClosure(false)
+            }, timeout: 3) {
+                completion(objectID)
+            }
         }
     }
     

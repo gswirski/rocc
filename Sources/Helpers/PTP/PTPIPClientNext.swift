@@ -301,13 +301,52 @@ final class PTPIPClientNext {
     
     func getReducedObject(objectId: DWord, callback: @escaping DataResponse) {
         let opRequestPacket = CommandRequestPacketArguments(commandCode: .canonGetReducedObject, arguments: [objectId, 0x00200000, 0x00000000])
-        
         print("Canon getThumbEx")
         sendCommandRequestPacket(opRequestPacket, priority: .normal, responseCallback: { (response) in
             print("Canon getThumbEx response A")
         }, dataCallback: callback)
     }
 
+    func requestInnerDevelopStart(objectId: DWord, callback: CommandRequestPacketResponse? = nil) {
+        let opRequestPacket = CommandRequestPacketArguments(
+            commandCode: .canonRequestInnerDevelopStart, arguments: [objectId, 0x04],
+            data: ByteBuffer(hexString: "0f 00 00 00 02 00 00 00"),
+            phaseInfo: 2
+        )
+        sendCommandRequestPacket(opRequestPacket, priority: .normal, responseCallback: callback, dataCallback: nil)
+    }
+    
+    func requestInnerDevelopEnd(callback: CommandRequestPacketResponse? = nil) {
+        let opRequestPacket = CommandRequestPacketArguments(
+            commandCode: .canonRequestInnerDevelopEnd, arguments: [0x0],
+            data: ByteBuffer(hexString: "00 00 00 00"),
+            phaseInfo: 2
+        )
+        sendCommandRequestPacket(opRequestPacket, priority: .normal, responseCallback: callback, dataCallback: nil)
+
+    }
+    
+    func transferComplete(objectId: DWord, callback: CommandRequestPacketResponse? = nil) {
+        let opRequestPacket = CommandRequestPacketArguments(
+            commandCode: .canonTransferComplete, arguments: [objectId]
+        )
+        sendCommandRequestPacket(opRequestPacket, priority: .normal, responseCallback: callback, dataCallback: nil)
+
+    }
+    
+    func getPartialObject(objectId: DWord, offset: DWord, maxbyte: DWord, callback: @escaping DataResponse) {
+        let opRequestPacket = CommandRequestPacketArguments(
+            commandCode: .canonGetPartialObject64, arguments: [objectId, offset, maxbyte, 0x0]
+        )
+        sendCommandRequestPacket(opRequestPacket, priority: .normal, responseCallback: { (response) in
+            print("Canon getThumbEx getPartialObject response A \(response.transactionId)")
+        }, dataCallback: { (response) in
+            print("Canon getThumbEx getPartialObject response B")
+            callback(response)
+        })
+
+    }
+    
     func sendSetControlDeviceAValue(_ value: PTP.DeviceProperty.Value, callback: CommandRequestPacketResponse? = nil) {
         
         let transactionID = getNextTransactionId()

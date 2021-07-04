@@ -116,7 +116,11 @@ extension CanonPTPIPDevice {
             switch propType {
             case .PTP_EC_CANON_EOS_CameraStatusChanged:
                 let value = eventData[dWord: pointer + 8]!
-                print("Received property \(propType) \(value)")
+                //lastCameraStatus = value
+                print("Canon getThumbEx Received property \(propType) \(value)")
+            case .PTP_EC_CANON_EOS_StorageStatusChanged:
+                let value = eventData.sliced(Int(pointer), Int(pointer + UInt(size!))).toHex
+                print("Canon getThumbEx storage status \(value)" )
             case .PTP_EC_CANON_EOS_PropValueChanged:
                 let subType = CanonSubPropType(rawValue: eventData[dWord: pointer + 8]!)
                 
@@ -266,11 +270,11 @@ extension CanonPTPIPDevice {
                     isoField.olcValue = Word(value)
                     olcOffset += 6
                 }
-                if (mask & 0x0010) != 0 { // UNKNOWN
+                if (mask & 0x0010) != 0 { // MEMORY STATUS?
                     let data = eventData.sliced(Int(pointer) + 16 + Int(olcOffset), Int(pointer) + 16 + Int(olcOffset) + 4)
-                    lastOLCInfoChanged.unknown1 = ByteBuffer(bytes: data.bytes)
+                    lastOLCInfoChanged.maybeMemoryStatus = ByteBuffer(bytes: data.bytes)
 
-                    Logger.log(message: "Intervalometer - OLC(0x0010 unknown) - \(data.toHex)", category: "PTPIPClient", level: .debug)
+                    Logger.log(message: "Canon getThumbEx Intervalometer - OLC(0x0010 unknown) - \(data.toHex)", category: "PTPIPClient", level: .debug)
                     olcOffset += 4
                 }
                 if (mask & 0x0020) != 0 { // SELF TIMER?
@@ -333,7 +337,10 @@ extension CanonPTPIPDevice {
                 let parent = eventData[dWord: pointer + 36]!
                 
                 print("Received property \(propType) objectID:\(objectID) parent \(parent) storageID \(storageID) OFC \(OFC) size \(size)")
+            case .PTP_EC_CANON_EOS_RequestObjectTransferDevelop:
                 
+                lastDevelopObjectAdded = eventData.sliced(Int(pointer), Int(pointer) + Int(size!))
+
             default:
                 if Int(size!) < 300 {
                     let bytes = eventData.sliced(Int(pointer), Int(pointer) + Int(size!))

@@ -100,8 +100,12 @@ extension Aperture.Value: CanonPTPPropValueConvertable {
             }
         }
 
-        let item = canonApertureMapping[UInt32(binaryInt)]!
-        self = .userDefined(value: item.value, id: item.id)
+        if let item = canonApertureMapping[UInt32(binaryInt)] {
+            self = .userDefined(value: item.value, id: item.id)
+            return
+        } else {
+            return nil
+        }
     }
     
     var canonPTPValue: PTPDevicePropertyDataType {

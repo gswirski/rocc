@@ -112,9 +112,11 @@ internal final class CanonPTPIPDevice: SonyCamera {
     /// we need to fetch an event
     var allProperties: [PTP.DeviceProperty.Code: PTPDeviceProperty]?
     
+    var lastCameraStatus: DWord?
     var lastEventPacket: EventPacket?
     var lastOLCInfoChanged = CanonOLCInfo()
     var lastObjectAdded: ByteBuffer?
+    var lastDevelopObjectAdded: ByteBuffer?
     
     var lastEvent: CameraEvent?
     
@@ -218,10 +220,32 @@ internal final class CanonPTPIPDevice: SonyCamera {
         self.performFunction(Event.get, payload: nil, callback: { [weak self] (error, event) in
             self?.lastEvent = event
             // Can ignore errors as we don't really require this event for the connection process to complete!
-            self?.performSetRequestOLCInfoGroup(completion: completion)
+            self?.getDeviceInfo(completion: completion)
             
         })
     }
+    
+    private func getDeviceInfo(completion: @escaping CanonPTPIPDevice.ConnectedCompletion) {
+        let opRequest = CommandRequestPacketArguments(commandCode: .getDeviceInfo, arguments: [])
+        ptpIPClient?.sendCommandRequestPacket(opRequest, priority: .normal, responseCallback: { (response) in
+            print("Initialization response \(response)")
+            
+            self.performSetRequestOLCInfoGroup(completion: completion)
+
+        }, dataCallback: { (response) in
+            switch response {
+            case .success(let container):
+                Rocc.Logger.log(message: "DeviceInfo \(container.data.toHex)", category: "CanonPTPIPCamera")
+
+                let data = PTP.DeviceInfo(data: container.data)
+                self.deviceInfo = data
+                print("Initialization data \(data)")
+            default:
+                break
+            }
+        })
+    }
+
     
     private func performSetRequestOLCInfoGroup(completion: @escaping CanonPTPIPDevice.ConnectedCompletion) {
         let packet = Packet.commandRequestPacket(code: .canonSetRequestOLCInfoGroup, arguments: [0x0fff], transactionId: ptpIPClient?.getNextTransactionId() ?? 1)

@@ -133,5 +133,10 @@ struct PTP {
         case canonRemoteReleaseOff = 0x9129
         case canonGetThumbEx = 0x910A
         case canonGetReducedObject = 0x916F
+        case canonRequestInnerDevelopStart = 0x9141
+        case canonRequestInnerDevelopEnd = 0x9143
+        case canonGetPartialObject = 0x9107
+        case canonGetPartialObject64 = 0x9172
+        case canonTransferComplete = 0x9117
     }
 }

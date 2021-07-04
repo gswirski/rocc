@@ -58,7 +58,7 @@ extension PTP {
             guard let _vendorExtensionVersion: Word = data.read(offset: &offset) else { return nil }
             vendorExtensionVersion = _vendorExtensionVersion
             
-            guard let _vendorExtensionDescription: String = data.read(offset: &offset) else { return nil }
+            let _vendorExtensionDescription: String = data.read(offset: &offset) ?? ""
             vendorExtensionDescription = _vendorExtensionDescription
             
             guard let _functionalMode: Word = data.read(offset: &offset) else { return nil }

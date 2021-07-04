@@ -13,7 +13,7 @@ struct CanonOLCInfo {
     var shutterSpeed: ByteBuffer?
     var aperture: ByteBuffer?
     var iso: ByteBuffer?
-    var unknown1: ByteBuffer?
+    var maybeMemoryStatus: ByteBuffer?
     var selfTimer: ByteBuffer?
     var exposureMeter: ByteBuffer?
     var unknown2: ByteBuffer?
