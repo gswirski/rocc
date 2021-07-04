@@ -52,7 +52,7 @@ struct EndDataPacket: Packetable {
     }
     
     var description: String {
-        return "\(length) | n:\(name) | t:\(transactionId) | \(data.toHex)"
+        return "\(length) | n:\(name) | t:\(transactionId) | \(data.toHex.trunc(length: 50))"
 
    }
 }
