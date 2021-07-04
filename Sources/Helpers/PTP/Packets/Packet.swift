@@ -197,7 +197,7 @@ struct Packet: Packetable {
         
         let size = data.length
         
-        let _startDataPacket = startDataPacket(size: DWord(size), transactionId: transactionId)
+        let _startDataPacket = startDataPacket(size: QWord(size), transactionId: transactionId)
         
         // If we have small amounts of data send it with end data packet
         if data.length < 128 {
@@ -223,12 +223,11 @@ struct Packet: Packetable {
         return packet
     }
     
-    static func startDataPacket(size: DWord, transactionId: DWord = 0) -> StartDataPacket {
+    static func startDataPacket(size: QWord, transactionId: DWord = 0) -> StartDataPacket {
         
         var packet = StartDataPacket(transactionId: transactionId, dataLength: size)
         packet.data[dWord: UInt(headerLength)] = transactionId
-        packet.data.append(size) //TODO: This should be a single QWord
-        packet.data.append(DWord(0)) //Fake to simulate 16 bytes
+        packet.data.append(size)
         packet.data.set(header: .startDataPacket)
         
         return packet

@@ -18,25 +18,25 @@ struct StartDataPacket: Packetable {
     
     let transactionId: DWord
     
-    let dataLength: DWord
+    let dataLength: QWord
     
     init?(length: DWord, name: Packet.Name, data: ByteBuffer) {
         
         self.length = length
         self.name = name
         
-        self.data = data
-        
         var offset: UInt = 0
         
         guard let transactionId: DWord = data.read(offset: &offset) else { return nil }
         self.transactionId = transactionId
         
-        guard let dataLength: DWord = data.read(offset: &offset) else { return nil }
+        guard let dataLength: QWord = data.read(offset: &offset) else { return nil }
         self.dataLength = dataLength
+        
+        self.data = data.sliced(Int(offset), Int(length) - Packet.headerLength)
     }
     
-    init(transactionId: DWord, dataLength: DWord) {
+    init(transactionId: DWord, dataLength: QWord) {
         self.transactionId = transactionId
         name = .startDataPacket
         length = 20

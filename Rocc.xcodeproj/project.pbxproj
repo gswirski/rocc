@@ -193,6 +193,7 @@
 		B1FB48732092743100C33C86 /* Aperture.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1FB48722092743100C33C86 /* Aperture.swift */; };
 		B1FF7A382371EC180010D5F0 /* SDIOExtDeviceInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1FF7A372371EC180010D5F0 /* SDIOExtDeviceInfo.swift */; };
 		B1FF7A422371F4AB0010D5F0 /* DeviceProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1FF7A412371F4AB0010D5F0 /* DeviceProperty.swift */; };
+		EF0BB472269217F5000BD4EB /* CanonPTPTransferRTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF0BB471269217F5000BD4EB /* CanonPTPTransferRTests.swift */; };
 		EF140C5A24902FC7001BAD7F /* Retries.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF140C5924902FC7001BAD7F /* Retries.swift */; };
 		EF481EE5266D1B1000894E07 /* libptp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EF481EE4266D1AB600894E07 /* libptp.a */; };
 		EF481EE8266D22FF00894E07 /* DeviceDiscoveryHandle.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF481EE7266D22FF00894E07 /* DeviceDiscoveryHandle.swift */; };
@@ -433,6 +434,7 @@
 		B1FB48722092743100C33C86 /* Aperture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Aperture.swift; sourceTree = "<group>"; };
 		B1FF7A372371EC180010D5F0 /* SDIOExtDeviceInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDIOExtDeviceInfo.swift; sourceTree = "<group>"; };
 		B1FF7A412371F4AB0010D5F0 /* DeviceProperty.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceProperty.swift; sourceTree = "<group>"; };
+		EF0BB471269217F5000BD4EB /* CanonPTPTransferRTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanonPTPTransferRTests.swift; sourceTree = "<group>"; };
 		EF140C5924902FC7001BAD7F /* Retries.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Retries.swift; sourceTree = "<group>"; };
 		EF481EE2266D1AB600894E07 /* libptp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libptp.h; sourceTree = "<group>"; };
 		EF481EE4266D1AB600894E07 /* libptp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libptp.a; sourceTree = "<group>"; };
@@ -943,6 +945,7 @@
 			children = (
 				EF584A3A25B83C910063F8CC /* CanonPTPEventTests.swift */,
 				EF584A9325C4B6D30063F8CC /* CanonPTPLiveStreamingTests.swift */,
+				EF0BB471269217F5000BD4EB /* CanonPTPTransferRTests.swift */,
 			);
 			path = Canon;
 			sourceTree = "<group>";
@@ -1320,6 +1323,7 @@
 				B1035B53238C51E80023270E /* PTPPacketParsingTests.swift in Sources */,
 				B1EF38C824793BF500E26C4E /* ApertureFormatterTests.swift in Sources */,
 				B1A25F2921ADEAAC00D9EE81 /* ShutterSpeedFormatterTests.swift in Sources */,
+				EF0BB472269217F5000BD4EB /* CanonPTPTransferRTests.swift in Sources */,
 				B17B271A2533220800B441E2 /* SonyPTPPropConversionTests.swift in Sources */,
 				B182B92E23836C0B0054539E /* AsyncWhileTests.swift in Sources */,
 				B19A440A251E7B2A0006915D /* SonyPTPCameraTests.swift in Sources */,
@@ -1468,7 +1472,10 @@
 		B1316A622089C08F006BD136 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = arm64;
+				ARCHS = (
+					arm64,
+					x86_64,
+				);
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
@@ -1508,7 +1515,10 @@
 		B1316A632089C08F006BD136 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = arm64;
+				ARCHS = (
+					arm64,
+					x86_64,
+				);
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;

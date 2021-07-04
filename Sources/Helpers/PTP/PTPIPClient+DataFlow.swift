@@ -23,6 +23,11 @@ extension PTPIPClient {
             return startPacket.transactionId
         }
         
+        init(startPacket: StartDataPacket) {
+            self.startPacket = startPacket
+            data.append(bytes: startPacket.data.bytes.compactMap({ $0 }))
+        }
+        
         mutating func appendData(from dataPacket: StartDataPacket) {
             data.append(bytes: dataPacket.data.bytes.compactMap({ $0 }))
         }

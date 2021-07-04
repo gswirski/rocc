@@ -153,9 +153,12 @@ extension ShutterSpeed: CanonPTPPropValueConvertable {
             return
         }
             
-        let item = canonShutterSpeedMapping[UInt32(binaryInt)]!
-        
-        self = .userDefined(value: item)
+        if let item = canonShutterSpeedMapping[UInt32(binaryInt)] {
+            self = .userDefined(value: item)
+            return
+        }
+    
+        return nil
     }
     
     var canonPTPValue: PTPDevicePropertyDataType {
