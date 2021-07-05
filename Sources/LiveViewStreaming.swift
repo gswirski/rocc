@@ -152,8 +152,10 @@ public struct FrameInfo {
             status = .focussed
         } else if failedFocus != 0 {
             status = .invalid
-        } else {
+        } else if statusBitmask > 2 { // 0 & 1 seem to be boundries of a wide area AF
             status = .normal
+        } else {
+            return nil
         }
     }
 }
@@ -524,6 +526,7 @@ public final class LiveViewStream: NSObject {
                     
                     return frame
                 }
+                //print("FocusPoint -------------------------------- ")
                 delegate?.liveViewStream(self, didReceive: frames, inViewfinder: ViewfinderInfo(size: CGPoint(x: viewfinderWidth, y: viewfinderHeight)))
             default:
                 //print("Viewfinder frame - \(type) - \(size)")
