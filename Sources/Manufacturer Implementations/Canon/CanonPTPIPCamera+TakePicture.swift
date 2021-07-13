@@ -37,6 +37,10 @@ extension CanonPTPIPDevice {
     }
     
     func stopTakingPicture(completion: @escaping CaptureCompletion) {
+        // clear the last object to prevent stale data from appearing in the feed
+        lastObjectAdded = nil
+
+        
         ptpIPClient?.sendRemoteReleaseOff(callback: { [weak self] (_) in
             guard let self = self else { return }
 
