@@ -1891,12 +1891,16 @@ internal class CameraClient: ServiceClient {
         let body = SonyRequestBody(method: "awaitTakePicture")
         
         requestController.request(service.type, method: .POST, body: body.requestSerialised) { (response, error) in
-            
             if let error = error ?? CameraError(responseDictionary: response?.dictionary, methodName: "awaitTakePicture") {
-                completion(Result.failure(error))
-                return
+                if let error = error as? CameraError, case .stillCapturingNotFinished(_) = error {
+                    Logger.log(message:"Still capture not finished. Awaiting again", category: "CameraClient", level: .debug)
+                    self.awaitTakePicture(completion)
+                    return
+                } else {
+                    completion(Result.failure(error))
+                    return
+                }
             }
-            
             guard let result = response?.dictionary?["result"] as? [[String]], let urlString = result.first?.first, let url = URL(string: urlString) else {
                 completion(Result.failure(CameraError.invalidResponse("awaitTakePicture")))
                 return
